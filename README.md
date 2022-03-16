@@ -6,6 +6,6 @@
 import Pyroscope from 'pyroscope';
 
 
-Pyroscope.start({server: 'pyroscope:4040'});
+Pyroscope.init({server: 'pyroscope:4040'});
 
 ```

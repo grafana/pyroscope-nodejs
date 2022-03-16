@@ -23,11 +23,15 @@ const config: PyroscopeConfig = {
   autoStart: true,
 }
 
-export function init(c: PyroscopeConfig): void {
-  config.server = c.server || DEFAULT_SERVER
-  config.sourceMapPath = c.sourceMapPath || DEFAULT_SOURCEMAP_PATH
+export function init(
+  c: PyroscopeConfig = { server: DEFAULT_SERVER, autoStart: true }
+): void {
+  if (c) {
+    config.server = c.server || DEFAULT_SERVER
+    config.sourceMapPath = c.sourceMapPath || DEFAULT_SOURCEMAP_PATH
+  }
 
-  if (c.autoStart) {
+  if (c && c.autoStart) {
     startCpuProfiling()
     startHeapProfiling()
   }
