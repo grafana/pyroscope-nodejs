@@ -1,4 +1,4 @@
-import pprof from 'pprof'
+import * as pprof from 'pprof'
 
 import perftools from 'pprof/proto/profile'
 
@@ -55,7 +55,7 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
     {
       method: 'POST',
       headers: formData.getHeaders(),
-      body: formData,
+      body: formData as any,
     }
   )
 }
