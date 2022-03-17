@@ -1,11 +1,13 @@
 import * as pprof from 'pprof'
 
 import perftools from 'pprof/proto/profile'
-
-import axios from 'axios'
+import debug from 'debug'
+import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
 
 type Label = perftools.perftools.profiles.Label
+
+const log = debug('pyroscope')
 
 export interface PyroscopeConfig {
   server: string
@@ -37,8 +39,24 @@ export function init(
   }
 }
 
-async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
+function handleError(error: AxiosError) {
+  if (error.response) {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    log('Pyroscope received error while ingesting data to server')
+    log(error.response.data)
+  } else if (error.request) {
+    // The request was made but no response was received
+    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+    // http.ClientRequest in node.js
+    log('Error when ingesting data to server:', error.message)
+  } else {
+    // Something happened in setting up the request that triggered an Error
+    log('Error', error.message)
+  }
+}
 
+async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   const buf = await pprof.encode(profile)
 
   const formData = new FormData()
@@ -56,13 +74,14 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
       headers: formData.getHeaders(),
       data: formData as any,
     }
-  ).catch((e) => console.error(e))
+  ).catch(handleError)
 }
 
 let isCpuProfilingEnabled = true
 
 export async function startCpuProfiling() {
   isCpuProfilingEnabled = true
+  log('Pyroscope has started CPU profiling')
   const sourceMapPath = config.sourceMapPath || [process.cwd()]
   const sm = await pprof.SourceMapper.create(sourceMapPath)
   while (isCpuProfilingEnabled) {
@@ -87,23 +106,24 @@ export async function startHeapProfiling() {
   const stackDepth = 32
 
   if (heapProfilingTimer) return false
+  log('Pyroscope has started heap profiling')
 
   const sm = await pprof.SourceMapper.create([process.cwd()])
 
   pprof.heap.start(intervalBytes, stackDepth)
 
   heapProfilingTimer = setInterval(async () => {
-    console.log('Collecting heap profile')
+    log('Collecting heap profile')
     const profile = pprof.heap.profile(undefined, sm)
-    console.log('Heap profile collected...')
+    log('Heap profile collected...')
     await uploadProfile(profile)
-    console.log('Heap profile uploaded...')
+    log('Heap profile uploaded...')
   }, INTERVAL)
 }
 
 export function stopHeapProfiling() {
   if (heapProfilingTimer) {
-    console.log('Stopping heap profiling')
+    log('Stopping heap profiling')
     clearInterval(heapProfilingTimer)
     heapProfilingTimer = undefined
   }

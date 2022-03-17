@@ -42,7 +42,9 @@
     "url": "https://github.com/pyroscope-io/pyroscope-nodejs/issues"
   },
   "dependencies": {
+    "@types/debug": "^4.1.7",
     "axios": "^0.26.1",
+    "debug": "^4.3.3",
     "form-data": "^4.0.0",
     "pprof": "^3.2.0"
   },
