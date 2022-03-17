@@ -2,9 +2,14 @@
   "name": "pyroscope",
   "version": "0.1.2",
   "description": "pyroscope nodejs package",
-  "exports": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "main": "./dist/cjs/index.js",
   "types": "dist/types/index.d.js",
-  "type": "module",
   "scripts": {
     "postinstall": "husky install",
     "prepublishOnly": "pinst --disable",
@@ -37,8 +42,8 @@
     "url": "https://github.com/pyroscope-io/pyroscope-nodejs/issues"
   },
   "dependencies": {
+    "axios": "^0.26.1",
     "form-data": "^4.0.0",
-    "node-fetch": "^3.2.3",
     "pprof": "^3.2.0"
   },
   "devDependencies": {

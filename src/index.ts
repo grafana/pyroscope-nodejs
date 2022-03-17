@@ -2,7 +2,7 @@ import * as pprof from 'pprof'
 
 import perftools from 'pprof/proto/profile'
 
-import fetch from 'node-fetch'
+import axios from 'axios'
 import FormData from 'form-data'
 
 type Label = perftools.perftools.profiles.Label
@@ -38,7 +38,6 @@ export function init(
 }
 
 async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
-  // TODO: Tag profile here
 
   const buf = await pprof.encode(profile)
 
@@ -50,14 +49,14 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   })
 
   // send data to the server
-  return fetch(
+  return axios(
     `${config.server}/ingest?name=nodejs&sampleRate=100&spyName=nodejs`,
     {
       method: 'POST',
       headers: formData.getHeaders(),
-      body: formData as any,
+      data: formData as any,
     }
-  )
+  ).catch((e) => console.error(e))
 }
 
 let isCpuProfilingEnabled = true
