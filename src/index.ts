@@ -5,17 +5,20 @@ import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
 
+type ILabel = perftools.perftools.profiles.ILabel
 type Label = perftools.perftools.profiles.Label
 
 const log = debug('pyroscope')
 
 export interface PyroscopeConfig {
   server: string
+  name: string
   sourceMapPath?: string[]
   autoStart: boolean
 }
 
 const INTERVAL = 10000
+const SAMPLERATE = 1000
 // Base sampling interval, constant for pyroscope
 const DEFAULT_SERVER = 'http://localhost:4040'
 const DEFAULT_SOURCEMAP_PATH = [process.cwd()]
@@ -23,10 +26,15 @@ const DEFAULT_SOURCEMAP_PATH = [process.cwd()]
 const config: PyroscopeConfig = {
   server: DEFAULT_SERVER,
   autoStart: true,
+  name: 'nodejs',
 }
 
 export function init(
-  c: PyroscopeConfig = { server: DEFAULT_SERVER, autoStart: true }
+  c: PyroscopeConfig = {
+    server: DEFAULT_SERVER,
+    autoStart: true,
+    name: 'nodejs',
+  }
 ): void {
   if (c) {
     config.server = c.server || DEFAULT_SERVER
@@ -56,7 +64,11 @@ function handleError(error: AxiosError) {
   }
 }
 
-async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
+async function uploadProfile(
+  profile: perftools.perftools.profiles.IProfile,
+  tags: Label[]
+) {
+  profile.sample?.forEach((t) => (t.label = tags))
   const buf = await pprof.encode(profile)
 
   const formData = new FormData()
@@ -68,7 +80,7 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
 
   // send data to the server
   return axios(
-    `${config.server}/ingest?name=nodejs&sampleRate=100&spyName=nodejs`,
+    `${config.server}/ingest?name=${config.name}&sampleRate=${SAMPLERATE}`,
     {
       method: 'POST',
       headers: formData.getHeaders(),
@@ -79,18 +91,30 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
 
 let isCpuProfilingEnabled = true
 
-export async function startCpuProfiling() {
+export async function startCpuProfiling(tags: Record<string, any> = {}) {
   isCpuProfilingEnabled = true
-  log('Pyroscope has started CPU profiling')
+  log('Pyroscope has started CPU Profiling')
   const sourceMapPath = config.sourceMapPath || [process.cwd()]
   const sm = await pprof.SourceMapper.create(sourceMapPath)
   while (isCpuProfilingEnabled) {
+    log('Collecting CPU Profile')
     const profile = await pprof.time.profile({
       lineNumbers: true,
       sourceMapper: sm,
       durationMillis: INTERVAL,
     })
-    await uploadProfile(profile)
+    console.log(profile)
+    log('CPU Profile uploaded')
+    await uploadProfile(
+      profile,
+      Object.keys(tags).map((t: string) =>
+        perftools.perftools.profiles.Label.create({
+          key: t as any,
+          str: tags[t],
+        })
+      )
+    )
+    log('CPU Profile has been uploaded')
   }
 }
 
@@ -116,7 +140,7 @@ export async function startHeapProfiling() {
     log('Collecting heap profile')
     const profile = pprof.heap.profile(undefined, sm)
     log('Heap profile collected...')
-    await uploadProfile(profile)
+    await uploadProfile(profile, [])
     log('Heap profile uploaded...')
   }, INTERVAL)
 }
