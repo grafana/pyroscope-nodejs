@@ -5,8 +5,8 @@ import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
 
-type ILabel = perftools.perftools.profiles.ILabel
 type Label = perftools.perftools.profiles.Label
+type TagList = Record<string, any>
 
 const log = debug('pyroscope')
 
@@ -68,6 +68,7 @@ async function uploadProfile(
   profile: perftools.perftools.profiles.IProfile,
   tags: Label[]
 ) {
+  // Apply labels to all samples
   profile.sample?.forEach((t) => (t.label = tags))
   const buf = await pprof.encode(profile)
 
@@ -91,7 +92,15 @@ async function uploadProfile(
 
 let isCpuProfilingEnabled = true
 
-export async function startCpuProfiling(tags: Record<string, any> = {}) {
+const tagListToLabels = (tags: TagList) =>
+  Object.keys(tags).map((t: string) =>
+    perftools.perftools.profiles.Label.create({
+      key: t as any,
+      str: tags[t],
+    })
+  )
+
+export async function startCpuProfiling(tags: TagList = {}) {
   isCpuProfilingEnabled = true
   log('Pyroscope has started CPU Profiling')
   const sourceMapPath = config.sourceMapPath || [process.cwd()]
@@ -105,15 +114,7 @@ export async function startCpuProfiling(tags: Record<string, any> = {}) {
     })
     console.log(profile)
     log('CPU Profile uploaded')
-    await uploadProfile(
-      profile,
-      Object.keys(tags).map((t: string) =>
-        perftools.perftools.profiles.Label.create({
-          key: t as any,
-          str: tags[t],
-        })
-      )
-    )
+    await uploadProfile(profile, tagListToLabels(tags))
     log('CPU Profile has been uploaded')
   }
 }
@@ -125,7 +126,7 @@ export async function stopCpuProfiling() {
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
 
-export async function startHeapProfiling() {
+export async function startHeapProfiling(tags: TagList = {}) {
   const intervalBytes = 1024 * 512
   const stackDepth = 32
 
@@ -140,7 +141,7 @@ export async function startHeapProfiling() {
     log('Collecting heap profile')
     const profile = pprof.heap.profile(undefined, sm)
     log('Heap profile collected...')
-    await uploadProfile(profile, [])
+    await uploadProfile(profile, tagListToLabels(tags))
     log('Heap profile uploaded...')
   }, INTERVAL)
 }
