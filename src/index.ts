@@ -22,7 +22,6 @@ const INTERVAL = 10000
 const SAMPLERATE = 1000
 // Base sampling interval, constant for pyroscope
 const DEFAULT_SERVER = 'http://localhost:4040'
-const DEFAULT_SOURCEMAP_PATH = [process.cwd()]
 
 const config: PyroscopeConfig = {
   server: DEFAULT_SERVER,
@@ -40,10 +39,12 @@ export function init(
 ): void {
   if (c) {
     config.server = c.server || DEFAULT_SERVER
-    config.sourceMapPath = c.sourceMapPath || DEFAULT_SOURCEMAP_PATH
-    pprof.SourceMapper.create(config.sourceMapPath).then(
-      (sm) => (config.sm = sm)
-    )
+    config.sourceMapPath = c.sourceMapPath
+    if (!!config.sourceMapPath) {
+      pprof.SourceMapper.create(config.sourceMapPath).then(
+        (sm) => (config.sm = sm)
+      )
+    }
   }
 
   if (c && c.autoStart) {
