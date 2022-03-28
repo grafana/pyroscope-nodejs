@@ -15,6 +15,7 @@ export interface PyroscopeConfig {
   name: string
   sourceMapPath?: string[]
   autoStart: boolean
+  sm?: any
 }
 
 const INTERVAL = 10000
@@ -27,6 +28,7 @@ const config: PyroscopeConfig = {
   server: DEFAULT_SERVER,
   autoStart: true,
   name: 'nodejs',
+  sm: undefined,
 }
 
 export function init(
@@ -39,6 +41,9 @@ export function init(
   if (c) {
     config.server = c.server || DEFAULT_SERVER
     config.sourceMapPath = c.sourceMapPath || DEFAULT_SOURCEMAP_PATH
+    pprof.SourceMapper.create(config.sourceMapPath).then(
+      (sm) => (config.sm = sm)
+    )
   }
 
   if (c && c.autoStart) {
@@ -103,13 +108,11 @@ const tagListToLabels = (tags: TagList) =>
 export async function startCpuProfiling(tags: TagList = {}) {
   isCpuProfilingEnabled = true
   log('Pyroscope has started CPU Profiling')
-  const sourceMapPath = config.sourceMapPath || [process.cwd()]
-  const sm = await pprof.SourceMapper.create(sourceMapPath)
   while (isCpuProfilingEnabled) {
     log('Collecting CPU Profile')
     const profile = await pprof.time.profile({
       lineNumbers: true,
-      sourceMapper: sm,
+      sourceMapper: config.sm,
       durationMillis: INTERVAL,
     })
     console.log(profile)
