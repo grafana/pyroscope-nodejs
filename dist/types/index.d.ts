@@ -4,9 +4,10 @@ export interface PyroscopeConfig {
     name: string;
     sourceMapPath?: string[];
     autoStart: boolean;
+    sm?: any;
 }
 export declare function init(c?: PyroscopeConfig): void;
-export declare function startCpuProfiling(tags?: TagList): Promise<void>;
+export declare function startCpuProfiling(tags?: TagList): void;
 export declare function stopCpuProfiling(): Promise<void>;
 export declare function startHeapProfiling(tags?: TagList): Promise<false | undefined>;
 export declare function stopHeapProfiling(): void;

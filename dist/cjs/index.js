@@ -98,9 +98,10 @@ const tagListToLabels = (tags) => Object.keys(tags).map((t) => profile_1.default
 }));
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer = undefined;
-let cpuProfilingTimer = undefined;
+let isCpuProfilingRunning = false;
 function startCpuProfiling(tags = {}) {
     log('Pyroscope has started CPU Profiling');
+    isCpuProfilingRunning = true;
     const profilingRound = () => {
         log('Collecting CPU Profile');
         pprof.time
@@ -111,6 +112,9 @@ function startCpuProfiling(tags = {}) {
         })
             .then((profile) => {
             log('CPU Profile uploading');
+            if (isCpuProfilingRunning) {
+                setImmediate(profilingRound);
+            }
             return uploadProfile(profile, tagListToLabels(tags));
         })
             .then((d) => {
@@ -118,14 +122,11 @@ function startCpuProfiling(tags = {}) {
         });
     };
     profilingRound();
-    cpuProfilingTimer = setInterval(() => profilingRound, INTERVAL);
 }
 exports.startCpuProfiling = startCpuProfiling;
+// It doesn't stop it immediately, just wait until it ends
 async function stopCpuProfiling() {
-    if (cpuProfilingTimer) {
-        clearInterval(cpuProfilingTimer);
-        cpuProfilingTimer = undefined;
-    }
+    isCpuProfilingRunning = false;
 }
 exports.stopCpuProfiling = stopCpuProfiling;
 async function startHeapProfiling(tags = {}) {
