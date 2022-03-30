@@ -33,11 +33,11 @@ const INTERVAL = 10000;
 const SAMPLERATE = 1000;
 // Base sampling interval, constant for pyroscope
 const DEFAULT_SERVER = 'http://localhost:4040';
-const DEFAULT_SOURCEMAP_PATH = [process.cwd()];
 const config = {
     server: DEFAULT_SERVER,
     autoStart: true,
     name: 'nodejs',
+    sm: undefined,
 };
 function init(c = {
     server: DEFAULT_SERVER,
@@ -46,7 +46,10 @@ function init(c = {
 }) {
     if (c) {
         config.server = c.server || DEFAULT_SERVER;
-        config.sourceMapPath = c.sourceMapPath || DEFAULT_SOURCEMAP_PATH;
+        config.sourceMapPath = c.sourceMapPath;
+        if (!!config.sourceMapPath) {
+            pprof.SourceMapper.create(config.sourceMapPath).then((sm) => (config.sm = sm));
+        }
     }
     if (c && c.autoStart) {
         startCpuProfiling();
@@ -89,36 +92,42 @@ async function uploadProfile(profile, tags) {
         data: formData,
     }).catch(handleError);
 }
-let isCpuProfilingEnabled = true;
 const tagListToLabels = (tags) => Object.keys(tags).map((t) => profile_1.default.perftools.profiles.Label.create({
     key: t,
     str: tags[t],
 }));
-async function startCpuProfiling(tags = {}) {
-    isCpuProfilingEnabled = true;
+// Could be false or a function to stop heap profiling
+let heapProfilingTimer = undefined;
+let cpuProfilingTimer = undefined;
+function startCpuProfiling(tags = {}) {
     log('Pyroscope has started CPU Profiling');
-    const sourceMapPath = config.sourceMapPath || [process.cwd()];
-    const sm = await pprof.SourceMapper.create(sourceMapPath);
-    while (isCpuProfilingEnabled) {
+    const profilingRound = () => {
         log('Collecting CPU Profile');
-        const profile = await pprof.time.profile({
+        pprof.time
+            .profile({
             lineNumbers: true,
-            sourceMapper: sm,
+            sourceMapper: config.sm,
             durationMillis: INTERVAL,
+        })
+            .then((profile) => {
+            log('CPU Profile uploading');
+            return uploadProfile(profile, tagListToLabels(tags));
+        })
+            .then((d) => {
+            log('CPU Profile has been uploaded');
         });
-        console.log(profile);
-        log('CPU Profile uploaded');
-        await uploadProfile(profile, tagListToLabels(tags));
-        log('CPU Profile has been uploaded');
-    }
+    };
+    profilingRound();
+    cpuProfilingTimer = setInterval(() => profilingRound, INTERVAL);
 }
 exports.startCpuProfiling = startCpuProfiling;
 async function stopCpuProfiling() {
-    isCpuProfilingEnabled = false;
+    if (cpuProfilingTimer) {
+        clearInterval(cpuProfilingTimer);
+        cpuProfilingTimer = undefined;
+    }
 }
 exports.stopCpuProfiling = stopCpuProfiling;
-// Could be false or a function to stop heap profiling
-let heapProfilingTimer = undefined;
 async function startHeapProfiling(tags = {}) {
     const intervalBytes = 1024 * 512;
     const stackDepth = 32;
@@ -151,3 +160,7 @@ exports.default = {
     startHeapProfiling,
     stopHeapProfiling,
 };
+process.on('exit', () => {
+    log('Exiting gracefully...');
+    log('All non-saved data would be discarded');
+});

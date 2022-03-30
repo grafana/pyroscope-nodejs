@@ -96,8 +96,6 @@ async function uploadProfile(
   ).catch(handleError)
 }
 
-let isCpuProfilingEnabled = true
-
 const tagListToLabels = (tags: TagList) =>
   Object.keys(tags).map((t: string) =>
     perftools.perftools.profiles.Label.create({
@@ -106,29 +104,39 @@ const tagListToLabels = (tags: TagList) =>
     })
   )
 
-export async function startCpuProfiling(tags: TagList = {}) {
-  isCpuProfilingEnabled = true
+// Could be false or a function to stop heap profiling
+let heapProfilingTimer: undefined | NodeJS.Timer = undefined
+let cpuProfilingTimer: undefined | NodeJS.Timer = undefined
+
+export function startCpuProfiling(tags: TagList = {}) {
   log('Pyroscope has started CPU Profiling')
-  while (isCpuProfilingEnabled) {
+  const profilingRound = () => {
     log('Collecting CPU Profile')
-    const profile = await pprof.time.profile({
-      lineNumbers: true,
-      sourceMapper: config.sm,
-      durationMillis: INTERVAL,
-    })
-    console.log(profile)
-    log('CPU Profile uploaded')
-    await uploadProfile(profile, tagListToLabels(tags))
-    log('CPU Profile has been uploaded')
+    pprof.time
+      .profile({
+        lineNumbers: true,
+        sourceMapper: config.sm,
+        durationMillis: INTERVAL,
+      })
+      .then((profile) => {
+        log('CPU Profile uploading')
+        return uploadProfile(profile, tagListToLabels(tags))
+      })
+      .then((d) => {
+        log('CPU Profile has been uploaded')
+      })
   }
+
+  profilingRound()
+  cpuProfilingTimer = setInterval(() => profilingRound, INTERVAL)
 }
 
 export async function stopCpuProfiling() {
-  isCpuProfilingEnabled = false
+  if (cpuProfilingTimer) {
+    clearInterval(cpuProfilingTimer)
+    cpuProfilingTimer = undefined
+  }
 }
-
-// Could be false or a function to stop heap profiling
-let heapProfilingTimer: undefined | NodeJS.Timer = undefined
 
 export async function startHeapProfiling(tags: TagList = {}) {
   const intervalBytes = 1024 * 512
@@ -165,3 +173,8 @@ export default {
   startHeapProfiling,
   stopHeapProfiling,
 }
+
+process.on('exit', () => {
+  log('Exiting gracefully...')
+  log('All non-saved data would be discarded')
+})
