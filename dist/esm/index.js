@@ -63,6 +63,7 @@ async function uploadProfile(profile) {
     });
     const tagList = Object.keys(config.tags).map((t) => `${t}=${config.tags[t]}`);
     const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}`;
+    log(`Sending data to ${url}`);
     // send data to the server
     return axios(url, {
         method: 'POST',
