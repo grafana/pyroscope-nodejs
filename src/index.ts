@@ -16,6 +16,7 @@ export interface PyroscopeConfig {
   sourceMapPath?: string[]
   autoStart: boolean
   sm?: any
+  tags: TagList
 }
 
 const INTERVAL = 10000
@@ -28,6 +29,7 @@ const config: PyroscopeConfig = {
   autoStart: true,
   name: 'nodejs',
   sm: undefined,
+  tags: {},
 }
 
 export function init(
@@ -35,6 +37,7 @@ export function init(
     server: DEFAULT_SERVER,
     autoStart: true,
     name: 'nodejs',
+    tags: {},
   }
 ): void {
   if (c) {
@@ -45,6 +48,7 @@ export function init(
         (sm) => (config.sm = sm)
       )
     }
+    config.tags = c.tags
   }
 
   if (c && c.autoStart) {
@@ -70,12 +74,8 @@ function handleError(error: AxiosError) {
   }
 }
 
-async function uploadProfile(
-  profile: perftools.perftools.profiles.IProfile,
-  tags: Label[]
-) {
+async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   // Apply labels to all samples
-  profile.sample?.forEach((t) => (t.label = tags))
   const buf = await pprof.encode(profile)
 
   const formData = new FormData()
@@ -85,15 +85,18 @@ async function uploadProfile(
     filename: 'profile',
   })
 
+  const tagList = Object.keys(config.tags).map(
+    (t: string) => `${t}=${config.tags[t]}`
+  )
+
+  const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}`
+
   // send data to the server
-  return axios(
-    `${config.server}/ingest?name=${config.name}&sampleRate=${SAMPLERATE}`,
-    {
-      method: 'POST',
-      headers: formData.getHeaders(),
-      data: formData as any,
-    }
-  ).catch(handleError)
+  return axios(url, {
+    method: 'POST',
+    headers: formData.getHeaders(),
+    data: formData as any,
+  }).catch(handleError)
 }
 
 const tagListToLabels = (tags: TagList) =>
@@ -140,7 +143,7 @@ export function startCpuProfiling(tags: TagList = {}) {
           setImmediate(profilingRound)
         }
         log('CPU Profile uploading')
-        return uploadProfile(profile, tagListToLabels(tags))
+        return uploadProfile(profile)
       })
       .then((d) => {
         log('CPU Profile has been uploaded')
@@ -170,7 +173,7 @@ export async function startHeapProfiling(tags: TagList = {}) {
     log('Collecting heap profile')
     const profile = pprof.heap.profile(undefined, sm)
     log('Heap profile collected...')
-    await uploadProfile(profile, tagListToLabels(tags))
+    await uploadProfile(profile)
     log('Heap profile uploaded...')
   }, INTERVAL)
 }

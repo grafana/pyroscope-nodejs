@@ -13,11 +13,13 @@ const config = {
     autoStart: true,
     name: 'nodejs',
     sm: undefined,
+    tags: {},
 };
 export function init(c = {
     server: DEFAULT_SERVER,
     autoStart: true,
     name: 'nodejs',
+    tags: {},
 }) {
     if (c) {
         config.server = c.server || DEFAULT_SERVER;
@@ -25,6 +27,7 @@ export function init(c = {
         if (!!config.sourceMapPath) {
             pprof.SourceMapper.create(config.sourceMapPath).then((sm) => (config.sm = sm));
         }
+        config.tags = c.tags;
     }
     if (c && c.autoStart) {
         startCpuProfiling();
@@ -49,9 +52,8 @@ function handleError(error) {
         log('Error', error.message);
     }
 }
-async function uploadProfile(profile, tags) {
+async function uploadProfile(profile) {
     // Apply labels to all samples
-    profile.sample?.forEach((t) => (t.label = tags));
     const buf = await pprof.encode(profile);
     const formData = new FormData();
     formData.append('profile', buf, {
@@ -59,8 +61,10 @@ async function uploadProfile(profile, tags) {
         contentType: 'text/json',
         filename: 'profile',
     });
+    const tagList = Object.keys(config.tags).map((t) => `${t}=${config.tags[t]}`);
+    const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}`;
     // send data to the server
-    return axios(`${config.server}/ingest?name=${config.name}&sampleRate=${SAMPLERATE}`, {
+    return axios(url, {
         method: 'POST',
         headers: formData.getHeaders(),
         data: formData,
@@ -103,7 +107,7 @@ export function startCpuProfiling(tags = {}) {
                 setImmediate(profilingRound);
             }
             log('CPU Profile uploading');
-            return uploadProfile(profile, tagListToLabels(tags));
+            return uploadProfile(profile);
         })
             .then((d) => {
             log('CPU Profile has been uploaded');
@@ -127,7 +131,7 @@ export async function startHeapProfiling(tags = {}) {
         log('Collecting heap profile');
         const profile = pprof.heap.profile(undefined, sm);
         log('Heap profile collected...');
-        await uploadProfile(profile, tagListToLabels(tags));
+        await uploadProfile(profile);
         log('Heap profile uploaded...');
     }, INTERVAL);
 }

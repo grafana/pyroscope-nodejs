@@ -5,6 +5,7 @@ export interface PyroscopeConfig {
     sourceMapPath?: string[];
     autoStart: boolean;
     sm?: any;
+    tags: TagList;
 }
 export declare function init(c?: PyroscopeConfig): void;
 export declare function startCpuProfiling(tags?: TagList): void;
