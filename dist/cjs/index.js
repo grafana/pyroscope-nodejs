@@ -30,7 +30,7 @@ const axios_1 = __importDefault(require("axios"));
 const form_data_1 = __importDefault(require("form-data"));
 const log = (0, debug_1.default)('pyroscope');
 const INTERVAL = 10000;
-const SAMPLERATE = 1000;
+const SAMPLERATE = 100;
 // Base sampling interval, constant for pyroscope
 const DEFAULT_SERVER = 'http://localhost:4040';
 const config = {
@@ -99,6 +99,18 @@ const tagListToLabels = (tags) => Object.keys(tags).map((t) => profile_1.default
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer = undefined;
 let isCpuProfilingRunning = false;
+const fs_1 = __importDefault(require("fs"));
+let chunk = 0;
+const writeProfileAsync = (profile) => {
+    pprof.encode(profile).then((buf) => {
+        fs_1.default.writeFile(`${config.name}-${chunk}.pb.gz`, buf, (err) => {
+            if (err)
+                throw err;
+            console.log('Chunk written');
+            chunk += 1;
+        });
+    });
+};
 function startCpuProfiling(tags = {}) {
     log('Pyroscope has started CPU Profiling');
     isCpuProfilingRunning = true;
@@ -109,12 +121,14 @@ function startCpuProfiling(tags = {}) {
             lineNumbers: true,
             sourceMapper: config.sm,
             durationMillis: INTERVAL,
+            intervalMicros: 10000,
         })
             .then((profile) => {
-            log('CPU Profile uploading');
+            log('CPU Profile collected');
             if (isCpuProfilingRunning) {
                 setImmediate(profilingRound);
             }
+            log('CPU Profile uploading');
             return uploadProfile(profile, tagListToLabels(tags));
         })
             .then((d) => {
@@ -161,7 +175,11 @@ exports.default = {
     startHeapProfiling,
     stopHeapProfiling,
 };
-process.on('exit', () => {
-    log('Exiting gracefully...');
-    log('All non-saved data would be discarded');
-});
+if (module.parent && module.parent.id === 'internal/preload') {
+    // Start profiling with default config
+    init();
+    process.on('exit', () => {
+        log('Exiting gracefully...');
+        log('All non-saved data would be discarded');
+    });
+}
