@@ -124,6 +124,16 @@ const writeProfileAsync = (profile) => {
         });
     });
 };
+// TODO: merge this with startCpuProfiling
+export async function collectCpu(seconds) {
+    const profile = await pprof.time.profile({
+        lineNumbers: true,
+        sourceMapper: config.sm,
+        durationMillis: seconds || INTERVAL,
+        intervalMicros: 10000,
+    });
+    return pprof.encode(profile);
+}
 export function startCpuProfiling(tags = {}) {
     log('Pyroscope has started CPU Profiling');
     isCpuProfilingRunning = true;
