@@ -163,6 +163,18 @@ const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
   })
 }
 
+// TODO: merge this with startCpuProfiling
+export async function collectCpu(seconds?: number) {
+  const profile = await pprof.time.profile({
+    lineNumbers: true,
+    sourceMapper: config.sm,
+    durationMillis: seconds || INTERVAL,
+    intervalMicros: 10000,
+  })
+
+  return pprof.encode(profile)
+}
+
 export function startCpuProfiling(tags: TagList = {}) {
   log('Pyroscope has started CPU Profiling')
   isCpuProfilingRunning = true
