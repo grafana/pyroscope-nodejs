@@ -1,3 +1,4 @@
+import perftools from 'pprof/proto/profile';
 declare type TagList = Record<string, any>;
 export interface PyroscopeConfig {
     server: string;
@@ -8,6 +9,7 @@ export interface PyroscopeConfig {
     tags: TagList;
 }
 export declare function init(c?: PyroscopeConfig): void;
+export declare const processProfile: (profile: perftools.perftools.profiles.IProfile) => perftools.perftools.profiles.IProfile | undefined;
 export declare function startCpuProfiling(tags?: TagList): void;
 export declare function stopCpuProfiling(): Promise<void>;
 export declare function startHeapProfiling(tags?: TagList): Promise<false | undefined>;

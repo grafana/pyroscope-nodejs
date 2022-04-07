@@ -43,6 +43,7 @@ export function init(
   if (c) {
     config.server = c.server || DEFAULT_SERVER
     config.sourceMapPath = c.sourceMapPath
+    config.name = c.name
     if (!!config.sourceMapPath) {
       pprof.SourceMapper.create(config.sourceMapPath).then(
         (sm) => (config.sm = sm)
@@ -74,28 +75,67 @@ function handleError(error: AxiosError) {
   }
 }
 
+export const processProfile = (
+  profile: perftools.perftools.profiles.IProfile
+): perftools.perftools.profiles.IProfile | undefined => {
+  const newProfile = profile.location?.reduce((a, location, i) => {
+    // location -> function -> name
+    if (location && location.line && a.stringTable) {
+      const functionId = location.line[0]?.functionId
+      const functionCtx: perftools.perftools.profiles.IFunction | undefined =
+        a.function?.find((x) => x.id == functionId)
+      const newNameId = a.stringTable.length
+      const functionName = a.stringTable[Number(functionCtx?.name)]
+      if (functionName.indexOf(':') === -1) {
+        const newName = (
+          `${a.stringTable[Number(functionCtx?.filename)]}:${
+            a.stringTable[Number(functionCtx?.name)]
+          }:${location?.line[0].line}` as string
+        ).replace(process.cwd(), '$(CWD)')
+        if (functionCtx) {
+          functionCtx.name = newNameId
+        }
+
+        return {
+          ...a,
+          location: [...(a.location || [])],
+          stringTable: [...(a.stringTable || []), newName],
+        }
+      } else {
+        return a
+      }
+    }
+    return {}
+  }, profile)
+  return newProfile
+}
+
 async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
+  debugger
   // Apply labels to all samples
-  const buf = await pprof.encode(profile)
+  const newProfile = processProfile(profile)
+  if (newProfile) {
+    const buf = await pprof.encode(newProfile)
 
-  const formData = new FormData()
-  formData.append('profile', buf, {
-    knownLength: buf.byteLength,
-    contentType: 'text/json',
-    filename: 'profile',
-  })
+    const formData = new FormData()
+    formData.append('profile', buf, {
+      knownLength: buf.byteLength,
+      contentType: 'text/json',
+      filename: 'profile',
+    })
 
-  const tagList = Object.keys(config.tags).map(
-    (t: string) => `${t}=${config.tags[t]}`
-  )
-  const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}`
-  log(`Sending data to ${url}`)
-  // send data to the server
-  return axios(url, {
-    method: 'POST',
-    headers: formData.getHeaders(),
-    data: formData as any,
-  }).catch(handleError)
+    const tagList = config.tags
+      ? Object.keys(config.tags).map((t: string) => `${t}=${config.tags[t]}`)
+      : ''
+    const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}`
+    log(`Sending data to ${url}`)
+    // send data to the server
+    return axios(url, {
+      method: 'POST',
+      headers: formData.getHeaders(),
+      data: formData as any,
+    }).catch(handleError)
+  }
 }
 
 const tagListToLabels = (tags: TagList) =>
