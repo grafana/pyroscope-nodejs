@@ -1,6 +1,6 @@
 {
   "name": "@pyroscope/nodejs",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "pyroscope nodejs package",
   "exports": {
     ".": {
@@ -42,10 +42,12 @@
   },
   "dependencies": {
     "@types/debug": "^4.1.7",
+    "@types/source-map": "^0.5.7",
     "axios": "^0.26.1",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
-    "pprof": "^3.2.0"
+    "pprof": "^3.2.0",
+    "source-map": "^0.7.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.1.0",

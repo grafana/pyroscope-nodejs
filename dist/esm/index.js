@@ -26,7 +26,11 @@ export function init(c = {
         config.sourceMapPath = c.sourceMapPath;
         config.name = c.name;
         if (!!config.sourceMapPath) {
-            pprof.SourceMapper.create(config.sourceMapPath).then((sm) => (config.sm = sm));
+            pprof.SourceMapper.create(config.sourceMapPath)
+                .then((sm) => (config.sm = sm))
+                .catch((e) => {
+                log(e);
+            });
         }
         config.tags = c.tags;
     }
@@ -62,7 +66,7 @@ export const processProfile = (profile) => {
             const newNameId = a.stringTable.length;
             const functionName = a.stringTable[Number(functionCtx?.name)];
             if (functionName.indexOf(':') === -1) {
-                const newName = `${a.stringTable[Number(functionCtx?.filename)]}:${a.stringTable[Number(functionCtx?.name)]}:${location?.line[0].line}`.replace(process.cwd(), '$(CWD)');
+                const newName = `${a.stringTable[Number(functionCtx?.filename)]}:${a.stringTable[Number(functionCtx?.name)]}:${location?.line[0].line}`.replace(process.cwd(), '.');
                 if (functionCtx) {
                     functionCtx.name = newNameId;
                 }
@@ -146,6 +150,9 @@ export function startCpuProfiling(tags = {}) {
         })
             .then((d) => {
             log('CPU Profile has been uploaded');
+        })
+            .catch((e) => {
+            log(e);
         });
     };
     profilingRound();
@@ -160,11 +167,10 @@ export async function startHeapProfiling(tags = {}) {
     if (heapProfilingTimer)
         return false;
     log('Pyroscope has started heap profiling');
-    const sm = await pprof.SourceMapper.create([process.cwd()]);
     pprof.heap.start(intervalBytes, stackDepth);
     heapProfilingTimer = setInterval(async () => {
         log('Collecting heap profile');
-        const profile = pprof.heap.profile(undefined, sm);
+        const profile = pprof.heap.profile(undefined, config.sm);
         log('Heap profile collected...');
         await uploadProfile(profile);
         log('Heap profile uploaded...');
