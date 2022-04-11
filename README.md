@@ -19,6 +19,16 @@ import Pyroscope from 'pyroscope';
 Pyroscope.init({server: 'http://pyroscope:4040'});
 ```
 
+Once you `init` Pyroscope with `autoStart` option defaulted or `true` it will immediately start both CPU and Memory profiling. 
+
+
+### Debugging
+
+Use `DEBUG` env var set to `pyroscope` to enable debugging messages. Otherwise all messages will be suppressed.
+
+`DEBUG=pyroscope node index.js`
+
+
 ## API
 
 
@@ -35,6 +45,8 @@ interface PyroscopeConfig {
     server: string;
     sourceMapPath?: string[];
     autoStart: boolean;
+    name: string;
+    tags: Record<string, any>;
 }
 ```
 
