@@ -41,12 +41,12 @@
     "url": "https://github.com/pyroscope-io/pyroscope-nodejs/issues"
   },
   "dependencies": {
+    "@datadog/pprof": "file:../pprof-nodejs",
     "@types/debug": "^4.1.7",
     "@types/source-map": "^0.5.7",
     "axios": "^0.26.1",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
-    "pprof": "^3.2.0",
     "source-map": "^0.7.3"
   },
   "devDependencies": {

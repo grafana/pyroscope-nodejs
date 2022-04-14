@@ -1,4 +1,4 @@
-import * as pprof from 'pprof'
+import * as pprof from '@datadog/pprof'
 
 import perftools from 'pprof/proto/profile'
 import debug from 'debug'
@@ -43,7 +43,7 @@ export function init(
   if (c) {
     config.server = c.server || DEFAULT_SERVER
     config.sourceMapPath = c.sourceMapPath
-    config.name = c.name
+    config.name = c.name || 'nodejs'
     if (!!config.sourceMapPath) {
       pprof.SourceMapper.create(config.sourceMapPath)
         .then((sm) => (config.sm = sm))
@@ -55,7 +55,7 @@ export function init(
   }
 
   if (c && c.autoStart) {
-    startCpuProfiling()
+    startWallProfiling()
     startHeapProfiling()
   }
 }
@@ -115,7 +115,7 @@ export const processProfile = (
 async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   debugger
   // Apply labels to all samples
-  const newProfile = processProfile(profile)
+  const newProfile = profile
   if (newProfile) {
     const buf = await pprof.encode(newProfile)
 
@@ -165,12 +165,45 @@ const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
   })
 }
 
-export function startCpuProfiling(tags: TagList = {}) {
+let cpuProfilerTimer: undefined | NodeJS.Timer = undefined
+let cpuProfiler: any = undefined
+
+export function startCpuProfiling(tags: Record<string, any>) {
+  cpuProfiler = new pprof.CpuProfiler()
+  cpuProfiler.start(10.0)
   log('Pyroscope has started CPU Profiling')
+
+  cpuProfiler.labels = tags
+  const profilingRound = () => {
+    log('Collecting CPU Profile')
+    const profile = cpuProfiler.profile()
+    log('Cpu Profile collected')
+
+    writeProfileAsync(profile)
+
+    if (profile) {
+      uploadProfile(profile).then(() => {
+        log('CPU Profile uploading')
+      })
+    }
+  }
+
+  cpuProfilerTimer = setInterval(profilingRound, INTERVAL)
+}
+
+export function stopCpuProfiling() {
+  if (cpuProfilerTimer) {
+    cpuProfiler.stop()
+    clearTimeout(cpuProfilerTimer)
+  }
+}
+
+export function startWallProfiling(tags: TagList = {}) {
+  log('Pyroscope has started Wall Profiling')
   isCpuProfilingRunning = true
 
   const profilingRound = () => {
-    log('Collecting CPU Profile')
+    log('Collecting Wall Profile')
     pprof.time
       .profile({
         lineNumbers: true,
@@ -179,15 +212,15 @@ export function startCpuProfiling(tags: TagList = {}) {
         intervalMicros: 10000,
       })
       .then((profile) => {
-        log('CPU Profile collected')
+        log('Wall Profile collected')
         if (isCpuProfilingRunning) {
           setImmediate(profilingRound)
         }
-        log('CPU Profile uploading')
+        log('Wall Profile uploading')
         return uploadProfile(profile)
       })
       .then((d) => {
-        log('CPU Profile has been uploaded')
+        log('Wall Profile has been uploaded')
       })
       .catch((e) => {
         log(e)
@@ -197,7 +230,7 @@ export function startCpuProfiling(tags: TagList = {}) {
 }
 
 // It doesn't stop it immediately, just wait until it ends
-export async function stopCpuProfiling() {
+export async function stopWallProfiling() {
   isCpuProfilingRunning = false
 }
 
@@ -231,6 +264,8 @@ export default {
   init,
   startCpuProfiling,
   stopCpuProfiling,
+  startWallProfiling,
+  stopWallProfiling,
   startHeapProfiling,
   stopHeapProfiling,
 }
