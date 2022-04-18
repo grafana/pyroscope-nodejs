@@ -31,7 +31,7 @@
   ],
   "keywords": [],
   "author": "Pyroscope Team <hello@pyroscope.io>",
-  "license": "Apache 2",
+  "license": "Apache-2.0",
   "homepage": "https://github.com/pyroscope-io/pyroscope-nodejs",
   "repository": {
     "type": "git",
