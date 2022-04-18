@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stopHeapProfiling = exports.startHeapProfiling = exports.stopCpuProfiling = exports.startCpuProfiling = exports.processProfile = exports.init = void 0;
+exports.stopHeapProfiling = exports.startHeapProfiling = exports.stopCpuProfiling = exports.startCpuProfiling = exports.collectCpu = exports.processProfile = exports.init = void 0;
 const pprof = __importStar(require("pprof"));
 const profile_1 = __importDefault(require("pprof/proto/profile"));
 const debug_1 = __importDefault(require("debug"));
@@ -155,6 +155,17 @@ const writeProfileAsync = (profile) => {
         });
     });
 };
+// TODO: merge this with startCpuProfiling
+async function collectCpu(seconds) {
+    const profile = await pprof.time.profile({
+        lineNumbers: true,
+        sourceMapper: config.sm,
+        durationMillis: seconds || INTERVAL,
+        intervalMicros: 10000,
+    });
+    return pprof.encode(profile);
+}
+exports.collectCpu = collectCpu;
 function startCpuProfiling(tags = {}) {
     log('Pyroscope has started CPU Profiling');
     isCpuProfilingRunning = true;
