@@ -55,7 +55,7 @@ export function init(
   }
 
   if (c && c.autoStart) {
-    startCpuProfiling()
+    startWallProfiling()
     startHeapProfiling()
   }
 }
@@ -140,6 +140,7 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const tagListToLabels = (tags: TagList) =>
   Object.keys(tags).map((t: string) =>
     perftools.perftools.profiles.Label.create({
@@ -150,11 +151,12 @@ const tagListToLabels = (tags: TagList) =>
 
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
-let isCpuProfilingRunning = false
+let isWallProfilingRunning = false
 
 import fs from 'fs'
 
 let chunk = 0
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
   pprof.encode(profile).then((buf) => {
     fs.writeFile(`${config.name}-${chunk}.pb.gz`, buf, (err) => {
@@ -165,8 +167,7 @@ const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
   })
 }
 
-// TODO: merge this with startCpuProfiling
-export async function collectCpu(seconds?: number) {
+export async function collectCpu(seconds?: number): Promise<Buffer> {
   const profile = await pprof.time.profile({
     lineNumbers: true,
     sourceMapper: config.sm,
@@ -177,9 +178,9 @@ export async function collectCpu(seconds?: number) {
   return pprof.encode(profile)
 }
 
-export function startCpuProfiling(tags: TagList = {}) {
+export function startWallProfiling(tags: TagList = {}): void {
   log('Pyroscope has started CPU Profiling')
-  isCpuProfilingRunning = true
+  isWallProfilingRunning = true
 
   const profilingRound = () => {
     log('Collecting CPU Profile')
@@ -192,7 +193,7 @@ export function startCpuProfiling(tags: TagList = {}) {
       })
       .then((profile) => {
         log('CPU Profile collected')
-        if (isCpuProfilingRunning) {
+        if (isWallProfilingRunning) {
           setImmediate(profilingRound)
         }
         log('CPU Profile uploading')
@@ -209,15 +210,15 @@ export function startCpuProfiling(tags: TagList = {}) {
 }
 
 // It doesn't stop it immediately, just wait until it ends
-export async function stopCpuProfiling() {
-  isCpuProfilingRunning = false
+export function stopWallProfiling(): void {
+  isWallProfilingRunning = false
 }
 
-export async function startHeapProfiling(tags: TagList = {}) {
+export function startHeapProfiling(tags: TagList = {}): void {
   const intervalBytes = 1024 * 512
   const stackDepth = 32
 
-  if (heapProfilingTimer) return false
+  if (heapProfilingTimer) return
   log('Pyroscope has started heap profiling')
 
   pprof.heap.start(intervalBytes, stackDepth)
@@ -231,7 +232,7 @@ export async function startHeapProfiling(tags: TagList = {}) {
   }, INTERVAL)
 }
 
-export function stopHeapProfiling() {
+export function stopHeapProfiling(): void {
   if (heapProfilingTimer) {
     log('Stopping heap profiling')
     clearInterval(heapProfilingTimer)
@@ -241,8 +242,10 @@ export function stopHeapProfiling() {
 
 export default {
   init,
-  startCpuProfiling,
-  stopCpuProfiling,
+  startCpuProfiling: startWallProfiling,
+  stopCpuProfiling: stopWallProfiling,
+  startWallProfiling,
+  stopWallProfiling,
   startHeapProfiling,
   stopHeapProfiling,
 }

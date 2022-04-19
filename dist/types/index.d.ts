@@ -12,14 +12,16 @@ export interface PyroscopeConfig {
 export declare function init(c?: PyroscopeConfig): void;
 export declare const processProfile: (profile: perftools.perftools.profiles.IProfile) => perftools.perftools.profiles.IProfile | undefined;
 export declare function collectCpu(seconds?: number): Promise<Buffer>;
-export declare function startCpuProfiling(tags?: TagList): void;
-export declare function stopCpuProfiling(): Promise<void>;
-export declare function startHeapProfiling(tags?: TagList): Promise<false | undefined>;
+export declare function startWallProfiling(tags?: TagList): void;
+export declare function stopWallProfiling(): void;
+export declare function startHeapProfiling(tags?: TagList): void;
 export declare function stopHeapProfiling(): void;
 declare const _default: {
     init: typeof init;
-    startCpuProfiling: typeof startCpuProfiling;
-    stopCpuProfiling: typeof stopCpuProfiling;
+    startCpuProfiling: typeof startWallProfiling;
+    stopCpuProfiling: typeof stopWallProfiling;
+    startWallProfiling: typeof startWallProfiling;
+    stopWallProfiling: typeof stopWallProfiling;
     startHeapProfiling: typeof startHeapProfiling;
     stopHeapProfiling: typeof stopHeapProfiling;
 };

@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stopHeapProfiling = exports.startHeapProfiling = exports.stopCpuProfiling = exports.startCpuProfiling = exports.collectCpu = exports.processProfile = exports.init = void 0;
+exports.stopHeapProfiling = exports.startHeapProfiling = exports.stopWallProfiling = exports.startWallProfiling = exports.collectCpu = exports.processProfile = exports.init = void 0;
 const pprof = __importStar(require("pprof"));
 const profile_1 = __importDefault(require("pprof/proto/profile"));
 const debug_1 = __importDefault(require("debug"));
@@ -60,7 +60,7 @@ function init(c = {
         config.tags = c.tags;
     }
     if (c && c.autoStart) {
-        startCpuProfiling();
+        startWallProfiling();
         startHeapProfiling();
     }
 }
@@ -136,15 +136,17 @@ async function uploadProfile(profile) {
         }).catch(handleError);
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const tagListToLabels = (tags) => Object.keys(tags).map((t) => profile_1.default.perftools.profiles.Label.create({
     key: t,
     str: tags[t],
 }));
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer = undefined;
-let isCpuProfilingRunning = false;
+let isWallProfilingRunning = false;
 const fs_1 = __importDefault(require("fs"));
 let chunk = 0;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const writeProfileAsync = (profile) => {
     pprof.encode(profile).then((buf) => {
         fs_1.default.writeFile(`${config.name}-${chunk}.pb.gz`, buf, (err) => {
@@ -155,7 +157,6 @@ const writeProfileAsync = (profile) => {
         });
     });
 };
-// TODO: merge this with startCpuProfiling
 async function collectCpu(seconds) {
     const profile = await pprof.time.profile({
         lineNumbers: true,
@@ -166,9 +167,9 @@ async function collectCpu(seconds) {
     return pprof.encode(profile);
 }
 exports.collectCpu = collectCpu;
-function startCpuProfiling(tags = {}) {
+function startWallProfiling(tags = {}) {
     log('Pyroscope has started CPU Profiling');
-    isCpuProfilingRunning = true;
+    isWallProfilingRunning = true;
     const profilingRound = () => {
         log('Collecting CPU Profile');
         pprof.time
@@ -180,7 +181,7 @@ function startCpuProfiling(tags = {}) {
         })
             .then((profile) => {
             log('CPU Profile collected');
-            if (isCpuProfilingRunning) {
+            if (isWallProfilingRunning) {
                 setImmediate(profilingRound);
             }
             log('CPU Profile uploading');
@@ -195,17 +196,17 @@ function startCpuProfiling(tags = {}) {
     };
     profilingRound();
 }
-exports.startCpuProfiling = startCpuProfiling;
+exports.startWallProfiling = startWallProfiling;
 // It doesn't stop it immediately, just wait until it ends
-async function stopCpuProfiling() {
-    isCpuProfilingRunning = false;
+function stopWallProfiling() {
+    isWallProfilingRunning = false;
 }
-exports.stopCpuProfiling = stopCpuProfiling;
-async function startHeapProfiling(tags = {}) {
+exports.stopWallProfiling = stopWallProfiling;
+function startHeapProfiling(tags = {}) {
     const intervalBytes = 1024 * 512;
     const stackDepth = 32;
     if (heapProfilingTimer)
-        return false;
+        return;
     log('Pyroscope has started heap profiling');
     pprof.heap.start(intervalBytes, stackDepth);
     heapProfilingTimer = setInterval(async () => {
@@ -227,8 +228,10 @@ function stopHeapProfiling() {
 exports.stopHeapProfiling = stopHeapProfiling;
 exports.default = {
     init,
-    startCpuProfiling,
-    stopCpuProfiling,
+    startCpuProfiling: startWallProfiling,
+    stopCpuProfiling: stopWallProfiling,
+    startWallProfiling,
+    stopWallProfiling,
     startHeapProfiling,
     stopHeapProfiling,
 };
