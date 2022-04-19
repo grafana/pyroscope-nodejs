@@ -161,7 +161,7 @@ async function collectCpu(seconds) {
     const profile = await pprof.time.profile({
         lineNumbers: true,
         sourceMapper: config.sm,
-        durationMillis: seconds || INTERVAL,
+        durationMillis: (seconds || 10) * 1000 || INTERVAL,
         intervalMicros: 10000,
     });
     return pprof.encode(profile);
@@ -234,6 +234,7 @@ exports.default = {
     stopWallProfiling,
     startHeapProfiling,
     stopHeapProfiling,
+    collectCpu,
 };
 if (module.parent && module.parent.id === 'internal/preload') {
     // Start profiling with default config

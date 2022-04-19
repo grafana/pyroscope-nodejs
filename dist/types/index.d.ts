@@ -24,5 +24,6 @@ declare const _default: {
     stopWallProfiling: typeof stopWallProfiling;
     startHeapProfiling: typeof startHeapProfiling;
     stopHeapProfiling: typeof stopHeapProfiling;
+    collectCpu: typeof collectCpu;
 };
 export default _default;

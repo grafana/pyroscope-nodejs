@@ -171,7 +171,7 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
   const profile = await pprof.time.profile({
     lineNumbers: true,
     sourceMapper: config.sm,
-    durationMillis: seconds || INTERVAL,
+    durationMillis: (seconds || 10) * 1000 || INTERVAL,
     intervalMicros: 10000,
   })
 
@@ -248,6 +248,7 @@ export default {
   stopWallProfiling,
   startHeapProfiling,
   stopHeapProfiling,
+  collectCpu,
 }
 
 if (module.parent && module.parent.id === 'internal/preload') {
