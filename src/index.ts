@@ -1,6 +1,6 @@
 import * as pprof from '@datadog/pprof'
 
-import perftools from 'pprof/proto/profile'
+import perftools from '@datadog/pprof/proto/profile'
 import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
@@ -170,7 +170,7 @@ let cpuProfiler: any = undefined
 
 export function startCpuProfiling(tags: Record<string, any>) {
   cpuProfiler = new pprof.CpuProfiler()
-  cpuProfiler.start(10.0)
+  cpuProfiler.start(100.0)
   log('Pyroscope has started CPU Profiling')
 
   cpuProfiler.labels = tags

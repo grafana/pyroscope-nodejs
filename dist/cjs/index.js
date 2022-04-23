@@ -22,9 +22,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stopHeapProfiling = exports.startHeapProfiling = exports.stopCpuProfiling = exports.startCpuProfiling = exports.processProfile = exports.init = void 0;
-const pprof = __importStar(require("pprof"));
-const profile_1 = __importDefault(require("pprof/proto/profile"));
+exports.stopHeapProfiling = exports.startHeapProfiling = exports.stopWallProfiling = exports.startWallProfiling = exports.stopCpuProfiling = exports.startCpuProfiling = exports.processProfile = exports.init = void 0;
+const pprof = __importStar(require("@datadog/pprof"));
+const profile_1 = __importDefault(require("@datadog/pprof/proto/profile"));
 const debug_1 = __importDefault(require("debug"));
 const axios_1 = __importDefault(require("axios"));
 const form_data_1 = __importDefault(require("form-data"));
@@ -49,7 +49,7 @@ function init(c = {
     if (c) {
         config.server = c.server || DEFAULT_SERVER;
         config.sourceMapPath = c.sourceMapPath;
-        config.name = c.name;
+        config.name = c.name || 'nodejs';
         if (!!config.sourceMapPath) {
             pprof.SourceMapper.create(config.sourceMapPath)
                 .then((sm) => (config.sm = sm))
@@ -60,7 +60,7 @@ function init(c = {
         config.tags = c.tags;
     }
     if (c && c.autoStart) {
-        startCpuProfiling();
+        startWallProfiling();
         startHeapProfiling();
     }
 }
@@ -114,7 +114,7 @@ exports.processProfile = processProfile;
 async function uploadProfile(profile) {
     debugger;
     // Apply labels to all samples
-    const newProfile = (0, exports.processProfile)(profile);
+    const newProfile = profile;
     if (newProfile) {
         const buf = await pprof.encode(newProfile);
         const formData = new form_data_1.default();
@@ -155,11 +155,39 @@ const writeProfileAsync = (profile) => {
         });
     });
 };
-function startCpuProfiling(tags = {}) {
+let cpuProfilerTimer = undefined;
+let cpuProfiler = undefined;
+function startCpuProfiling(tags) {
+    cpuProfiler = new pprof.CpuProfiler();
+    cpuProfiler.start(100.0);
     log('Pyroscope has started CPU Profiling');
-    isCpuProfilingRunning = true;
+    cpuProfiler.labels = tags;
     const profilingRound = () => {
         log('Collecting CPU Profile');
+        const profile = cpuProfiler.profile();
+        log('Cpu Profile collected');
+        writeProfileAsync(profile);
+        if (profile) {
+            uploadProfile(profile).then(() => {
+                log('CPU Profile uploading');
+            });
+        }
+    };
+    cpuProfilerTimer = setInterval(profilingRound, INTERVAL);
+}
+exports.startCpuProfiling = startCpuProfiling;
+function stopCpuProfiling() {
+    if (cpuProfilerTimer) {
+        cpuProfiler.stop();
+        clearTimeout(cpuProfilerTimer);
+    }
+}
+exports.stopCpuProfiling = stopCpuProfiling;
+function startWallProfiling(tags = {}) {
+    log('Pyroscope has started Wall Profiling');
+    isCpuProfilingRunning = true;
+    const profilingRound = () => {
+        log('Collecting Wall Profile');
         pprof.time
             .profile({
             lineNumbers: true,
@@ -168,15 +196,15 @@ function startCpuProfiling(tags = {}) {
             intervalMicros: 10000,
         })
             .then((profile) => {
-            log('CPU Profile collected');
+            log('Wall Profile collected');
             if (isCpuProfilingRunning) {
                 setImmediate(profilingRound);
             }
-            log('CPU Profile uploading');
+            log('Wall Profile uploading');
             return uploadProfile(profile);
         })
             .then((d) => {
-            log('CPU Profile has been uploaded');
+            log('Wall Profile has been uploaded');
         })
             .catch((e) => {
             log(e);
@@ -184,12 +212,12 @@ function startCpuProfiling(tags = {}) {
     };
     profilingRound();
 }
-exports.startCpuProfiling = startCpuProfiling;
+exports.startWallProfiling = startWallProfiling;
 // It doesn't stop it immediately, just wait until it ends
-async function stopCpuProfiling() {
+async function stopWallProfiling() {
     isCpuProfilingRunning = false;
 }
-exports.stopCpuProfiling = stopCpuProfiling;
+exports.stopWallProfiling = stopWallProfiling;
 async function startHeapProfiling(tags = {}) {
     const intervalBytes = 1024 * 512;
     const stackDepth = 32;
@@ -218,6 +246,8 @@ exports.default = {
     init,
     startCpuProfiling,
     stopCpuProfiling,
+    startWallProfiling,
+    stopWallProfiling,
     startHeapProfiling,
     stopHeapProfiling,
 };
