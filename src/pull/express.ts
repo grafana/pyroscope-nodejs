@@ -18,7 +18,7 @@ async function handlerCpu(req: Request, res: Response) {
 }
 
 async function handlerHeap(req: Request, res: Response) {
-  log('Collecting Heap for', req.query.seconds)
+  log('Fetching Heap Profile')
   try {
     const p = await Pyroscope.collectHeap()
     console.log(p)

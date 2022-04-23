@@ -182,13 +182,10 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
   }
 }
 
-export async function collectHeap(seconds?: number): Promise<Buffer> {
+export async function collectHeap(): Promise<Buffer> {
   const intervalBytes = 1024 * 512
   const stackDepth = 32
-
-  log('Pyroscope has started heap profiling')
-
-  pprof.heap.start(intervalBytes, stackDepth)
+  log('Collecting heap...')
   const profile = pprof.heap.profile(undefined, config.sm)
   const newProfile = processProfile(profile)
   if (newProfile) {
