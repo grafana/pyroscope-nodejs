@@ -8,10 +8,9 @@ async function handlerCpu(req: Request, res: Response) {
   log('Collecting Cpu for', req.query.seconds)
   try {
     const p = await Pyroscope.collectCpu(Number(req.query.seconds))
-    console.log(p)
     res.send(p)
   } catch (e) {
-    console.error('Error collecting cpu', e)
+    log('Error collecting cpu', e)
     res.sendStatus(500)
   }
   res.end()
@@ -21,10 +20,9 @@ async function handlerHeap(req: Request, res: Response) {
   log('Fetching Heap Profile')
   try {
     const p = await Pyroscope.collectHeap()
-    console.log(p)
     res.send(p)
   } catch (e) {
-    console.error('Error collecting Heap', e)
+    log('Error collecting Heap', e)
     res.sendStatus(500)
   }
   res.end()

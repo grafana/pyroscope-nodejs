@@ -183,8 +183,6 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
 }
 
 export async function collectHeap(): Promise<Buffer> {
-  const intervalBytes = 1024 * 512
-  const stackDepth = 32
   log('Collecting heap...')
   const profile = pprof.heap.profile(undefined, config.sm)
   const newProfile = processProfile(profile)
@@ -267,6 +265,12 @@ export function stopHeapProfiling(): void {
   }
 }
 
+export const startCpuProfiling = startWallProfiling
+export const stopCpuProfiling = stopWallProfiling
+
+export { expressMiddleware } from './pull'
+import { expressMiddleware } from './pull'
+
 export default {
   init,
   startCpuProfiling: startWallProfiling,
@@ -279,6 +283,8 @@ export default {
   collectHeap,
   startHeapCollecting,
   stopHeapCollecting,
+
+  expressMiddleware,
 }
 
 if (module.parent && module.parent.id === 'internal/preload') {
@@ -287,6 +293,5 @@ if (module.parent && module.parent.id === 'internal/preload') {
 
   process.on('exit', () => {
     log('Exiting gracefully...')
-    log('All non-saved data would be discarded')
   })
 }
