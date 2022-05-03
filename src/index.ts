@@ -126,9 +126,14 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
     })
 
     const tagList = config.tags
-      ? Object.keys(config.tags).map((t: string) => `${t}=${config.tags[t]}`)
+      ? Object.keys(config.tags).map(
+          (t: string) =>
+            `${encodeURIComponent(t)}=${encodeURIComponent(config.tags[t])}`
+        )
       : ''
-    const url = `${config.server}/ingest?name=${config.name}{${tagList}}&spyName=nodespy&sampleRate=${SAMPLERATE}`
+    const url = `${config.server}/ingest?name=${encodeURIComponent(
+      config.name
+    )}{${tagList}}&sampleRate=${SAMPLERATE}&spyName=nodeSpy`
     log(`Sending data to ${url}`)
     // send data to the server
     return axios(url, {

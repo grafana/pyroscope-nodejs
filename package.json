@@ -1,6 +1,6 @@
 {
   "name": "@pyroscope/nodejs",
-  "version": "0.1.12",
+  "version": "0.1.16",
   "description": "pyroscope nodejs package",
   "exports": {
     ".": {
