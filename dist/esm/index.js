@@ -24,7 +24,7 @@ export function init(c = {
     if (c) {
         config.server = c.server || DEFAULT_SERVER;
         config.sourceMapPath = c.sourceMapPath;
-        config.name = c.name;
+        config.name = c.name || 'nodejs';
         if (!!config.sourceMapPath) {
             pprof.SourceMapper.create(config.sourceMapPath)
                 .then((sm) => (config.sm = sm))
@@ -85,7 +85,6 @@ export const processProfile = (profile) => {
     return newProfile;
 };
 async function uploadProfile(profile) {
-    debugger;
     // Apply labels to all samples
     const newProfile = processProfile(profile);
     if (newProfile) {
@@ -99,7 +98,7 @@ async function uploadProfile(profile) {
         const tagList = config.tags
             ? Object.keys(config.tags).map((t) => `${t}=${config.tags[t]}`)
             : '';
-        const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}`;
+        const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}&spyName=nodeSpy`;
         log(`Sending data to ${url}`);
         // send data to the server
         return axios(url, {
