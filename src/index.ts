@@ -21,7 +21,8 @@ export interface PyroscopeConfig {
 const INTERVAL = 10000
 const SAMPLERATE = 100
 // Base sampling interval, constant for pyroscope
-const DEFAULT_SERVER = 'http://localhost:4040'
+const DEFAULT_SERVER =
+  process.env['PYROSCOPE_SERVER'] || 'http://localhost:4040'
 
 const config: PyroscopeConfig = {
   server: DEFAULT_SERVER,
@@ -42,7 +43,7 @@ export function init(
   if (c) {
     config.server = c.server || DEFAULT_SERVER
     config.sourceMapPath = c.sourceMapPath
-    config.name = c.name
+    config.name = c.name || 'nodejs'
     if (!!config.sourceMapPath) {
       pprof.SourceMapper.create(config.sourceMapPath)
         .then((sm) => (config.sm = sm))
@@ -53,7 +54,7 @@ export function init(
     config.tags = c.tags
   }
 
-  if (c && c.autoStart) {
+  if (c && (c.autoStart || c.autoStart === undefined)) {
     startWallProfiling()
     startHeapProfiling()
   }
@@ -112,7 +113,6 @@ export const processProfile = (
 }
 
 async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
-  debugger
   // Apply labels to all samples
   const newProfile = processProfile(profile)
   if (newProfile) {
@@ -131,6 +131,7 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
             `${encodeURIComponent(t)}=${encodeURIComponent(config.tags[t])}`
         )
       : ''
+
     const url = `${config.server}/ingest?name=${encodeURIComponent(
       config.name
     )}{${tagList}}&sampleRate=${SAMPLERATE}&spyName=nodeSpy`
