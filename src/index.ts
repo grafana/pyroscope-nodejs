@@ -21,7 +21,8 @@ export interface PyroscopeConfig {
 const INTERVAL = 10000
 const SAMPLERATE = 100
 // Base sampling interval, constant for pyroscope
-const DEFAULT_SERVER = 'http://localhost:4040'
+const DEFAULT_SERVER =
+  process.env['PYROSCOPE_SERVER'] || 'http://localhost:4040'
 
 const config: PyroscopeConfig = {
   server: DEFAULT_SERVER,
@@ -53,7 +54,7 @@ export function init(
     config.tags = c.tags
   }
 
-  if (c && c.autoStart) {
+  if (c && (c.autoStart || c.autoStart === undefined)) {
     startWallProfiling()
     startHeapProfiling()
   }
