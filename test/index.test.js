@@ -1,5 +1,5 @@
-const Pyroscope = require('@pyroscope/nodejs')
-const { expressMiddleware } = require('@pyroscope/nodejs')
+const Pyroscope = require('../')
+const { expressMiddleware } = require('../')
 
 test('correct Imports', () => {
     expect(Pyroscope.init).toBeInstanceOf(Function);
