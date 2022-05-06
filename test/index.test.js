@@ -1,4 +1,4 @@
-const Pyroscope = require('../')
+const Pyroscope = require('@pyroscope/nodejs')
 const { expressMiddleware } = require('@pyroscope/nodejs')
 
 test('correct Imports', () => {
