@@ -10,7 +10,7 @@ type TagList = Record<string, any>
 const log = debug('pyroscope')
 
 export interface PyroscopeConfig {
-  server: string
+  server?: string
   name: string
   sourceMapPath?: string[]
   autoStart: boolean
@@ -32,8 +32,9 @@ const config: PyroscopeConfig = {
   tags: {},
 }
 
+
 export function init(
-  c: PyroscopeConfig = {
+  c: Partial<PyroscopeConfig> = {
     server: DEFAULT_SERVER,
     autoStart: true,
     name: 'nodejs',
@@ -51,7 +52,7 @@ export function init(
           log(e)
         })
     }
-    config.tags = c.tags
+    config.tags = c.tags || {}
   }
 
   if (c && (c.autoStart || c.autoStart === undefined)) {
