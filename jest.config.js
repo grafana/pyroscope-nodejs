@@ -1,4 +1,10 @@
 module.exports = {
+  verbose: true,
+  rootDir: '.',
+  moduleNameMapper: {
+    '^@pyroscope/nodejs$': '<rootDir>/src/',
+    '^@pyroscope/nodejs(.*)$': '<rootDir>/src/$1',
+  },
   roots: ['<rootDir>/test'],
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',

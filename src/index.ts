@@ -5,7 +5,6 @@ import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
 
-type Label = perftools.perftools.profiles.Label
 type TagList = Record<string, any>
 
 const log = debug('pyroscope')
@@ -127,9 +126,14 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
     })
 
     const tagList = config.tags
-      ? Object.keys(config.tags).map((t: string) => `${t}=${config.tags[t]}`)
+      ? Object.keys(config.tags).map(
+          (t: string) =>
+            `${encodeURIComponent(t)}=${encodeURIComponent(config.tags[t])}`
+        )
       : ''
-    const url = `${config.server}/ingest?name=${config.name}{${tagList}}&sampleRate=${SAMPLERATE}`
+    const url = `${config.server}/ingest?name=${encodeURIComponent(
+      config.name
+    )}{${tagList}}&sampleRate=${SAMPLERATE}&spyName=nodeSpy`
     log(`Sending data to ${url}`)
     // send data to the server
     return axios(url, {
@@ -171,11 +175,27 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
   const profile = await pprof.time.profile({
     lineNumbers: true,
     sourceMapper: config.sm,
-    durationMillis: seconds || INTERVAL,
+    durationMillis: (seconds || 10) * 1000 || INTERVAL,
     intervalMicros: 10000,
   })
 
-  return pprof.encode(profile)
+  const newProfile = processProfile(profile)
+  if (newProfile) {
+    return pprof.encode(newProfile)
+  } else {
+    return new Buffer('', 'utf8')
+  }
+}
+
+export async function collectHeap(): Promise<Buffer> {
+  log('Collecting heap...')
+  const profile = pprof.heap.profile(undefined, config.sm)
+  const newProfile = processProfile(profile)
+  if (newProfile) {
+    return pprof.encode(newProfile)
+  } else {
+    return new Buffer('', 'utf8')
+  }
 }
 
 export function startWallProfiling(tags: TagList = {}): void {
@@ -214,14 +234,19 @@ export function stopWallProfiling(): void {
   isWallProfilingRunning = false
 }
 
-export function startHeapProfiling(tags: TagList = {}): void {
+export function startHeapCollecting() {
   const intervalBytes = 1024 * 512
   const stackDepth = 32
 
-  if (heapProfilingTimer) return
   log('Pyroscope has started heap profiling')
 
   pprof.heap.start(intervalBytes, stackDepth)
+}
+
+export function startHeapProfiling(tags: TagList = {}): void {
+  if (heapProfilingTimer) return
+
+  startHeapCollecting()
 
   heapProfilingTimer = setInterval(async () => {
     log('Collecting heap profile')
@@ -232,13 +257,24 @@ export function startHeapProfiling(tags: TagList = {}): void {
   }, INTERVAL)
 }
 
+export function stopHeapCollecting() {
+  pprof.heap.stop()
+}
+
 export function stopHeapProfiling(): void {
   if (heapProfilingTimer) {
     log('Stopping heap profiling')
     clearInterval(heapProfilingTimer)
     heapProfilingTimer = undefined
+    stopHeapCollecting()
   }
 }
+
+export const startCpuProfiling = startWallProfiling
+export const stopCpuProfiling = stopWallProfiling
+
+export { expressMiddleware } from './pull'
+import { expressMiddleware } from './pull'
 
 export default {
   init,
@@ -248,6 +284,12 @@ export default {
   stopWallProfiling,
   startHeapProfiling,
   stopHeapProfiling,
+  collectCpu,
+  collectHeap,
+  startHeapCollecting,
+  stopHeapCollecting,
+
+  expressMiddleware,
 }
 
 if (module.parent && module.parent.id === 'internal/preload') {
@@ -256,6 +298,5 @@ if (module.parent && module.parent.id === 'internal/preload') {
 
   process.on('exit', () => {
     log('Exiting gracefully...')
-    log('All non-saved data would be discarded')
   })
 }
