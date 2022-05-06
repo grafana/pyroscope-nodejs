@@ -1,21 +1,24 @@
-import Pyroscope, {processProfile} from '../src/index'
+import Pyroscope, {expressMiddleware, processProfile} from '@pyroscope/nodejs'
 import fs from 'fs';
 
-test('basicFunctions', () => {
+test('correct imports', () => {
   expect(Pyroscope.init).toBeInstanceOf(Function);
+  expect(Pyroscope.startWallProfiling).toBeInstanceOf(Function);
+  expect(Pyroscope.stopWallProfiling).toBeInstanceOf(Function);
+  expect(Pyroscope.startHeapProfiling).toBeInstanceOf(Function);
+  expect(Pyroscope.stopHeapProfiling).toBeInstanceOf(Function);  
   expect(Pyroscope.startCpuProfiling).toBeInstanceOf(Function);
   expect(Pyroscope.stopCpuProfiling).toBeInstanceOf(Function);
-  expect(Pyroscope.startHeapProfiling).toBeInstanceOf(Function);
-  expect(Pyroscope.stopHeapProfiling).toBeInstanceOf(Function);
+
+  expect(expressMiddleware).toBeInstanceOf(Function);
 })
 
 test("process profile", () => {
   const profile = JSON.parse(fs.readFileSync('./test/profile1.json').toString());
   
   const newProfile = processProfile(profile);
+  expect(newProfile?.stringTable?.length).toBe(176);
+  expect(newProfile?.stringTable).toContain('./dist/cjs/index.js:startCpuProfiling:144');
+  expect(newProfile?.stringTable).toContain('./dist/cjs/index.js:profilingRound:129');
 })
 
-
-test("tags definition", () => {
-  
-})
