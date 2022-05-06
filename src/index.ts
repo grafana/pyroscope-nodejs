@@ -1,6 +1,6 @@
 import * as pprof from 'pprof'
 
-import perftools from 'pprof/proto/profile'
+import type perftools from 'pprof/proto/profile'
 import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
@@ -145,15 +145,6 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const tagListToLabels = (tags: TagList) =>
-  Object.keys(tags).map((t: string) =>
-    perftools.perftools.profiles.Label.create({
-      key: t as any,
-      str: tags[t],
-    })
-  )
-
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
 let isWallProfilingRunning = false
@@ -274,8 +265,8 @@ export function stopHeapProfiling(): void {
 export const startCpuProfiling = startWallProfiling
 export const stopCpuProfiling = stopWallProfiling
 
-export { expressMiddleware } from './pull'
-import { expressMiddleware } from './pull'
+export { expressMiddleware } from './pull/index.js'
+import { expressMiddleware } from './pull/index.js'
 
 export default {
   init,
@@ -293,11 +284,3 @@ export default {
   expressMiddleware,
 }
 
-if (module.parent && module.parent.id === 'internal/preload') {
-  // Start profiling with default config
-  init()
-
-  process.on('exit', () => {
-    log('Exiting gracefully...')
-  })
-}

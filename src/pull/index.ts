@@ -1,1 +1,1 @@
-export { default as expressMiddleware } from './express'
+export { default as expressMiddleware } from './express.js'
