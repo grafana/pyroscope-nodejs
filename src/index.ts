@@ -12,7 +12,7 @@ const log = debug('pyroscope')
 const cloudHostnameSuffix = 'pyroscope.cloud'
 
 export interface PyroscopeConfig {
-  serverAddress: string
+  serverAddress?: string
   appName: string
   sourceMapPath?: string[]
   sm?: any
@@ -23,43 +23,47 @@ export interface PyroscopeConfig {
 
 const INTERVAL = 10000
 const SAMPLERATE = 100
-// Base sampling interval, constant for pyroscope
-const DEFAULT_SERVER =
-  process.env['PYROSCOPE_SERVER_ADDRESS'] || 'http://pyroscope:4040'
 
 const config: PyroscopeConfig = {
-  serverAddress: DEFAULT_SERVER,
-  appName: process.env['PYROSCOPE_APPLICATION_NAME'] || 'nodejs',
+  serverAddress: process.env['PYROSCOPE_SERVER_ADDRESS'],
+  appName: process.env['PYROSCOPE_APPLICATION_NAME'] || '',
   sm: undefined,
   tags: {},
   authToken: process.env['PYROSCOPE_AUTH_TOKEN'],
   configured: false,
 }
 
-export function init(
-  c: Partial<PyroscopeConfig> = {
-    serverAddress: DEFAULT_SERVER,
-    appName: 'nodejs',
-    tags: {},
+export function init(c: Partial<PyroscopeConfig> = {}): void {
+  config.serverAddress = c.serverAddress || config.serverAddress
+  config.appName = c.appName || config.appName
+  config.sourceMapPath = c.sourceMapPath || config.sourceMapPath
+  config.authToken = c.authToken || config.authToken
+  config.tags = c.tags || config.tags
+
+  if (!!config.sourceMapPath) {
+    pprof.SourceMapper.create(config.sourceMapPath)
+      .then((sm) => (config.sm = sm))
+      .catch((e) => {
+        log(e)
+      })
   }
-): void {
-  if (c) {
-    config.serverAddress = c.serverAddress || DEFAULT_SERVER
-    config.sourceMapPath = c.sourceMapPath
-    config.appName = c.appName || 'nodejs'
-    config.authToken = c.authToken
-    if (!!config.sourceMapPath) {
-      pprof.SourceMapper.create(config.sourceMapPath)
-        .then((sm) => (config.sm = sm))
-        .catch((e) => {
-          log(e)
-        })
-    }
-    config.tags = c.tags || {}
+
+  if (!config.appName) {
+    log(
+      'Provide a name for the application. Pyroscope is not configured and will not be able to ingest data.'
+    )
+    return
+  }
+
+  if (!config.serverAddress) {
+    log(
+      'Provide a pyroscope server address. Pyroscope is not configured and will not be able to ingest data.'
+    )
+    return
   }
 
   if (
-    config.serverAddress.indexOf(cloudHostnameSuffix) !== -1 &&
+    config.serverAddress?.indexOf(cloudHostnameSuffix) !== -1 &&
     !config.authToken
   ) {
     log(
