@@ -280,6 +280,16 @@ export function stopWallProfiling(): void {
   isWallProfilingRunning = false
 }
 
+export function start(): void {
+  startCpuProfiling()
+  startHeapProfiling()
+}
+
+export function stop(): void {
+  stopCpuProfiling()
+  stopHeapProfiling()
+}
+
 export function startHeapCollecting() {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
@@ -339,6 +349,8 @@ export default {
   collectHeap,
   startHeapCollecting,
   stopHeapCollecting,
+  start,
+  stop,
 
   expressMiddleware,
 }
