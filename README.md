@@ -28,9 +28,11 @@ Pyroscope.init({server: 'http://pyroscope:4040'});
 import Pyroscope from 'pyroscope';
 
 Pyroscope.init({server: 'http://pyroscope:4040'});
+Pyroscope.startCpuProfiling();
+Pyroscope.startHeapProfiling();
 ```
 
-Once you `init` Pyroscope with `autoStart` option defaulted or `true` it will immediately start both CPU and Memory profiling. 
+Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
 
 ## Pull Mode
 
@@ -56,8 +58,9 @@ app.get('/debug/pprof/profile', async function handler(req, res) {
 or you may use express middleware. 
 
 ```javascript
-import { expressMiddleware } from '@pyroscope/nodejs'
+import Pyroscope, { expressMiddleware } from '@pyroscope/nodejs'
 
+Pyroscope.init()
 const app = express()
 app.use(expressMiddleware);
 ```
@@ -95,28 +98,32 @@ init(c : PyroscopeConfig)
 Configuration options
 ```
 interface PyroscopeConfig {
-    server: string;
+    serverAddress: string;
     sourceMapPath?: string[];
-    autoStart: boolean;
-    name: string;
+    appName: string;
     tags: Record<string, any>;
-    apiKey?: string
+    authToken?: string
 }
 ```
 
 ### CPU Profiling
 ```javascript
-// Start and upload to server
+// Start collecting 10s i and upload to server
 Pyroscope.startCpuProfiling()
 Pyroscope.stopCpuProfiling()
-// Start and return collected profile
-Pyroscope.startCpuCollecting()
 
+// Or do it manually
+Pyroscope.collectCpu(seconds?:number);
 ```
 ### Heap Profiling
 ```javascript
 // Start heap profiling and upload to server
 Pyroscope.startHeapProfiling()
 Pyroscope.stopHeapProfiling()
+
+// Or do it manually
+Pyroscope.startHeapCollecting()
+Pyroscope.collectHeap();
+Pyroscope.stopHeapCollecting()
 ```
 

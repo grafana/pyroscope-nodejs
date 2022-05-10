@@ -12,13 +12,13 @@ const log = debug('pyroscope')
 const cloudHostnameSuffix = 'pyroscope.cloud'
 
 export interface PyroscopeConfig {
-  server: string
-  name: string
+  serverAddress: string
+  appName: string
   sourceMapPath?: string[]
-  autoStart: boolean
   sm?: any
   tags: TagList
-  apiKey?: string
+  authToken?: string
+  configured: boolean
 }
 
 const INTERVAL = 10000
@@ -28,27 +28,26 @@ const DEFAULT_SERVER =
   process.env['PYROSCOPE_SERVER'] || 'http://localhost:4040'
 
 const config: PyroscopeConfig = {
-  server: DEFAULT_SERVER,
-  autoStart: true,
-  name: 'nodejs',
+  serverAddress: DEFAULT_SERVER,
+  appName: 'nodejs',
   sm: undefined,
   tags: {},
-  apiKey: undefined,
+  authToken: undefined,
+  configured: false,
 }
 
 export function init(
   c: Partial<PyroscopeConfig> = {
-    server: DEFAULT_SERVER,
-    autoStart: true,
-    name: 'nodejs',
+    serverAddress: DEFAULT_SERVER,
+    appName: 'nodejs',
     tags: {},
   }
 ): void {
   if (c) {
-    config.server = c.server || DEFAULT_SERVER
+    config.serverAddress = c.serverAddress || DEFAULT_SERVER
     config.sourceMapPath = c.sourceMapPath
-    config.name = c.name || 'nodejs'
-    config.apiKey = c.apiKey
+    config.appName = c.appName || 'nodejs'
+    config.authToken = c.authToken
     if (!!config.sourceMapPath) {
       pprof.SourceMapper.create(config.sourceMapPath)
         .then((sm) => (config.sm = sm))
@@ -59,17 +58,16 @@ export function init(
     config.tags = c.tags || {}
   }
 
-  if (config.server.includes(cloudHostnameSuffix) && !config.apiKey) {
+  if (
+    config.serverAddress.indexOf(cloudHostnameSuffix) !== -1 &&
+    !config.authToken
+  ) {
     log(
-      'Pyroscope is running on a cloud server, but no API key was provided. Pyroscope will not be able to ingest data.'
+      'Pyroscope is running on a cloud server, but no authToken was provided. Pyroscope will not be able to ingest data.'
     )
     return
   }
-
-  if (c && (c.autoStart || c.autoStart === undefined)) {
-    startWallProfiling()
-    startHeapProfiling()
-  }
+  config.configured = true
 }
 
 function handleError(error: AxiosError) {
@@ -169,15 +167,18 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
         )
       : ''
 
-    const url = `${config.server}/ingest?name=${encodeURIComponent(
-      config.name
-    )}{${tagList}}&sampleRate=${SAMPLERATE}&spyName=nodeSpy`
+    const url = `${config.serverAddress}/ingest?name=${encodeURIComponent(
+      config.appName
+    )}{${tagList}}&sampleRate=${SAMPLERATE}&spyName=nodespy`
     log(`Sending data to ${url}`)
     // send data to the server
     return axios(url, {
       method: 'POST',
-      headers: config.apiKey
-        ? { ...formData.getHeaders(), Authorization: `Bearer ${config.apiKey}` }
+      headers: config.authToken
+        ? {
+            ...formData.getHeaders(),
+            Authorization: `Bearer ${config.authToken}`,
+          }
         : formData.getHeaders(),
       data: formData as any,
     }).catch(handleError)
@@ -194,7 +195,7 @@ let chunk = 0
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
   pprof.encode(profile).then((buf) => {
-    fs.writeFile(`${config.name}-${++chunk}.pb.gz`, buf, (err) => {
+    fs.writeFile(`${config.appName}-${chunk++}.pb.gz`, buf, (err) => {
       if (err) throw err
       console.log('Chunk written')
     })
@@ -202,6 +203,9 @@ const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
 }
 
 export async function collectCpu(seconds?: number): Promise<Buffer> {
+  if (!config.configured) {
+    throw 'Pyroscope is not configured. Please call init() first.'
+  }
   const profile = await pprof.time.profile({
     lineNumbers: true,
     sourceMapper: config.sm,
@@ -218,6 +222,10 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
 }
 
 export async function collectHeap(): Promise<Buffer> {
+  if (!config.configured) {
+    throw 'Pyroscope is not configured. Please call init() first.'
+  }
+
   log('Collecting heap...')
   const profile = pprof.heap.profile(undefined, config.sm)
   const newProfile = processProfile(profile)
@@ -229,6 +237,10 @@ export async function collectHeap(): Promise<Buffer> {
 }
 
 export function startWallProfiling(tags: TagList = {}): void {
+  if (!config.configured) {
+    throw 'Pyroscope is not configured. Please call init() first.'
+  }
+
   log('Pyroscope has started CPU Profiling')
   isWallProfilingRunning = true
 
@@ -265,6 +277,10 @@ export function stopWallProfiling(): void {
 }
 
 export function startHeapCollecting() {
+  if (!config.configured) {
+    throw 'Pyroscope is not configured. Please call init() first.'
+  }
+
   const intervalBytes = 1024 * 512
   const stackDepth = 32
 
@@ -315,6 +331,7 @@ export default {
   startHeapProfiling,
   stopHeapProfiling,
   collectCpu,
+  collectWall: collectCpu,
   collectHeap,
   startHeapCollecting,
   stopHeapCollecting,

@@ -33,6 +33,7 @@ export default function expressMiddleware(): (
   res: Response,
   next: NextFunction
 ) => void {
+  Pyroscope.startHeapCollecting()
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'GET' && req.path === '/debug/pprof/profile') {
       return handlerCpu(req, res).then(() => next())
