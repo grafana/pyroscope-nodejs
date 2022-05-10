@@ -100,6 +100,7 @@ interface PyroscopeConfig {
     autoStart: boolean;
     name: string;
     tags: Record<string, any>;
+    apiKey?: string
 }
 ```
 
