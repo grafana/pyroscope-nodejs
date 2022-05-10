@@ -25,14 +25,14 @@ const INTERVAL = 10000
 const SAMPLERATE = 100
 // Base sampling interval, constant for pyroscope
 const DEFAULT_SERVER =
-  process.env['PYROSCOPE_SERVER'] || 'http://localhost:4040'
+  process.env['PYROSCOPE_SERVER_ADDRESS'] || 'http://pyroscope:4040'
 
 const config: PyroscopeConfig = {
   serverAddress: DEFAULT_SERVER,
-  appName: 'nodejs',
+  appName: process.env['PYROSCOPE_APPLICATION_NAME'] || 'nodejs',
   sm: undefined,
   tags: {},
-  authToken: undefined,
+  authToken: process.env['PYROSCOPE_AUTH_TOKEN'],
   configured: false,
 }
 
