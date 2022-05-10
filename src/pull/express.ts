@@ -1,4 +1,4 @@
-import Pyroscope, { PyroscopeConfig } from '../index'
+import Pyroscope, { PyroscopeConfig } from '../index.js'
 import { Request, Response, NextFunction } from 'express'
 import debug from 'debug'
 
@@ -28,12 +28,11 @@ async function handlerHeap(req: Request, res: Response) {
   res.end()
 }
 
-export default function expressMiddleware(
-  options: PyroscopeConfig
-): (req: Request, res: Response, next: NextFunction) => void {
-  Pyroscope.init({ ...options, autoStart: false })
-  Pyroscope.startHeapCollecting()
-
+export default function expressMiddleware(): (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => void {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'GET' && req.path === '/debug/pprof/profile') {
       return handlerCpu(req, res).then(() => next())

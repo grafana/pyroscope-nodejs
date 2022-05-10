@@ -1,6 +1,6 @@
 import * as pprof from 'pprof'
 
-import perftools from 'pprof/proto/profile'
+import type perftools from 'pprof/proto/profile'
 import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
@@ -10,7 +10,7 @@ type TagList = Record<string, any>
 const log = debug('pyroscope')
 
 export interface PyroscopeConfig {
-  server: string
+  server?: string
   name: string
   sourceMapPath?: string[]
   autoStart: boolean
@@ -32,8 +32,9 @@ const config: PyroscopeConfig = {
   tags: {},
 }
 
+
 export function init(
-  c: PyroscopeConfig = {
+  c: Partial<PyroscopeConfig> = {
     server: DEFAULT_SERVER,
     autoStart: true,
     name: 'nodejs',
@@ -51,7 +52,7 @@ export function init(
           log(e)
         })
     }
-    config.tags = c.tags
+    config.tags = c.tags || {}
   }
 
   if (c && (c.autoStart || c.autoStart === undefined)) {
@@ -144,15 +145,6 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
     }).catch(handleError)
   }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const tagListToLabels = (tags: TagList) =>
-  Object.keys(tags).map((t: string) =>
-    perftools.perftools.profiles.Label.create({
-      key: t as any,
-      str: tags[t],
-    })
-  )
 
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
@@ -274,8 +266,8 @@ export function stopHeapProfiling(): void {
 export const startCpuProfiling = startWallProfiling
 export const stopCpuProfiling = stopWallProfiling
 
-export { expressMiddleware } from './pull'
-import { expressMiddleware } from './pull'
+export { expressMiddleware } from './pull/index.js'
+import { expressMiddleware } from './pull/index.js'
 
 export default {
   init,
@@ -293,11 +285,3 @@ export default {
   expressMiddleware,
 }
 
-if (module.parent && module.parent.id === 'internal/preload') {
-  // Start profiling with default config
-  init()
-
-  process.on('exit', () => {
-    log('Exiting gracefully...')
-  })
-}

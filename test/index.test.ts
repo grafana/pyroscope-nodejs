@@ -1,4 +1,4 @@
-import Pyroscope, {expressMiddleware, processProfile} from '@pyroscope/nodejs'
+import Pyroscope, {expressMiddleware, processProfile} from '../'
 import fs from 'fs';
 
 test('correct imports', () => {
