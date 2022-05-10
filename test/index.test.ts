@@ -18,7 +18,13 @@ test("process profile", () => {
   
   const newProfile = processProfile(profile);
   expect(newProfile?.stringTable?.length).toBe(176);
+
+  // Check we're receiving right data
   expect(newProfile?.stringTable).toContain('./dist/cjs/index.js:startCpuProfiling:144');
   expect(newProfile?.stringTable).toContain('./dist/cjs/index.js:profilingRound:129');
+
+  // Check profiles replacement works
+  expect(profile?.stringTable?.at(1)).toBe('sample');
+  expect(newProfile?.stringTable?.at(1)).toBe('samples');
 })
 

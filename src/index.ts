@@ -32,7 +32,6 @@ const config: PyroscopeConfig = {
   tags: {},
 }
 
-
 export function init(
   c: Partial<PyroscopeConfig> = {
     server: DEFAULT_SERVER,
@@ -81,41 +80,60 @@ function handleError(error: AxiosError) {
 export const processProfile = (
   profile: perftools.perftools.profiles.IProfile
 ): perftools.perftools.profiles.IProfile | undefined => {
-  const newProfile = profile.location?.reduce((a, location, i) => {
-    // location -> function -> name
-    if (location && location.line && a.stringTable) {
-      const functionId = location.line[0]?.functionId
-      const functionCtx: perftools.perftools.profiles.IFunction | undefined =
-        a.function?.find((x) => x.id == functionId)
-      const newNameId = a.stringTable.length
-      const functionName = a.stringTable[Number(functionCtx?.name)]
-      if (functionName.indexOf(':') === -1) {
-        const newName = (
-          `${a.stringTable[Number(functionCtx?.filename)]}:${
-            a.stringTable[Number(functionCtx?.name)]
-          }:${location?.line[0].line}` as string
-        ).replace(process.cwd(), '.')
-        if (functionCtx) {
-          functionCtx.name = newNameId
-        }
+  const replacements = {
+    objects: 'inuse_objects',
+    space: 'inuse_space',
+    sample: 'samples',
+  } as Record<string, string>
 
-        return {
-          ...a,
-          location: [...(a.location || [])],
-          stringTable: [...(a.stringTable || []), newName],
+  const newStringTable = profile.stringTable
+    ?.slice(0, 5)
+    .map((s) => (replacements[s] ? replacements[s] : s))
+    .concat(profile.stringTable?.slice(5))
+
+  // Inject line numbers and file names into symbols table
+  const newProfile = profile.location?.reduce(
+    (a, location, i) => {
+      // location -> function -> name
+      if (location && location.line && a.stringTable) {
+        const functionId = location.line[0]?.functionId
+        const functionCtx: perftools.perftools.profiles.IFunction | undefined =
+          a.function?.find((x) => x.id == functionId)
+        const newNameId = a.stringTable.length
+        const functionName = a.stringTable[Number(functionCtx?.name)]
+        if (functionName.indexOf(':') === -1) {
+          const newName = (
+            `${a.stringTable[Number(functionCtx?.filename)]}:${
+              a.stringTable[Number(functionCtx?.name)]
+            }:${location?.line[0].line}` as string
+          ).replace(process.cwd(), '.')
+          if (functionCtx) {
+            functionCtx.name = newNameId
+          }
+
+          return {
+            ...a,
+            location: [...(a.location || [])],
+            stringTable: [...(a.stringTable || []), newName],
+          }
+        } else {
+          return a
         }
-      } else {
-        return a
       }
-    }
-    return {}
-  }, profile)
+      return {}
+    },
+    {
+      ...profile,
+      stringTable: newStringTable,
+    } as perftools.perftools.profiles.IProfile
+  )
   return newProfile
 }
 
 async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   // Apply labels to all samples
   const newProfile = processProfile(profile)
+
   if (newProfile) {
     const buf = await pprof.encode(newProfile)
 
@@ -284,4 +302,3 @@ export default {
 
   expressMiddleware,
 }
-
