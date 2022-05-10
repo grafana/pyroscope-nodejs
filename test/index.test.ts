@@ -24,7 +24,7 @@ test("process profile", () => {
   expect(newProfile?.stringTable).toContain('./dist/cjs/index.js:profilingRound:129');
 
   // Check profiles replacement works
-  expect(profile?.stringTable?.at(1)).toBe('sample');
-  expect(newProfile?.stringTable?.at(1)).toBe('samples');
+  expect(profile?.stringTable).toContain('sample');
+  expect(newProfile?.stringTable).toContain('samples');
 })
 
