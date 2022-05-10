@@ -9,13 +9,16 @@ type TagList = Record<string, any>
 
 const log = debug('pyroscope')
 
+const cloudHostnameSuffix = 'pyroscope.cloud'
+
 export interface PyroscopeConfig {
-  server?: string
+  server: string
   name: string
   sourceMapPath?: string[]
   autoStart: boolean
   sm?: any
   tags: TagList
+  apiKey?: string
 }
 
 const INTERVAL = 10000
@@ -30,6 +33,7 @@ const config: PyroscopeConfig = {
   name: 'nodejs',
   sm: undefined,
   tags: {},
+  apiKey: undefined,
 }
 
 export function init(
@@ -44,6 +48,7 @@ export function init(
     config.server = c.server || DEFAULT_SERVER
     config.sourceMapPath = c.sourceMapPath
     config.name = c.name || 'nodejs'
+    config.apiKey = c.apiKey
     if (!!config.sourceMapPath) {
       pprof.SourceMapper.create(config.sourceMapPath)
         .then((sm) => (config.sm = sm))
@@ -52,6 +57,13 @@ export function init(
         })
     }
     config.tags = c.tags || {}
+  }
+
+  if (config.server.includes(cloudHostnameSuffix) && !config.apiKey) {
+    log(
+      'Pyroscope is running on a cloud server, but no API key was provided. Pyroscope will not be able to ingest data.'
+    )
+    return
   }
 
   if (c && (c.autoStart || c.autoStart === undefined)) {
@@ -96,7 +108,6 @@ export const processProfile = (
     (a, location, i) => {
       // location -> function -> name
       if (location && location.line && a.stringTable) {
-
         const functionId = location.line[0]?.functionId
         // Find the function name
         const functionCtx: perftools.perftools.profiles.IFunction | undefined =
@@ -142,8 +153,6 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   const newProfile = processProfile(profile)
 
   if (newProfile) {
-    writeProfileAsync(newProfile)
-
     const buf = await pprof.encode(newProfile)
 
     const formData = new FormData()
@@ -167,7 +176,9 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
     // send data to the server
     return axios(url, {
       method: 'POST',
-      headers: formData.getHeaders(),
+      headers: config.apiKey
+        ? { ...formData.getHeaders(), Authorization: `Bearer ${config.apiKey}` }
+        : formData.getHeaders(),
       data: formData as any,
     }).catch(handleError)
   }
