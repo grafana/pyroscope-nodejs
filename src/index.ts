@@ -85,7 +85,7 @@ export const processProfile = (
     space: 'inuse_space',
     sample: 'samples',
   } as Record<string, string>
-
+  // Replace the names of the samples to meet golang naming
   const newStringTable = profile.stringTable
     ?.slice(0, 5)
     .map((s) => (replacements[s] ? replacements[s] : s))
@@ -96,21 +96,28 @@ export const processProfile = (
     (a, location, i) => {
       // location -> function -> name
       if (location && location.line && a.stringTable) {
+
         const functionId = location.line[0]?.functionId
+        // Find the function name
         const functionCtx: perftools.perftools.profiles.IFunction | undefined =
           a.function?.find((x) => x.id == functionId)
+
+        // Store the new position of injected function name
         const newNameId = a.stringTable.length
+        // Get the function name
         const functionName = a.stringTable[Number(functionCtx?.name)]
         if (functionName.indexOf(':') === -1) {
+          // Build a new name by concatenating the file name and line number
           const newName = (
             `${a.stringTable[Number(functionCtx?.filename)]}:${
               a.stringTable[Number(functionCtx?.name)]
             }:${location?.line[0].line}` as string
           ).replace(process.cwd(), '.')
+          // Store the new name
           if (functionCtx) {
             functionCtx.name = newNameId
           }
-
+          // Update profile string table with the new name and location
           return {
             ...a,
             location: [...(a.location || [])],
@@ -135,6 +142,8 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
   const newProfile = processProfile(profile)
 
   if (newProfile) {
+    writeProfileAsync(newProfile)
+
     const buf = await pprof.encode(newProfile)
 
     const formData = new FormData()
@@ -174,10 +183,9 @@ let chunk = 0
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
   pprof.encode(profile).then((buf) => {
-    fs.writeFile(`${config.name}-${chunk}.pb.gz`, buf, (err) => {
+    fs.writeFile(`${config.name}-${++chunk}.pb.gz`, buf, (err) => {
       if (err) throw err
       console.log('Chunk written')
-      chunk += 1
     })
   })
 }
