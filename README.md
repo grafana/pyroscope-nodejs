@@ -21,6 +21,7 @@ Module is available for both CommonJS and ESM variants, so you can use it the wa
 const Pyroscope = require('pyroscope');
 
 Pyroscope.init({server: 'http://pyroscope:4040'});
+Pyroscope.start()
 ```
 
 ### Typescript:
@@ -28,8 +29,32 @@ Pyroscope.init({server: 'http://pyroscope:4040'});
 import Pyroscope from 'pyroscope';
 
 Pyroscope.init({server: 'http://pyroscope:4040'});
-Pyroscope.startCpuProfiling();
-Pyroscope.startHeapProfiling();
+Pyroscope.start()
+```
+
+Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
+
+## Pull Mode
+
+In order to enable pull mode you need to implement follwing endpoints:
+ * `/debug/pprof/profile` -- for wall-time profiling
+ * `/debug/pprof/heap` -- for heap profiling
+
+You may implement your own enpoints with Pyroscope API, like in the example:
+
+```javascript
+app.get('/debug/pprof/profile', async function handler(req, res) {
+  console.log('Collecting Cpu for', req.query.seconds);
+  try {
+    const p = await Pyroscope.collectCpu(req.query.seconds);
+    res.send(p);
+  } catch (e) {
+    console.error('Error collecting cpu', e);
+    res.sendStatus(500);
+  }
+});
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 

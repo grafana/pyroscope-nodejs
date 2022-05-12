@@ -1,4 +1,4 @@
-import Pyroscope, { PyroscopeConfig } from '../index.js'
+import Pyroscope from '../index.js'
 import { Request, Response, NextFunction } from 'express'
 import debug from 'debug'
 
@@ -8,7 +8,7 @@ async function handlerCpu(req: Request, res: Response) {
   log('Collecting Cpu for', req.query.seconds)
   try {
     const p = await Pyroscope.collectCpu(Number(req.query.seconds))
-    res.send(p)
+    res.status(200).send(p)
   } catch (e) {
     log('Error collecting cpu', e)
     res.sendStatus(500)
@@ -20,7 +20,7 @@ async function handlerHeap(req: Request, res: Response) {
   log('Fetching Heap Profile')
   try {
     const p = await Pyroscope.collectHeap()
-    res.send(p)
+    res.status(200).send(p)
   } catch (e) {
     log('Error collecting Heap', e)
     res.sendStatus(500)
