@@ -53,8 +53,6 @@ app.get('/debug/pprof/profile', async function handler(req, res) {
     res.sendStatus(500);
   }
 });
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 ```
 
 Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
