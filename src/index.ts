@@ -351,8 +351,8 @@ export function stopHeapProfiling(): void {
 export const startCpuProfiling = startWallProfiling
 export const stopCpuProfiling = stopWallProfiling
 
-export { expressMiddleware } from './pull/index.js'
-import { expressMiddleware } from './pull/index.js'
+import expressMiddleware from './express.js'
+export { expressMiddleware }
 
 export default {
   init,

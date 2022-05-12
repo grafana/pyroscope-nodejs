@@ -1,4 +1,4 @@
-import Pyroscope from '../index.js'
+import * as Pyroscope from './index.js'
 import { Request, Response, NextFunction } from 'express'
 import debug from 'debug'
 
