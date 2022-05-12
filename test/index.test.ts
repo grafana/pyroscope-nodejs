@@ -1,4 +1,4 @@
-import Pyroscope, {expressMiddleware, processProfile} from '../'
+import Pyroscope, {expressMiddleware, processProfile} from '@pyroscope/nodejs'
 import fs from 'fs';
 
 describe('typescript env', () => {

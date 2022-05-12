@@ -1,4 +1,4 @@
-import Pyroscope, { expressMiddleware } from '..';
+import Pyroscope, { expressMiddleware } from '@pyroscope/nodejs';
 import request from 'supertest';
 import express, { Response } from 'express';
 
@@ -85,6 +85,26 @@ describe('express middleware', () => {
                 expect(result.statusCode).toBe(200)
             })
         ]);
+    })
+
+    it('should be fine using two middlewares at the same time', () => {
+        const app = express();
+        app.use(expressMiddleware());
+
+        const app2 = express();
+        app2.use(expressMiddleware());
+
+        request(app).get('/debug/pprof/heap')
+            .then(result => expect(result.statusCode).toBe(200))
+            .catch(result => {
+                expect(result.statusCode).toBe(200)
+            })
+
+        request(app2).get('/debug/pprof/heap')
+            .then(result => expect(result.statusCode).toBe(200))
+            .catch(result => {
+                expect(result.statusCode).toBe(200)
+            })
     })
     
 
