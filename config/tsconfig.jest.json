@@ -1,0 +1,10 @@
+{
+    "extends": "../tsconfig",
+    "compilerOptions": {
+      "module": "esnext" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
+      "sourceMap": true, /* Generates corresponding source maps. */
+      "inlineSourceMap": true,
+      "moduleResolution": "node"
+    }
+  }
+  

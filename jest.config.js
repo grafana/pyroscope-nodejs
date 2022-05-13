@@ -1,24 +1,29 @@
 module.exports = {
-  verbose: true,
-  rootDir: '.',
+  "roots": [
+    "src",
+    "test"
+  ],
   moduleNameMapper: {
-    '^@pyroscope/nodejs$': '<rootDir>/src/',
-    '^@pyroscope/nodejs(.*)$': '<rootDir>/src/$1',
+    '^@pyroscope/nodejs$': '<rootDir>/src',
+      "./express.js": "<rootDir>/src/express.ts",
+      "./index.js": "<rootDir>/src/index.ts"
   },
-  roots: ['<rootDir>/test'],
-  testMatch: [
-    '**/__tests__/**/*.+(ts|tsx|js)',
-    '**/?(*.)+(spec|test).+(ts|tsx|js)',
+  preset: "ts-jest",
+  testEnvironment: "node",
+  collectCoverage: true,
+  collectCoverageFrom: [
+    "src/**/*.{ts,tsx}",
+    "test/**/*.{ts,js}",    
+    "!**/node_modules/**",
+    "!**/vendor/**"
   ],
   transform: {
-    '^.+\\.(js|ts|tsx)$': 'ts-jest',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      './config/fileTransformer.js',
+    "^.+\\.tsx?$": "ts-jest",
   },
   globals: {
     'ts-jest': {
-      tsconfig: './config/tsconfig.esm.json'
-    }
+      tsconfig: './config/tsconfig.jest.json',
+    },
   },
-  extensionsToTreatAsEsm: [".ts"]
+  "extensionsToTreatAsEsm": [".ts"]
 }

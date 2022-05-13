@@ -107,7 +107,7 @@ export const processProfile = (
 
   // Inject line numbers and file names into symbols table
   const newProfile = profile.location?.reduce(
-    (a, location, i) => {
+    (a, location) => {
       // location -> function -> name
       if (location && location.line && a.stringTable) {
         const functionId = location.line[0]?.functionId
@@ -210,18 +210,24 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
-  const profile = await pprof.time.profile({
-    lineNumbers: true,
-    sourceMapper: config.sm,
-    durationMillis: (seconds || 10) * 1000 || INTERVAL,
-    intervalMicros: 10000,
-  })
 
-  const newProfile = processProfile(profile)
-  if (newProfile) {
-    return pprof.encode(newProfile)
-  } else {
-    return new Buffer('', 'utf8')
+  try {
+    const profile = await pprof.time.profile({
+      lineNumbers: true,
+      sourceMapper: config.sm,
+      durationMillis: (seconds || 10) * 1000 || INTERVAL,
+      intervalMicros: 10000,
+    })
+
+    const newProfile = processProfile(profile)
+    if (newProfile) {
+      return pprof.encode(newProfile)
+    } else {
+      return Buffer.from('', 'utf8')
+    }
+  } catch (e) {
+    log(e)
+    return Buffer.from('', 'utf8')
   }
 }
 
@@ -236,11 +242,11 @@ export async function collectHeap(): Promise<Buffer> {
   if (newProfile) {
     return pprof.encode(newProfile)
   } else {
-    return new Buffer('', 'utf8')
+    return Buffer.from('', 'utf8')
   }
 }
 
-export function startWallProfiling(tags: TagList = {}): void {
+export function startWallProfiling(): void {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
@@ -290,9 +296,16 @@ export function stop(): void {
   stopHeapProfiling()
 }
 
+let isHeapCollectingStarted = false
+
 export function startHeapCollecting() {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
+  }
+
+  if (isHeapCollectingStarted) {
+    log('Heap collecting is already started')
+    return
   }
 
   const intervalBytes = 1024 * 512
@@ -301,10 +314,14 @@ export function startHeapCollecting() {
   log('Pyroscope has started heap profiling')
 
   pprof.heap.start(intervalBytes, stackDepth)
+  isHeapCollectingStarted = true
 }
 
-export function startHeapProfiling(tags: TagList = {}): void {
-  if (heapProfilingTimer) return
+export function startHeapProfiling(): void {
+  if (heapProfilingTimer) {
+    log('Pyroscope has already started heap profiling')
+    return
+  }
 
   startHeapCollecting()
 
@@ -319,6 +336,7 @@ export function startHeapProfiling(tags: TagList = {}): void {
 
 export function stopHeapCollecting() {
   pprof.heap.stop()
+  isHeapCollectingStarted = false
 }
 
 export function stopHeapProfiling(): void {
@@ -333,8 +351,8 @@ export function stopHeapProfiling(): void {
 export const startCpuProfiling = startWallProfiling
 export const stopCpuProfiling = stopWallProfiling
 
-export { expressMiddleware } from './pull/index.js'
-import { expressMiddleware } from './pull/index.js'
+import expressMiddleware from './express.js'
+export { expressMiddleware }
 
 export default {
   init,
