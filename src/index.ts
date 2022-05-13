@@ -48,21 +48,8 @@ export function init(c: Partial<PyroscopeConfig> = {}): void {
       })
   }
 
-  if (!config.appName) {
-    log(
-      'Provide a name for the application. Pyroscope is not configured and will not be able to ingest data.'
-    )
-    return
-  }
-
-  if (!config.serverAddress) {
-    log(
-      'Provide a pyroscope server address. Pyroscope is not configured and will not be able to ingest data.'
-    )
-    return
-  }
-
   if (
+    config.serverAddress &&
     config.serverAddress?.indexOf(cloudHostnameSuffix) !== -1 &&
     !config.authToken
   ) {
@@ -193,19 +180,6 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
 let isWallProfilingRunning = false
 
-import fs from 'fs'
-
-let chunk = 0
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
-  pprof.encode(profile).then((buf) => {
-    fs.writeFile(`${config.appName}-${chunk++}.pb.gz`, buf, (err) => {
-      if (err) throw err
-      console.log('Chunk written')
-    })
-  })
-}
-
 export async function collectCpu(seconds?: number): Promise<Buffer> {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
@@ -246,10 +220,22 @@ export async function collectHeap(): Promise<Buffer> {
   }
 }
 
-export function startWallProfiling(): void {
+function checkConfigured() {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
+
+  if (!config.serverAddress) {
+    throw 'Please set the server address in the init()'
+  }
+
+  if (!config.appName) {
+    throw 'Please define app name in the init()'
+  }
+}
+
+export function startWallProfiling(): void {
+  checkConfigured()
 
   log('Pyroscope has started CPU Profiling')
   isWallProfilingRunning = true
@@ -318,6 +304,8 @@ export function startHeapCollecting() {
 }
 
 export function startHeapProfiling(): void {
+  checkConfigured()
+
   if (heapProfilingTimer) {
     log('Pyroscope has already started heap profiling')
     return
@@ -325,12 +313,11 @@ export function startHeapProfiling(): void {
 
   startHeapCollecting()
 
-  heapProfilingTimer = setInterval(async () => {
+  heapProfilingTimer = setInterval(() => {
     log('Collecting heap profile')
     const profile = pprof.heap.profile(undefined, config.sm)
     log('Heap profile collected...')
-    await uploadProfile(profile)
-    log('Heap profile uploaded...')
+    uploadProfile(profile).then(() => log('Heap profile uploaded...'))
   }, INTERVAL)
 }
 

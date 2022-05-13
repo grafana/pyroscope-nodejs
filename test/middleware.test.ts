@@ -2,10 +2,9 @@ import Pyroscope, { expressMiddleware } from '@pyroscope/nodejs';
 import request from 'supertest';
 import express, { Response } from 'express';
 
-Pyroscope.init({
-    appName: "Test",
-    serverAddress: "http://pyroscope:4040"
-});
+
+// You only need appName for the pull mode
+Pyroscope.init();
 
 
 describe('express middleware', () => {

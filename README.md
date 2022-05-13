@@ -17,22 +17,22 @@ Module is available for both CommonJS and ESM variants, so you can use it the wa
 
 ### Javascript
 
-```
+```javascript
 const Pyroscope = require('pyroscope');
 
-Pyroscope.init({server: 'http://pyroscope:4040'});
+Pyroscope.init({serverAddress: 'http://pyroscope:4040', appName: 'nodejs'});
 Pyroscope.start()
 ```
 
 ### Typescript:
-```
+```typescript
 import Pyroscope from 'pyroscope';
 
-Pyroscope.init({server: 'http://pyroscope:4040'});
+Pyroscope.init({serverAddress: 'http://pyroscope:4040', appName: 'nodejs'});
 Pyroscope.start()
 ```
 
-Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
+Both params `appName` and `serverAddress` are mandatory. Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. `start()` starts both memory and CPU profiling
 
 ## Pull Mode
 
@@ -43,6 +43,8 @@ In order to enable pull mode you need to implement follwing endpoints:
 You may implement your own enpoints with Pyroscope API, like in the example:
 
 ```javascript
+Pyroscope.init()
+
 app.get('/debug/pprof/profile', async function handler(req, res) {
   console.log('Collecting Cpu for', req.query.seconds);
   try {
@@ -55,7 +57,7 @@ app.get('/debug/pprof/profile', async function handler(req, res) {
 });
 ```
 
-Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
+Parameter `appName` is mandatory in pull mode.
 
 ## Pull Mode
 
@@ -85,7 +87,7 @@ import Pyroscope, { expressMiddleware } from '@pyroscope/nodejs'
 
 Pyroscope.init()
 const app = express()
-app.use(expressMiddleware);
+app.use(expressMiddleware());
 ```
 
 then you also need to configure your pyroscope server by providing config file 
@@ -119,19 +121,21 @@ init(c : PyroscopeConfig)
 ```
 
 Configuration options
-```
+```typescript
 interface PyroscopeConfig {
-    serverAddress: string;
-    sourceMapPath?: string[];
-    appName: string;
-    tags: Record<string, any>;
-    authToken?: string
+    serverAddress?: string;          // Server address for push mode
+    sourceMapPath?: string[];       // Sourcemaps directories (optional)
+    appName?: string;                // Application name
+    tags?: Record<string, any>;     // Tags 
+    authToken?: string              // Auth token for cloud version
 }
 ```
 
+Both `serverAddress` and `appName` are mandatory for push mode.
+
 ### CPU Profiling
 ```javascript
-// Start collecting 10s i and upload to server
+// Start collecting for 10s and push to server
 Pyroscope.startCpuProfiling()
 Pyroscope.stopCpuProfiling()
 
