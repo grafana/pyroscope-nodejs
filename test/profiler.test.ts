@@ -34,7 +34,8 @@ describe('common behavour of profilers', () => {
 
             res.send("ok")
             setImmediate(() => {
-                server.close(done);
+                server.close();
+                done()
             })
         });
     });
@@ -52,7 +53,8 @@ describe('common behavour of profilers', () => {
 
             res.send("ok")
             setImmediate(() => {
-                server.close(done);
+                server.close();
+                done()
             })
         });
     });
