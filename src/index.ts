@@ -180,19 +180,6 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
 let isWallProfilingRunning = false
 
-import fs from 'fs'
-
-let chunk = 0
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const writeProfileAsync = (profile: perftools.perftools.profiles.IProfile) => {
-  pprof.encode(profile).then((buf) => {
-    fs.writeFile(`${config.appName}-${chunk++}.pb.gz`, buf, (err) => {
-      if (err) throw err
-      console.log('Chunk written')
-    })
-  })
-}
-
 export async function collectCpu(seconds?: number): Promise<Buffer> {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
@@ -326,12 +313,11 @@ export function startHeapProfiling(): void {
 
   startHeapCollecting()
 
-  heapProfilingTimer = setInterval(async () => {
+  heapProfilingTimer = setInterval(() => {
     log('Collecting heap profile')
     const profile = pprof.heap.profile(undefined, config.sm)
     log('Heap profile collected...')
-    await uploadProfile(profile)
-    log('Heap profile uploaded...')
+    uploadProfile(profile).then(() => log('Heap profile uploaded...'))
   }, INTERVAL)
 }
 

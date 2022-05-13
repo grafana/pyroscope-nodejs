@@ -11,7 +11,7 @@ describe('common behavour of profilers', () => {
 
         Pyroscope.init({appName: "nodejs"});
         expect(Pyroscope.start).toThrowError("Please set the server address in the init()");
-        
+
         done();
     })
 
@@ -53,5 +53,16 @@ describe('common behavour of profilers', () => {
             })
         });
     });
+
+    it('should allow to call start profiling twice', (done) => {
+        Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
+        Pyroscope.startHeapProfiling();
+        Pyroscope.startHeapProfiling();
+        Pyroscope.stopHeapProfiling();
+        Pyroscope.stopHeapProfiling();
+        // And stop it without starting CPU
+        Pyroscope.stop();
+        done()
+    })
 
 });
