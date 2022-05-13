@@ -48,12 +48,12 @@
     "source-map": "^0.7.3"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.7",
-    "@types/express": "^4.17.13",
-    "@types/source-map": "^0.5.7",
     "@commitlint/cli": "^13.1.0",
     "@commitlint/config-conventional": "^13.1.0",
+    "@types/debug": "^4.1.7",
+    "@types/express": "^4.17.13",
     "@types/jest": "^27.0.1",
+    "@types/source-map": "^0.5.7",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
