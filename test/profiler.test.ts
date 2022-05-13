@@ -33,7 +33,9 @@ describe('common behavour of profilers', () => {
             expect(req.query['name']).toEqual('nodejs{}');
 
             res.send("ok")
-            server.close(done);
+            setImmediate(() => {
+                server.close(done);
+            })
         });
     });
 
@@ -49,7 +51,9 @@ describe('common behavour of profilers', () => {
             expect(req.query['name']).toEqual('nodejs{env=test env}');
 
             res.send("ok")
-            server.close(done);
+            setImmediate(() => {
+                server.close(done);
+            })
         });
     });
 
