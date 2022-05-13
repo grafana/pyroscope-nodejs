@@ -4,9 +4,7 @@ import express, { Response } from 'express';
 
 
 // You only need appName for the pull mode
-Pyroscope.init({
-    appName: "Test"
-});
+Pyroscope.init();
 
 
 describe('express middleware', () => {

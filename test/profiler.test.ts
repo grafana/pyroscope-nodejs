@@ -7,16 +7,11 @@ describe('common behavour of profilers', () => {
 
     it('should require server name and app name as options', (done) => {
         Pyroscope.init({})
-        expect(Pyroscope.start).toThrowError("Pyroscope is not configured. Please call init() first.");
+        expect(Pyroscope.start).toThrowError("Please set the server address in the init()");
 
         Pyroscope.init({appName: "nodejs"});
         expect(Pyroscope.start).toThrowError("Please set the server address in the init()");
         
-        Pyroscope.init({appName: "", serverAddress: "http://pyroscope:4040"})
-        expect(Pyroscope.start).toThrowError("Pyroscope is not configured. Please call init() first.");
-
-        Pyroscope.init({appName: "nodejs"});
-        expect(Pyroscope.start).not.toThrowError("");
         done();
     })
 

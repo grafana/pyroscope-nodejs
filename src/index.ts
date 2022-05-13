@@ -48,13 +48,6 @@ export function init(c: Partial<PyroscopeConfig> = {}): void {
       })
   }
 
-  if (!config.appName) {
-    log(
-      'Provide a name for the application. Pyroscope is not configured and will not be able to ingest data.'
-    )
-    return
-  }
-
   if (
     config.serverAddress &&
     config.serverAddress?.indexOf(cloudHostnameSuffix) !== -1 &&
@@ -240,7 +233,7 @@ export async function collectHeap(): Promise<Buffer> {
   }
 }
 
-export function startWallProfiling(): void {
+function checkConfigured() {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
@@ -248,6 +241,14 @@ export function startWallProfiling(): void {
   if (!config.serverAddress) {
     throw 'Please set the server address in the init()'
   }
+
+  if (!config.appName) {
+    throw 'Please define app name in the init()'
+  }
+}
+
+export function startWallProfiling(): void {
+  checkConfigured()
 
   log('Pyroscope has started CPU Profiling')
   isWallProfilingRunning = true
@@ -316,6 +317,8 @@ export function startHeapCollecting() {
 }
 
 export function startHeapProfiling(): void {
+  checkConfigured()
+
   if (heapProfilingTimer) {
     log('Pyroscope has already started heap profiling')
     return
