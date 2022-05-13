@@ -55,14 +55,8 @@ export function init(c: Partial<PyroscopeConfig> = {}): void {
     return
   }
 
-  if (!config.serverAddress) {
-    log(
-      'Provide a pyroscope server address. Pyroscope is not configured and will not be able to ingest data.'
-    )
-    return
-  }
-
   if (
+    config.serverAddress &&
     config.serverAddress?.indexOf(cloudHostnameSuffix) !== -1 &&
     !config.authToken
   ) {
@@ -249,6 +243,10 @@ export async function collectHeap(): Promise<Buffer> {
 export function startWallProfiling(): void {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
+  }
+
+  if (!config.serverAddress) {
+    throw 'Please set the server address in the init()'
   }
 
   log('Pyroscope has started CPU Profiling')

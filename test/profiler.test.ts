@@ -8,16 +8,16 @@ describe('common behavour of profilers', () => {
     it('should require server name and app name as options', (done) => {
         Pyroscope.init({})
         expect(Pyroscope.start).toThrowError("Pyroscope is not configured. Please call init() first.");
+
+        Pyroscope.init({appName: "nodejs"});
+        expect(Pyroscope.start).toThrowError("Please set the server address in the init()");
         
-        Pyroscope.init({serverAddress: "http://pyroscope:4040"})
+        Pyroscope.init({appName: "", serverAddress: "http://pyroscope:4040"})
         expect(Pyroscope.start).toThrowError("Pyroscope is not configured. Please call init() first.");
 
-        Pyroscope.init({serverAddress: "http://pyroscope:4040", appName: "nodejs"})
-        expect(Pyroscope.start).not.toThrowError("Pyroscope is not configured. Please call init() first.")
-        Pyroscope.stop()
-        process.nextTick(() => {
-            done();
-        });
+        Pyroscope.init({appName: "nodejs"});
+        expect(Pyroscope.start).not.toThrowError("");
+        done();
     })
 
     it('should call a server on startCpuProfiling and clear gracefully', (done) => {
