@@ -17,22 +17,22 @@ Module is available for both CommonJS and ESM variants, so you can use it the wa
 
 ### Javascript
 
-```
+```javascript
 const Pyroscope = require('pyroscope');
 
-Pyroscope.init({server: 'http://pyroscope:4040'});
+Pyroscope.init({serverAddress: 'http://pyroscope:4040', appName: 'nodejs'});
 Pyroscope.start()
 ```
 
 ### Typescript:
-```
+```typescript
 import Pyroscope from 'pyroscope';
 
-Pyroscope.init({server: 'http://pyroscope:4040'});
+Pyroscope.init({serverAddress: 'http://pyroscope:4040', appName: 'nodejs'});
 Pyroscope.start()
 ```
 
-Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
+Both params `appName` and `serverAddress` are mandatory. Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
 
 ## Pull Mode
 
@@ -43,6 +43,8 @@ In order to enable pull mode you need to implement follwing endpoints:
 You may implement your own enpoints with Pyroscope API, like in the example:
 
 ```javascript
+Pyroscope.init({appName: "node" })
+
 app.get('/debug/pprof/profile', async function handler(req, res) {
   console.log('Collecting Cpu for', req.query.seconds);
   try {
@@ -55,7 +57,7 @@ app.get('/debug/pprof/profile', async function handler(req, res) {
 });
 ```
 
-Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. 
+Parameter `appName` is mandatory in pull mode.
 
 ## Pull Mode
 
@@ -83,9 +85,9 @@ or you may use express middleware.
 ```javascript
 import Pyroscope, { expressMiddleware } from '@pyroscope/nodejs'
 
-Pyroscope.init()
+Pyroscope.init({appName: 'node'})
 const app = express()
-app.use(expressMiddleware);
+app.use(expressMiddleware());
 ```
 
 then you also need to configure your pyroscope server by providing config file 
@@ -124,7 +126,7 @@ interface PyroscopeConfig {
     serverAddress: string;
     sourceMapPath?: string[];
     appName: string;
-    tags: Record<string, any>;
+    tags?: Record<string, any>;
     authToken?: string
 }
 ```
