@@ -1,5 +1,16 @@
 # Pyroscope nodejs package
 
+## Running Pyroscope server
+In order to send data from your node application to Pyroscope, you'll first need to run the Pyroscope server. If on a mac you can simply do this with
+```
+# install pyroscope
+brew install pyroscope-io/brew/pyroscope
+
+# start pyroscope server:
+pyroscope server
+```
+or if not then see [the documentation](https://github.com/pyroscope-io/pyroscope#add-pyroscope-server-locally-in-2-steps) for more info on how to start the server.
+
 ## Modes
 
 Pyroscope supports two main operation modes: 
