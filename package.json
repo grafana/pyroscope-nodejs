@@ -45,7 +45,6 @@
     "axios": "^0.26.1",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
-    "pprof": "@datadog/pprof",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
