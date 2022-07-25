@@ -16,22 +16,22 @@ describe('common behavour of profilers', () => {
     })
 
     it('should call a server on startCpuProfiling and clear gracefully', (done) => {
-        Pyroscope.init({serverAddress: "http://localhost:4040", appName: "nodejs"})
+        Pyroscope.init({serverAddress: "http://localhost:4445", appName: "nodejs"})
         const app = express();
-        const server = app.listen(4040, () => {
-            Pyroscope.startCpuProfiling()
+        const server = app.listen(4445, () => {
+            Pyroscope.startWallProfiling()
 
         });
         app.post('/ingest', (req, res) => {
-            Pyroscope.stopCpuProfiling()
+            Pyroscope.stopWallProfiling()
             expect(req.query['spyName']).toEqual('nodespy');
             expect(req.query['name']).toEqual('nodejs{}');
 
-            res.send("ok")
             setImmediate(() => {
                 server.close();
                 done()
             })
+            res.send("ok")
         });
     });
 
@@ -46,11 +46,11 @@ describe('common behavour of profilers', () => {
             expect(req.query['spyName']).toEqual('nodespy');
             expect(req.query['name']).toEqual('nodejs{env=test env}');
 
-            res.send("ok")
             setImmediate(() => {
                 server.close();
                 done()
             })
+            res.send("ok")
         });
     });
 

@@ -345,7 +345,7 @@ import {
   setCpuLabels,
   getCpuLabels,
   tagCall,
-  tag
+  tag,
 } from './cpu.js'
 export {
   startCpuProfiling,

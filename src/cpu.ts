@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { CpuProfiler } from '@datadog/pprof'
 import debug from 'debug'
-import util from 'util'
 
 const log = debug('pyroscope::cpu')
 
@@ -25,13 +24,6 @@ export function startCpuProfiling() {
   cpuProfilingTimer = setInterval(() => {
     log('Collecting cpu profile')
     const profile = cpuProfiler.profile()
-    console.log(
-      util.inspect(profile, {
-        showHidden: false,
-        depth: null,
-        colors: true,
-      })
-    )
     if (profile) {
       log('Cpu profile collected')
       uploadProfile(profile).then(() => log('CPU profile uploaded...'))
