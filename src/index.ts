@@ -1,6 +1,6 @@
-import * as pprof from 'pprof'
+import * as pprof from '@datadog/pprof'
 
-import type perftools from 'pprof/proto/profile'
+import type perftools from '@datadog/pprof/proto/profile'
 import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
@@ -24,6 +24,7 @@ export interface PyroscopeConfig {
 const INTERVAL = 10000
 const SAMPLERATE = 100
 
+export
 const config: PyroscopeConfig = {
   serverAddress: process.env['PYROSCOPE_SERVER_ADDRESS'],
   appName: process.env['PYROSCOPE_APPLICATION_NAME'] || '',
@@ -137,7 +138,9 @@ export const processProfile = (
   return newProfile
 }
 
-async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
+export async function uploadProfile(
+  profile: perftools.perftools.profiles.IProfile
+) {
   // Apply labels to all samples
   const newProfile = processProfile(profile)
 
@@ -220,6 +223,7 @@ export async function collectHeap(): Promise<Buffer> {
   }
 }
 
+export
 function checkConfigured() {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
@@ -335,16 +339,29 @@ export function stopHeapProfiling(): void {
   }
 }
 
-export const startCpuProfiling = startWallProfiling
-export const stopCpuProfiling = stopWallProfiling
-
+import {
+  startCpuProfiling,
+  stopCpuProfiling,
+  setCpuLabels,
+  getCpuLabels,
+  tagCall,
+  tag
+} from './cpu.js'
+export {
+  startCpuProfiling,
+  stopCpuProfiling,
+  setCpuLabels,
+  getCpuLabels,
+  tagCall,
+  tag,
+}
 import expressMiddleware from './express.js'
 export { expressMiddleware }
 
 export default {
   init,
-  startCpuProfiling: startWallProfiling,
-  stopCpuProfiling: stopWallProfiling,
+  startCpuProfiling,
+  stopCpuProfiling,
   startWallProfiling,
   stopWallProfiling,
   startHeapProfiling,

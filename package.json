@@ -1,6 +1,6 @@
 {
   "name": "@pyroscope/nodejs",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "description": "pyroscope nodejs package",
   "exports": {
     ".": {
@@ -41,10 +41,11 @@
     "url": "https://github.com/pyroscope-io/pyroscope-nodejs/issues"
   },
   "dependencies": {
+    "@datadog/pprof": "^1.0.0",
     "axios": "^0.26.1",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
-    "pprof": "^3.2.0",
+    "pprof": "@datadog/pprof",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
