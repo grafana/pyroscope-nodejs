@@ -1,7 +1,7 @@
-import Pyroscope, {expressMiddleware, processProfile} from '@pyroscope/nodejs'
+import Pyroscope, {expressMiddleware, processProfile} from '../'
 import fs from 'fs';
 
-describe('typescript env', () => {
+describe.only('typescript env', () => {
   it('correct imports', () => {
     expect(Pyroscope.init).toBeInstanceOf(Function);
     expect(Pyroscope.startWallProfiling).toBeInstanceOf(Function);

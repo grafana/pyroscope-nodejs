@@ -201,7 +201,7 @@ export function stop(): void {
   stopCpuProfiling()
   stopHeapProfiling()
 }
-
+// CPU Export
 import {
   startCpuProfiling,
   stopCpuProfiling,
@@ -220,6 +220,7 @@ export {
   tagWrapper,
   tag,
 }
+// Heap Export
 import {
   startHeapProfiling,
   stopHeapProfiling,
@@ -227,7 +228,6 @@ import {
   startHeapCollecting,
   stopHeapCollecting,
 } from './heap.js'
-import { startWallProfiling, stopWallProfiling, collectWall } from './wall.js'
 export {
   startHeapProfiling,
   stopHeapProfiling,
@@ -235,6 +235,10 @@ export {
   startHeapCollecting,
   stopHeapCollecting,
 }
+// Wall Export
+import { startWallProfiling, stopWallProfiling, collectWall } from './wall.js'
+export { startWallProfiling, stopWallProfiling, collectWall }
+
 import expressMiddleware from './express.js'
 export { expressMiddleware }
 

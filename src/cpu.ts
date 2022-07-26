@@ -26,10 +26,10 @@ export function startCpuProfiling() {
   }
 
   cpuProfilingTimer = setInterval(() => {
-    log('Collecting cpu profile')
+    log('Continously collecting cpu profile')
     const profile = cpuProfiler.profile()
     if (profile) {
-      log('Cpu profile collected')
+      log('Continuous cpu profile collected. Going to upload')
       uploadProfile(profile).then(() => log('CPU profile uploaded...'))
     } else {
       log('Cpu profile collection failed')
@@ -63,29 +63,42 @@ export function tag(key: string, value: number | string | undefined) {
   cpuProfiler.labels = { ...cpuProfiler.labels, [key]: value }
 }
 
-
 export function collectCpu(seconds: number): Promise<Buffer> {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
   log('Pyroscope has started CPU Profiling')
-  return new Promise((resolve, reject) => {
-    cpuProfiler.start(100);
+  cpuProfiler.start(100)
 
-    setInterval(() => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
       log('Collecting cpu profile')
-      const profile = cpuProfiler.profile();
+      const profile = cpuProfiler.profile()
       if (profile) {
-        log('Cpu profile collected')
-        const newProfile = processProfile(profile);
-        if ( newProfile ) {
-          encode(newProfile).then(profile => resolve(profile))
+        log('Cpu profile collected. Now processing')
+        const newProfile = processProfile(profile)
+        if (newProfile) {
+          log('Processed profile. Now encoding to pprof format')
+          return encode(newProfile)
+            .then((profile) => {
+              log('Encoded profile. Stopping cpu profiling')
+              cpuProfiler.stop()
+              return resolve(profile)
+            })
+            .catch((e) => {
+              log('Error while encoding profile')
+              return new Buffer('', 'utf-8')
+            })
         }
       } else {
         log('Cpu profile collection failed')
       }
-    }, seconds * 1000);
-  }
+
+      log('Stopping cpuProfiler')
+      cpuProfiler.stop()
+      reject(new Buffer('', 'utf-8'))
+    }, seconds * 1000)
+  })
 }
 
 export function tagWrapper(

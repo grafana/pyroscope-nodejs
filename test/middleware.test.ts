@@ -15,20 +15,24 @@ describe('express middleware', () => {
         expect(typeof expressMiddleware).toBe('function');
         
     })
-    it('should respond to cpu calls', () => {
+    it('should respond to cpu calls', async () => {
         const app = express();
         app.use(expressMiddleware());
         return request(app).get('/debug/pprof/profile?seconds=1')
-                .then(result => expect(result.statusCode).toBe(200))
+                .then(result => {
+                    expect(result.statusCode).toBe(200)
+                })
                 .catch(result => {
                     expect(result.statusCode).toBe(200)
                 })
     })
-    it('should respond to repetitive cpu calls', () => {
+    it('should respond to repetitive cpu calls', async () => {
         const app = express();
         app.use(expressMiddleware());
         return request(app).get('/debug/pprof/profile?seconds=1')
-                .then(result => expect(result.statusCode).toBe(200))
+                .then(result => {
+                    expect(result.statusCode).toBe(200)
+                })
                 .catch(result => {
                     expect(result.statusCode).toBe(200)
                 })
