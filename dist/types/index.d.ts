@@ -1,0 +1,48 @@
+import type perftools from '@datadog/pprof/proto/profile';
+import debug from 'debug';
+declare type TagList = Record<string, any>;
+export declare const log: debug.Debugger;
+export interface PyroscopeConfig {
+    serverAddress?: string;
+    appName: string;
+    sourceMapPath?: string[];
+    sm?: any;
+    tags: TagList;
+    authToken?: string;
+    configured: boolean;
+}
+export declare const INTERVAL = 10000;
+export declare const SAMPLERATE = 100;
+export declare const config: PyroscopeConfig;
+export declare function init(c?: Partial<PyroscopeConfig>): void;
+export declare const processProfile: (profile: perftools.perftools.profiles.IProfile) => perftools.perftools.profiles.IProfile | undefined;
+export declare function uploadProfile(profile: perftools.perftools.profiles.IProfile): Promise<void | import("axios").AxiosResponse<any, any>>;
+export declare function checkConfigured(): void;
+export declare function start(): void;
+export declare function stop(): void;
+import { startCpuProfiling, stopCpuProfiling, setCpuLabels, getCpuLabels, tagWrapper, tag, collectCpu } from './cpu.js';
+export { startCpuProfiling, stopCpuProfiling, setCpuLabels, getCpuLabels, collectCpu, tagWrapper, tag, };
+import { startHeapProfiling, stopHeapProfiling, collectHeap, startHeapCollecting, stopHeapCollecting } from './heap.js';
+export { startHeapProfiling, stopHeapProfiling, collectHeap, startHeapCollecting, stopHeapCollecting, };
+import { startWallProfiling, stopWallProfiling, collectWall } from './wall.js';
+export { startWallProfiling, stopWallProfiling, collectWall };
+import expressMiddleware from './express.js';
+export { expressMiddleware };
+declare const _default: {
+    init: typeof init;
+    startCpuProfiling: typeof startCpuProfiling;
+    stopCpuProfiling: typeof stopCpuProfiling;
+    startWallProfiling: typeof startWallProfiling;
+    stopWallProfiling: typeof stopWallProfiling;
+    startHeapProfiling: typeof startHeapProfiling;
+    stopHeapProfiling: typeof stopHeapProfiling;
+    collectCpu: typeof collectCpu;
+    collectWall: typeof collectWall;
+    collectHeap: typeof collectHeap;
+    startHeapCollecting: typeof startHeapCollecting;
+    stopHeapCollecting: typeof stopHeapCollecting;
+    start: typeof start;
+    stop: typeof stop;
+    expressMiddleware: typeof expressMiddleware;
+};
+export default _default;
