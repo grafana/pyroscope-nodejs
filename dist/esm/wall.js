@@ -1,6 +1,5 @@
 import * as pprof from '@datadog/pprof';
 import { config, processProfile, log, INTERVAL, checkConfigured, uploadProfile, } from './index';
-import util from 'util';
 let isWallProfilingRunning = false;
 export async function collectWall(seconds) {
     if (!config.configured) {
@@ -45,7 +44,6 @@ export function startWallProfiling() {
                 setImmediate(profilingRound);
             }
             log('CPU Profile uploading');
-            console.log(util.inspect(profile, true, null, true));
             return uploadProfile(profile);
         })
             .then((d) => {

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tagWrapper = exports.collectCpu = exports.tag = exports.getCpuLabels = exports.setCpuLabels = exports.stopCpuProfiling = exports.stopCpuCollecting = exports.startCpuProfiling = void 0;
+exports.tagWrapper = exports.collectCpu = exports.processCpuProfile = exports.tag = exports.getCpuLabels = exports.setCpuLabels = exports.stopCpuProfiling = exports.stopCpuCollecting = exports.startCpuProfiling = void 0;
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const pprof_1 = require("@datadog/pprof");
 const debug_1 = __importDefault(require("debug"));
@@ -58,6 +58,10 @@ function tag(key, value) {
     cpuProfiler.labels = { ...cpuProfiler.labels, [key]: value };
 }
 exports.tag = tag;
+function processCpuProfile(profile) {
+    return { ...profile, period: 10000000 };
+}
+exports.processCpuProfile = processCpuProfile;
 function collectCpu(seconds) {
     if (!index_1.config.configured) {
         throw 'Pyroscope is not configured. Please call init() first.';
@@ -70,7 +74,7 @@ function collectCpu(seconds) {
             const profile = cpuProfiler.profile();
             if (profile) {
                 log('Cpu profile collected. Now processing');
-                const newProfile = (0, index_1.processProfile)(profile);
+                const newProfile = processCpuProfile((0, index_1.processProfile)(profile));
                 if (newProfile) {
                     log('Processed profile. Now encoding to pprof format');
                     return (0, pprof_1.encode)(newProfile)

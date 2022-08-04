@@ -18,14 +18,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.stopWallProfiling = exports.startWallProfiling = exports.collectWall = void 0;
 const pprof = __importStar(require("@datadog/pprof"));
 const index_1 = require("./index");
-const util_1 = __importDefault(require("util"));
 let isWallProfilingRunning = false;
 async function collectWall(seconds) {
     if (!index_1.config.configured) {
@@ -71,7 +67,6 @@ function startWallProfiling() {
                 setImmediate(profilingRound);
             }
             (0, index_1.log)('CPU Profile uploading');
-            console.log(util_1.default.inspect(profile, true, null, true));
             return (0, index_1.uploadProfile)(profile);
         })
             .then((d) => {

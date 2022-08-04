@@ -46,6 +46,9 @@ export function getCpuLabels() {
 export function tag(key, value) {
     cpuProfiler.labels = { ...cpuProfiler.labels, [key]: value };
 }
+export function processCpuProfile(profile) {
+    return { ...profile, period: 10000000 };
+}
 export function collectCpu(seconds) {
     if (!config.configured) {
         throw 'Pyroscope is not configured. Please call init() first.';
@@ -58,7 +61,7 @@ export function collectCpu(seconds) {
             const profile = cpuProfiler.profile();
             if (profile) {
                 log('Cpu profile collected. Now processing');
-                const newProfile = processProfile(profile);
+                const newProfile = processCpuProfile(processProfile(profile));
                 if (newProfile) {
                     log('Processed profile. Now encoding to pprof format');
                     return encode(newProfile)
