@@ -28,15 +28,12 @@ async function collectWall(seconds) {
         throw 'Pyroscope is not configured. Please call init() first.';
     }
     try {
-        ;
-        process._startProfilerIdleNotifier();
         const profile = await pprof.time.profile({
             lineNumbers: true,
             sourceMapper: index_1.config.sm,
             durationMillis: (seconds || 10) * 1000 || index_1.INTERVAL,
             intervalMicros: 10000,
         });
-        process._stopProfilerIdleNotifier();
         const newProfile = (0, index_1.processProfile)(profile);
         if (newProfile) {
             return pprof.encode(newProfile);
@@ -53,11 +50,10 @@ async function collectWall(seconds) {
 exports.collectWall = collectWall;
 function startWallProfiling() {
     (0, index_1.checkConfigured)();
-    (0, index_1.log)('Pyroscope has started Wall Profiling');
+    (0, index_1.log)('Pyroscope has started CPU Profiling');
     isWallProfilingRunning = true;
-    process._startProfilerIdleNotifier();
     const profilingRound = () => {
-        (0, index_1.log)('Collecting Wall Profile');
+        (0, index_1.log)('Collecting CPU Profile');
         pprof.time
             .profile({
             lineNumbers: true,
@@ -66,15 +62,15 @@ function startWallProfiling() {
             intervalMicros: 10000,
         })
             .then((profile) => {
-            (0, index_1.log)('Wall Profile collected');
+            (0, index_1.log)('CPU Profile collected');
             if (isWallProfilingRunning) {
                 setImmediate(profilingRound);
             }
-            (0, index_1.log)('Wall Profile uploading');
+            (0, index_1.log)('CPU Profile uploading');
             return (0, index_1.uploadProfile)(profile);
         })
             .then((d) => {
-            (0, index_1.log)('Wall Profile has been uploaded');
+            (0, index_1.log)('CPU Profile has been uploaded');
         })
             .catch((e) => {
             (0, index_1.log)(e);
@@ -86,6 +82,5 @@ exports.startWallProfiling = startWallProfiling;
 // It doesn't stop it immediately, just wait until it ends
 function stopWallProfiling() {
     isWallProfilingRunning = false;
-    process._stopProfilerIdleNotifier();
 }
 exports.stopWallProfiling = stopWallProfiling;
