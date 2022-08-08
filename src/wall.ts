@@ -16,13 +16,14 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
   }
 
   try {
+    ;(process as any)._startProfilerIdleNotifier()
     const profile = await pprof.time.profile({
       lineNumbers: true,
       sourceMapper: config.sm,
       durationMillis: (seconds || 10) * 1000 || INTERVAL,
       intervalMicros: 10000,
     })
-
+    ;(process as any)._stopProfilerIdleNotifier()
     const newProfile = processProfile(profile)
     if (newProfile) {
       return pprof.encode(newProfile)
@@ -38,11 +39,11 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
 export function startWallProfiling(): void {
   checkConfigured()
 
-  log('Pyroscope has started CPU Profiling')
+  log('Pyroscope has started Wall Profiling')
   isWallProfilingRunning = true
-
+  ;(process as any)._startProfilerIdleNotifier()
   const profilingRound = () => {
-    log('Collecting CPU Profile')
+    log('Collecting Wall Profile')
     pprof.time
       .profile({
         lineNumbers: true,
@@ -51,15 +52,15 @@ export function startWallProfiling(): void {
         intervalMicros: 10000,
       })
       .then((profile) => {
-        log('CPU Profile collected')
+        log('Wall Profile collected')
         if (isWallProfilingRunning) {
           setImmediate(profilingRound)
         }
-        log('CPU Profile uploading')
+        log('Wall Profile uploading')
         return uploadProfile(profile)
       })
       .then((d) => {
-        log('CPU Profile has been uploaded')
+        log('Wall Profile has been uploaded')
       })
       .catch((e) => {
         log(e)
@@ -71,4 +72,5 @@ export function startWallProfiling(): void {
 // It doesn't stop it immediately, just wait until it ends
 export function stopWallProfiling(): void {
   isWallProfilingRunning = false
+  ;(process as any)._stopProfilerIdleNotifier()
 }
