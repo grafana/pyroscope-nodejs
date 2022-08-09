@@ -14,6 +14,10 @@ const cpuProfiler = new CpuProfiler()
 
 let cpuProfilingTimer: NodeJS.Timer | undefined = undefined
 
+export function isCpuProfilingRunning(): boolean {
+  return cpuProfilingTimer !== undefined
+}
+
 export function startCpuProfiling() {
   checkConfigured()
 
@@ -38,7 +42,7 @@ export function startCpuProfiling() {
 }
 
 export function stopCpuCollecting() {
-  cpuProfiler.Stop()
+  cpuProfiler.stop()
 }
 
 export function stopCpuProfiling(): void {
@@ -108,12 +112,13 @@ export function collectCpu(seconds: number): Promise<Buffer> {
 }
 
 export function tagWrapper(
-  key: string,
-  value: string | undefined,
+  tags: Record<string, string | number | undefined>,
   fn: () => void,
   ...args: unknown[]
 ) {
-  tag(key, value)
+  cpuProfiler.labels = { ...cpuProfiler.labels, ...tags }
   ;(fn as ShamefulAny)(...args)
-  tag(key, undefined)
+  Object.keys(tags).forEach((key) => {
+    cpuProfiler.labels[key] = undefined
+  })
 }
