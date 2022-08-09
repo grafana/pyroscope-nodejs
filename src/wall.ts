@@ -8,7 +8,11 @@ import {
   uploadProfile,
 } from './index'
 
-let isWallProfilingRunning = false
+let _isWallProfilingRunning = false
+
+export function isWallProfilingRunning(): boolean {
+  return _isWallProfilingRunning
+}
 
 export async function collectWall(seconds?: number): Promise<Buffer> {
   if (!config.configured) {
@@ -17,13 +21,14 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
 
   try {
     ;(process as any)._startProfilerIdleNotifier()
+    _isWallProfilingRunning = true
     const profile = await pprof.time.profile({
       lineNumbers: true,
       sourceMapper: config.sm,
       durationMillis: (seconds || 10) * 1000 || INTERVAL,
       intervalMicros: 10000,
     })
-    ;(process as any)._stopProfilerIdleNotifier()
+    stopWallProfiling()
     const newProfile = processProfile(profile)
     if (newProfile) {
       return pprof.encode(newProfile)
@@ -40,7 +45,7 @@ export function startWallProfiling(): void {
   checkConfigured()
 
   log('Pyroscope has started Wall Profiling')
-  isWallProfilingRunning = true
+  _isWallProfilingRunning = true
   ;(process as any)._startProfilerIdleNotifier()
   const profilingRound = () => {
     log('Collecting Wall Profile')
@@ -53,7 +58,7 @@ export function startWallProfiling(): void {
       })
       .then((profile) => {
         log('Wall Profile collected')
-        if (isWallProfilingRunning) {
+        if (_isWallProfilingRunning) {
           setImmediate(profilingRound)
         }
         log('Wall Profile uploading')
@@ -71,6 +76,6 @@ export function startWallProfiling(): void {
 
 // It doesn't stop it immediately, just wait until it ends
 export function stopWallProfiling(): void {
-  isWallProfilingRunning = false
+  _isWallProfilingRunning = false
   ;(process as any)._stopProfilerIdleNotifier()
 }
