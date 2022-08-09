@@ -8,7 +8,11 @@ import {
   uploadProfile,
 } from './index'
 
-let isWallProfilingRunning = false
+let _isWallProfilingRunning = false
+
+export function isWallProfilingRunning(): boolean {
+  return _isWallProfilingRunning
+}
 
 export async function collectWall(seconds?: number): Promise<Buffer> {
   if (!config.configured) {
@@ -16,13 +20,15 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
   }
 
   try {
+    ;(process as any)._startProfilerIdleNotifier()
+    _isWallProfilingRunning = true
     const profile = await pprof.time.profile({
       lineNumbers: true,
       sourceMapper: config.sm,
       durationMillis: (seconds || 10) * 1000 || INTERVAL,
       intervalMicros: 10000,
     })
-
+    stopWallProfiling()
     const newProfile = processProfile(profile)
     if (newProfile) {
       return pprof.encode(newProfile)
@@ -38,11 +44,11 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
 export function startWallProfiling(): void {
   checkConfigured()
 
-  log('Pyroscope has started CPU Profiling')
-  isWallProfilingRunning = true
-
+  log('Pyroscope has started Wall Profiling')
+  _isWallProfilingRunning = true
+  ;(process as any)._startProfilerIdleNotifier()
   const profilingRound = () => {
-    log('Collecting CPU Profile')
+    log('Collecting Wall Profile')
     pprof.time
       .profile({
         lineNumbers: true,
@@ -51,15 +57,15 @@ export function startWallProfiling(): void {
         intervalMicros: 10000,
       })
       .then((profile) => {
-        log('CPU Profile collected')
-        if (isWallProfilingRunning) {
+        log('Wall Profile collected')
+        if (_isWallProfilingRunning) {
           setImmediate(profilingRound)
         }
-        log('CPU Profile uploading')
+        log('Wall Profile uploading')
         return uploadProfile(profile)
       })
       .then((d) => {
-        log('CPU Profile has been uploaded')
+        log('Wall Profile has been uploaded')
       })
       .catch((e) => {
         log(e)
@@ -70,5 +76,6 @@ export function startWallProfiling(): void {
 
 // It doesn't stop it immediately, just wait until it ends
 export function stopWallProfiling(): void {
-  isWallProfilingRunning = false
+  _isWallProfilingRunning = false
+  ;(process as any)._stopProfilerIdleNotifier()
 }

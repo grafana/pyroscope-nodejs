@@ -65,4 +65,17 @@ describe('common behavour of profilers', () => {
         done()
     })
 
+    it('should not allow to start cpu and wall profiling at the same time', (done) => {
+        Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
+        Pyroscope.startCpuProfiling();
+        Pyroscope.startWallProfiling();
+
+        setImmediate(() => {
+            Pyroscope.stopWallProfiling();
+            Pyroscope.stopCpuProfiling();
+            // And stop it without starting CPU
+            setTimeout(done, 10000);
+        });
+    })    
+
 });
