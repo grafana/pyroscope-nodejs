@@ -8,7 +8,14 @@ type ShamefulAny = any
 
 const log = debug('pyroscope::cpu')
 
-import { checkConfigured, config, processProfile, uploadProfile } from './index'
+import {
+  checkConfigured,
+  config,
+  INTERVAL,
+  processProfile,
+  SAMPLERATE,
+  uploadProfile,
+} from './index'
 
 const cpuProfiler = new CpuProfiler()
 
@@ -22,7 +29,7 @@ export function startCpuProfiling() {
   checkConfigured()
 
   log('Pyroscope has started CPU Profiling')
-  cpuProfiler.start(100)
+  cpuProfiler.start(SAMPLERATE)
 
   if (cpuProfilingTimer) {
     log('Pyroscope has already started cpu profiling')
@@ -38,7 +45,7 @@ export function startCpuProfiling() {
     } else {
       log('Cpu profile collection failed')
     }
-  }, 10000)
+  }, INTERVAL)
 }
 
 export function stopCpuCollecting() {
