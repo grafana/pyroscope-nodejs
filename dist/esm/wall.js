@@ -1,17 +1,24 @@
 import * as pprof from '@datadog/pprof';
 import { config, processProfile, log, INTERVAL, checkConfigured, uploadProfile, } from './index';
-let isWallProfilingRunning = false;
+let _isWallProfilingRunning = false;
+export function isWallProfilingRunning() {
+    return _isWallProfilingRunning;
+}
 export async function collectWall(seconds) {
     if (!config.configured) {
         throw 'Pyroscope is not configured. Please call init() first.';
     }
     try {
+        ;
+        process._startProfilerIdleNotifier();
+        _isWallProfilingRunning = true;
         const profile = await pprof.time.profile({
             lineNumbers: true,
             sourceMapper: config.sm,
             durationMillis: (seconds || 10) * 1000 || INTERVAL,
             intervalMicros: 10000,
         });
+        stopWallProfiling();
         const newProfile = processProfile(profile);
         if (newProfile) {
             return pprof.encode(newProfile);
@@ -27,10 +34,11 @@ export async function collectWall(seconds) {
 }
 export function startWallProfiling() {
     checkConfigured();
-    log('Pyroscope has started CPU Profiling');
-    isWallProfilingRunning = true;
+    log('Pyroscope has started Wall Profiling');
+    _isWallProfilingRunning = true;
+    process._startProfilerIdleNotifier();
     const profilingRound = () => {
-        log('Collecting CPU Profile');
+        log('Collecting Wall Profile');
         pprof.time
             .profile({
             lineNumbers: true,
@@ -39,15 +47,15 @@ export function startWallProfiling() {
             intervalMicros: 10000,
         })
             .then((profile) => {
-            log('CPU Profile collected');
-            if (isWallProfilingRunning) {
+            log('Wall Profile collected');
+            if (_isWallProfilingRunning) {
                 setImmediate(profilingRound);
             }
-            log('CPU Profile uploading');
+            log('Wall Profile uploading');
             return uploadProfile(profile);
         })
             .then((d) => {
-            log('CPU Profile has been uploaded');
+            log('Wall Profile has been uploaded');
         })
             .catch((e) => {
             log(e);
@@ -57,5 +65,6 @@ export function startWallProfiling() {
 }
 // It doesn't stop it immediately, just wait until it ends
 export function stopWallProfiling() {
-    isWallProfilingRunning = false;
+    _isWallProfilingRunning = false;
+    process._stopProfilerIdleNotifier();
 }

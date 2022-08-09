@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tagWrapper = exports.collectCpu = exports.processCpuProfile = exports.tag = exports.getCpuLabels = exports.setCpuLabels = exports.stopCpuProfiling = exports.stopCpuCollecting = exports.startCpuProfiling = void 0;
+exports.tagWrapper = exports.collectCpu = exports.processCpuProfile = exports.tag = exports.getCpuLabels = exports.setCpuLabels = exports.stopCpuProfiling = exports.stopCpuCollecting = exports.startCpuProfiling = exports.isCpuProfilingRunning = void 0;
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const pprof_1 = require("@datadog/pprof");
 const debug_1 = __importDefault(require("debug"));
@@ -11,10 +11,14 @@ const log = (0, debug_1.default)('pyroscope::cpu');
 const index_1 = require("./index");
 const cpuProfiler = new pprof_1.CpuProfiler();
 let cpuProfilingTimer = undefined;
+function isCpuProfilingRunning() {
+    return cpuProfilingTimer !== undefined;
+}
+exports.isCpuProfilingRunning = isCpuProfilingRunning;
 function startCpuProfiling() {
     (0, index_1.checkConfigured)();
     log('Pyroscope has started CPU Profiling');
-    cpuProfiler.start(100);
+    cpuProfiler.start(index_1.SAMPLERATE);
     if (cpuProfilingTimer) {
         log('Pyroscope has already started cpu profiling');
         return;
@@ -29,11 +33,11 @@ function startCpuProfiling() {
         else {
             log('Cpu profile collection failed');
         }
-    }, 10000);
+    }, index_1.INTERVAL);
 }
 exports.startCpuProfiling = startCpuProfiling;
 function stopCpuCollecting() {
-    cpuProfiler.Stop();
+    cpuProfiler.stop();
 }
 exports.stopCpuCollecting = stopCpuCollecting;
 function stopCpuProfiling() {
@@ -99,9 +103,11 @@ function collectCpu(seconds) {
     });
 }
 exports.collectCpu = collectCpu;
-function tagWrapper(key, value, fn, ...args) {
-    tag(key, value);
+function tagWrapper(tags, fn, ...args) {
+    cpuProfiler.labels = { ...cpuProfiler.labels, ...tags };
     fn(...args);
-    tag(key, undefined);
+    Object.keys(tags).forEach((key) => {
+        cpuProfiler.labels[key] = undefined;
+    });
 }
 exports.tagWrapper = tagWrapper;

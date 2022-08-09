@@ -2,13 +2,16 @@
 import { CpuProfiler, encode } from '@datadog/pprof';
 import debug from 'debug';
 const log = debug('pyroscope::cpu');
-import { checkConfigured, config, processProfile, uploadProfile } from './index';
+import { checkConfigured, config, INTERVAL, processProfile, SAMPLERATE, uploadProfile, } from './index';
 const cpuProfiler = new CpuProfiler();
 let cpuProfilingTimer = undefined;
+export function isCpuProfilingRunning() {
+    return cpuProfilingTimer !== undefined;
+}
 export function startCpuProfiling() {
     checkConfigured();
     log('Pyroscope has started CPU Profiling');
-    cpuProfiler.start(100);
+    cpuProfiler.start(SAMPLERATE);
     if (cpuProfilingTimer) {
         log('Pyroscope has already started cpu profiling');
         return;
@@ -23,10 +26,10 @@ export function startCpuProfiling() {
         else {
             log('Cpu profile collection failed');
         }
-    }, 10000);
+    }, INTERVAL);
 }
 export function stopCpuCollecting() {
-    cpuProfiler.Stop();
+    cpuProfiler.stop();
 }
 export function stopCpuProfiling() {
     if (cpuProfilingTimer) {
@@ -85,8 +88,10 @@ export function collectCpu(seconds) {
         }, seconds * 1000);
     });
 }
-export function tagWrapper(key, value, fn, ...args) {
-    tag(key, value);
+export function tagWrapper(tags, fn, ...args) {
+    cpuProfiler.labels = { ...cpuProfiler.labels, ...tags };
     fn(...args);
-    tag(key, undefined);
+    Object.keys(tags).forEach((key) => {
+        cpuProfiler.labels[key] = undefined;
+    });
 }

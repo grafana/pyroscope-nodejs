@@ -19,21 +19,29 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stopWallProfiling = exports.startWallProfiling = exports.collectWall = void 0;
+exports.stopWallProfiling = exports.startWallProfiling = exports.collectWall = exports.isWallProfilingRunning = void 0;
 const pprof = __importStar(require("@datadog/pprof"));
 const index_1 = require("./index");
-let isWallProfilingRunning = false;
+let _isWallProfilingRunning = false;
+function isWallProfilingRunning() {
+    return _isWallProfilingRunning;
+}
+exports.isWallProfilingRunning = isWallProfilingRunning;
 async function collectWall(seconds) {
     if (!index_1.config.configured) {
         throw 'Pyroscope is not configured. Please call init() first.';
     }
     try {
+        ;
+        process._startProfilerIdleNotifier();
+        _isWallProfilingRunning = true;
         const profile = await pprof.time.profile({
             lineNumbers: true,
             sourceMapper: index_1.config.sm,
             durationMillis: (seconds || 10) * 1000 || index_1.INTERVAL,
             intervalMicros: 10000,
         });
+        stopWallProfiling();
         const newProfile = (0, index_1.processProfile)(profile);
         if (newProfile) {
             return pprof.encode(newProfile);
@@ -50,10 +58,11 @@ async function collectWall(seconds) {
 exports.collectWall = collectWall;
 function startWallProfiling() {
     (0, index_1.checkConfigured)();
-    (0, index_1.log)('Pyroscope has started CPU Profiling');
-    isWallProfilingRunning = true;
+    (0, index_1.log)('Pyroscope has started Wall Profiling');
+    _isWallProfilingRunning = true;
+    process._startProfilerIdleNotifier();
     const profilingRound = () => {
-        (0, index_1.log)('Collecting CPU Profile');
+        (0, index_1.log)('Collecting Wall Profile');
         pprof.time
             .profile({
             lineNumbers: true,
@@ -62,15 +71,15 @@ function startWallProfiling() {
             intervalMicros: 10000,
         })
             .then((profile) => {
-            (0, index_1.log)('CPU Profile collected');
-            if (isWallProfilingRunning) {
+            (0, index_1.log)('Wall Profile collected');
+            if (_isWallProfilingRunning) {
                 setImmediate(profilingRound);
             }
-            (0, index_1.log)('CPU Profile uploading');
+            (0, index_1.log)('Wall Profile uploading');
             return (0, index_1.uploadProfile)(profile);
         })
             .then((d) => {
-            (0, index_1.log)('CPU Profile has been uploaded');
+            (0, index_1.log)('Wall Profile has been uploaded');
         })
             .catch((e) => {
             (0, index_1.log)(e);
@@ -81,6 +90,7 @@ function startWallProfiling() {
 exports.startWallProfiling = startWallProfiling;
 // It doesn't stop it immediately, just wait until it ends
 function stopWallProfiling() {
-    isWallProfilingRunning = false;
+    _isWallProfilingRunning = false;
+    process._stopProfilerIdleNotifier();
 }
 exports.stopWallProfiling = stopWallProfiling;
