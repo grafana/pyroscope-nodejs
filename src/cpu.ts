@@ -38,7 +38,7 @@ export function startCpuProfiling() {
 
   cpuProfilingTimer = setInterval(() => {
     log('Continously collecting cpu profile')
-    const profile = cpuProfiler.profile()
+    const profile = fixNanosecondsPeriod(cpuProfiler.profile())
     if (profile) {
       log('Continuous cpu profile collected. Going to upload')
       uploadProfile(profile).then(() => log('CPU profile uploaded...'))
@@ -74,7 +74,7 @@ export function tag(key: string, value: number | string | undefined) {
   cpuProfiler.labels = { ...cpuProfiler.labels, [key]: value }
 }
 
-export function processCpuProfile(
+export function fixNanosecondsPeriod(
   profile?: perftools.profiles.IProfile
 ): perftools.profiles.IProfile {
   return { ...profile, period: 10000000 }
@@ -93,7 +93,7 @@ export function collectCpu(seconds: number): Promise<Buffer> {
       const profile = cpuProfiler.profile()
       if (profile) {
         log('Cpu profile collected. Now processing')
-        const newProfile = processCpuProfile(processProfile(profile))
+        const newProfile = fixNanosecondsPeriod(processProfile(profile))
         if (newProfile) {
           log('Processed profile. Now encoding to pprof format')
           return encode(newProfile)
