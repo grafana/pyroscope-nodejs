@@ -5,9 +5,13 @@ import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
 
+import { EventEmitter } from 'events'
+
 type TagList = Record<string, any>
 
 export const log = debug('pyroscope')
+
+export const emitter = new EventEmitter()
 
 const cloudHostnameSuffix = 'pyroscope.cloud'
 
@@ -257,6 +261,8 @@ export default {
   stopHeapCollecting,
   start,
   stop,
+
+  emitter,
 
   expressMiddleware,
 }

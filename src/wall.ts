@@ -8,6 +8,7 @@ import {
   INTERVAL,
   checkConfigured,
   uploadProfile,
+  emitter,
 } from './index'
 
 let _isWallProfilingRunning = false
@@ -32,6 +33,8 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
     stopWallProfiling()
     const newProfile = processProfile(fixNanosecondsPeriod(profile))
     if (newProfile) {
+      emitter.emit('profile', profile)
+
       return pprof.encode(newProfile)
     } else {
       return Buffer.from('', 'utf8')
@@ -64,10 +67,12 @@ export function startWallProfiling(): void {
       })
       .then((profile) => {
         log('Wall Profile collected')
+        emitter.emit('profile', profile)
         if (_isWallProfilingRunning) {
           setImmediate(profilingRound)
         }
         log('Wall Profile uploading')
+
         return uploadProfile(fixNanosecondsPeriod(profile))
       })
       .then((d) => {

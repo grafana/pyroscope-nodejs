@@ -11,6 +11,7 @@ const log = debug('pyroscope::cpu')
 import {
   checkConfigured,
   config,
+  emitter,
   INTERVAL,
   processProfile,
   SAMPLERATE,
@@ -41,6 +42,7 @@ export function startCpuProfiling() {
     const profile = fixNanosecondsPeriod(cpuProfiler.profile())
     if (profile) {
       log('Continuous cpu profile collected. Going to upload')
+      emitter.emit('profile', profile)
       uploadProfile(profile).then(() => log('CPU profile uploaded...'))
     } else {
       log('Cpu profile collection failed')
@@ -96,6 +98,7 @@ export function collectCpu(seconds: number): Promise<Buffer> {
         const newProfile = fixNanosecondsPeriod(processProfile(profile))
         if (newProfile) {
           log('Processed profile. Now encoding to pprof format')
+          emitter.emit('profile', newProfile)
           return encode(newProfile)
             .then((profile) => {
               log('Encoded profile. Stopping cpu profiling')
@@ -126,6 +129,6 @@ export function tagWrapper(
   cpuProfiler.labels = { ...cpuProfiler.labels, ...tags }
   ;(fn as ShamefulAny)(...args)
   Object.keys(tags).forEach((key) => {
-    cpuProfiler.labels[key] = undefined
+    cpuProfiler.labels = { ...cpuProfiler.labels, [key]: undefined }
   })
 }
