@@ -28,6 +28,7 @@ function startCpuProfiling() {
         const profile = fixNanosecondsPeriod(cpuProfiler.profile());
         if (profile) {
             log('Continuous cpu profile collected. Going to upload');
+            index_1.emitter.emit('profile', profile);
             (0, index_1.uploadProfile)(profile).then(() => log('CPU profile uploaded...'));
         }
         else {
@@ -81,6 +82,7 @@ function collectCpu(seconds) {
                 const newProfile = fixNanosecondsPeriod((0, index_1.processProfile)(profile));
                 if (newProfile) {
                     log('Processed profile. Now encoding to pprof format');
+                    index_1.emitter.emit('profile', newProfile);
                     return (0, pprof_1.encode)(newProfile)
                         .then((profile) => {
                         log('Encoded profile. Stopping cpu profiling');
@@ -107,7 +109,7 @@ function tagWrapper(tags, fn, ...args) {
     cpuProfiler.labels = { ...cpuProfiler.labels, ...tags };
     fn(...args);
     Object.keys(tags).forEach((key) => {
-        cpuProfiler.labels[key] = undefined;
+        cpuProfiler.labels = { ...cpuProfiler.labels, [key]: undefined };
     });
 }
 exports.tagWrapper = tagWrapper;

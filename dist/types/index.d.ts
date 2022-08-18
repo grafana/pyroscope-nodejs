@@ -1,7 +1,10 @@
+/// <reference types="node" />
 import type perftools from '@datadog/pprof/proto/profile';
 import debug from 'debug';
+import { EventEmitter } from 'events';
 declare type TagList = Record<string, any>;
 export declare const log: debug.Debugger;
+export declare const emitter: EventEmitter;
 export interface PyroscopeConfig {
     serverAddress?: string;
     appName: string;
@@ -43,6 +46,7 @@ declare const _default: {
     stopHeapCollecting: typeof stopHeapCollecting;
     start: typeof start;
     stop: typeof stop;
+    emitter: EventEmitter;
     expressMiddleware: typeof expressMiddleware;
 };
 export default _default;

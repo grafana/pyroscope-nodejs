@@ -2,7 +2,9 @@ import * as pprof from '@datadog/pprof';
 import debug from 'debug';
 import axios from 'axios';
 import FormData from 'form-data';
+import { EventEmitter } from 'events';
 export const log = debug('pyroscope');
+export const emitter = new EventEmitter();
 const cloudHostnameSuffix = 'pyroscope.cloud';
 export const INTERVAL = 10000;
 export const SAMPLERATE = 100;
@@ -174,5 +176,6 @@ export default {
     stopHeapCollecting,
     start,
     stop,
+    emitter,
     expressMiddleware,
 };

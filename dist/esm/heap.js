@@ -1,5 +1,5 @@
 import * as pprof from '@datadog/pprof';
-import { config, processProfile, checkConfigured, uploadProfile, INTERVAL, log } from './index';
+import { config, processProfile, checkConfigured, uploadProfile, INTERVAL, log, emitter, } from './index';
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer = undefined;
 export async function collectHeap() {
@@ -41,6 +41,7 @@ export function startHeapProfiling() {
     heapProfilingTimer = setInterval(() => {
         log('Collecting heap profile');
         const profile = pprof.heap.profile(undefined, config.sm);
+        emitter.emit('profile', profile);
         log('Heap profile collected...');
         uploadProfile(profile).then(() => log('Heap profile uploaded...'));
     }, INTERVAL);

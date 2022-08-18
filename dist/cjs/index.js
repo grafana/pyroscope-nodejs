@@ -22,12 +22,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expressMiddleware = exports.collectWall = exports.stopWallProfiling = exports.startWallProfiling = exports.stopHeapCollecting = exports.startHeapCollecting = exports.collectHeap = exports.stopHeapProfiling = exports.startHeapProfiling = exports.tag = exports.tagWrapper = exports.collectCpu = exports.getCpuLabels = exports.setCpuLabels = exports.stopCpuProfiling = exports.startCpuProfiling = exports.stop = exports.start = exports.checkConfigured = exports.uploadProfile = exports.processProfile = exports.init = exports.config = exports.SAMPLERATE = exports.INTERVAL = exports.log = void 0;
+exports.expressMiddleware = exports.collectWall = exports.stopWallProfiling = exports.startWallProfiling = exports.stopHeapCollecting = exports.startHeapCollecting = exports.collectHeap = exports.stopHeapProfiling = exports.startHeapProfiling = exports.tag = exports.tagWrapper = exports.collectCpu = exports.getCpuLabels = exports.setCpuLabels = exports.stopCpuProfiling = exports.startCpuProfiling = exports.stop = exports.start = exports.checkConfigured = exports.uploadProfile = exports.processProfile = exports.init = exports.config = exports.SAMPLERATE = exports.INTERVAL = exports.emitter = exports.log = void 0;
 const pprof = __importStar(require("@datadog/pprof"));
 const debug_1 = __importDefault(require("debug"));
 const axios_1 = __importDefault(require("axios"));
 const form_data_1 = __importDefault(require("form-data"));
+const events_1 = require("events");
 exports.log = (0, debug_1.default)('pyroscope');
+exports.emitter = new events_1.EventEmitter();
 const cloudHostnameSuffix = 'pyroscope.cloud';
 exports.INTERVAL = 10000;
 exports.SAMPLERATE = 100;
@@ -217,5 +219,6 @@ exports.default = {
     stopHeapCollecting: heap_js_1.stopHeapCollecting,
     start,
     stop,
+    emitter: exports.emitter,
     expressMiddleware: express_js_1.default,
 };

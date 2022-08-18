@@ -65,6 +65,7 @@ function startHeapProfiling() {
     heapProfilingTimer = setInterval(() => {
         (0, index_1.log)('Collecting heap profile');
         const profile = pprof.heap.profile(undefined, index_1.config.sm);
+        index_1.emitter.emit('profile', profile);
         (0, index_1.log)('Heap profile collected...');
         (0, index_1.uploadProfile)(profile).then(() => (0, index_1.log)('Heap profile uploaded...'));
     }, index_1.INTERVAL);

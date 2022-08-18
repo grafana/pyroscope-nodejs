@@ -43,6 +43,7 @@ async function collectWall(seconds) {
         stopWallProfiling();
         const newProfile = (0, index_1.processProfile)((0, cpu_1.fixNanosecondsPeriod)(profile));
         if (newProfile) {
+            index_1.emitter.emit('profile', profile);
             return pprof.encode(newProfile);
         }
         else {
@@ -74,6 +75,7 @@ function startWallProfiling() {
         })
             .then((profile) => {
             (0, index_1.log)('Wall Profile collected');
+            index_1.emitter.emit('profile', profile);
             if (_isWallProfilingRunning) {
                 setImmediate(profilingRound);
             }

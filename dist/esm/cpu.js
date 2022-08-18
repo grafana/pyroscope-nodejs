@@ -2,7 +2,7 @@
 import { CpuProfiler, encode } from '@datadog/pprof';
 import debug from 'debug';
 const log = debug('pyroscope::cpu');
-import { checkConfigured, config, INTERVAL, processProfile, SAMPLERATE, uploadProfile, } from './index';
+import { checkConfigured, config, emitter, INTERVAL, processProfile, SAMPLERATE, uploadProfile, } from './index';
 const cpuProfiler = new CpuProfiler();
 let cpuProfilingTimer = undefined;
 export function isCpuProfilingRunning() {
@@ -21,6 +21,7 @@ export function startCpuProfiling() {
         const profile = fixNanosecondsPeriod(cpuProfiler.profile());
         if (profile) {
             log('Continuous cpu profile collected. Going to upload');
+            emitter.emit('profile', profile);
             uploadProfile(profile).then(() => log('CPU profile uploaded...'));
         }
         else {
@@ -67,6 +68,7 @@ export function collectCpu(seconds) {
                 const newProfile = fixNanosecondsPeriod(processProfile(profile));
                 if (newProfile) {
                     log('Processed profile. Now encoding to pprof format');
+                    emitter.emit('profile', newProfile);
                     return encode(newProfile)
                         .then((profile) => {
                         log('Encoded profile. Stopping cpu profiling');
@@ -92,6 +94,6 @@ export function tagWrapper(tags, fn, ...args) {
     cpuProfiler.labels = { ...cpuProfiler.labels, ...tags };
     fn(...args);
     Object.keys(tags).forEach((key) => {
-        cpuProfiler.labels[key] = undefined;
+        cpuProfiler.labels = { ...cpuProfiler.labels, [key]: undefined };
     });
 }

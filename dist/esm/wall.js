@@ -1,6 +1,6 @@
 import * as pprof from '@datadog/pprof';
 import { fixNanosecondsPeriod } from './cpu';
-import { config, processProfile, log, INTERVAL, checkConfigured, uploadProfile, } from './index';
+import { config, processProfile, log, INTERVAL, checkConfigured, uploadProfile, emitter, } from './index';
 let _isWallProfilingRunning = false;
 export function isWallProfilingRunning() {
     return _isWallProfilingRunning;
@@ -20,6 +20,7 @@ export async function collectWall(seconds) {
         stopWallProfiling();
         const newProfile = processProfile(fixNanosecondsPeriod(profile));
         if (newProfile) {
+            emitter.emit('profile', profile);
             return pprof.encode(newProfile);
         }
         else {
@@ -49,6 +50,7 @@ export function startWallProfiling() {
         })
             .then((profile) => {
             log('Wall Profile collected');
+            emitter.emit('profile', profile);
             if (_isWallProfilingRunning) {
                 setImmediate(profilingRound);
             }
