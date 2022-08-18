@@ -212,7 +212,6 @@ import {
   setCpuLabels,
   getCpuLabels,
   tagWrapper,
-  tag,
   collectCpu,
 } from './cpu.js'
 export {
@@ -222,7 +221,6 @@ export {
   getCpuLabels,
   collectCpu,
   tagWrapper,
-  tag,
 }
 // Heap Export
 import {
@@ -263,6 +261,7 @@ export default {
   stop,
 
   emitter,
+  tagWrapper,
 
   expressMiddleware,
 }

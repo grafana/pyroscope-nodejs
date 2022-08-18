@@ -4,7 +4,6 @@ import express, { application } from 'express'
 jest.setTimeout(15000)
 describe('common behavour of profilers', () => {
 
-
     it('should require server name and app name as options', (done) => {
         Pyroscope.init({})
         expect(Pyroscope.start).toThrowError("Please set the server address in the init()");
@@ -77,5 +76,26 @@ describe('common behavour of profilers', () => {
             setTimeout(done, 10000);
         });
     })    
+
+    
+    it("should have labels on cpu profile", (done) => {
+        Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
+        let a = 0;
+        Pyroscope.emitter.once('profile', (profile) => {
+            expect(profile.stringTable).toContain('thisIsAnUniqueTag');
+            expect(profile.stringTable).toContain('label');
+            Pyroscope.stopCpuProfiling()
+            setTimeout(done, 10);
+        })
+        Pyroscope.startCpuProfiling();
+        Pyroscope.tagWrapper({ "label": "thisIsAnUniqueTag" }, function basicFunction() {
+            const time = +new Date() + 9 * 1000;
+            let i = 0;
+            while (+new Date() < time) {
+              i = i + Math.random();
+            }
+            a = a + i;
+        });
+    })
 
 });

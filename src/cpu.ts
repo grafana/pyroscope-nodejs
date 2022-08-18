@@ -55,8 +55,8 @@ export function stopCpuCollecting() {
 }
 
 export function stopCpuProfiling(): void {
-  if (cpuProfilingTimer) {
-    log('Stopping heap profiling')
+  if (cpuProfilingTimer !== undefined) {
+    log('Stopping cpu profiling')
     clearInterval(cpuProfilingTimer)
     cpuProfilingTimer = undefined
     stopCpuCollecting()

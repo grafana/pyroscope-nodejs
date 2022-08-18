@@ -37,4 +37,5 @@ describe('typescript env', () => {
     
     expect(newProfile.period).toBe(10000000);    
   })
+
 });
