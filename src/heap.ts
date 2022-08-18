@@ -5,7 +5,8 @@ import {
   checkConfigured,
   uploadProfile,
   INTERVAL,
-  log
+  log,
+  emitter,
 } from './index'
 
 // Could be false or a function to stop heap profiling
@@ -60,6 +61,8 @@ export function startHeapProfiling(): void {
   heapProfilingTimer = setInterval(() => {
     log('Collecting heap profile')
     const profile = pprof.heap.profile(undefined, config.sm)
+    emitter.emit('profile', profile)
+
     log('Heap profile collected...')
     uploadProfile(profile).then(() => log('Heap profile uploaded...'))
   }, INTERVAL)
