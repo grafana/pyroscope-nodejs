@@ -1,4 +1,5 @@
 import * as pprof from '@datadog/pprof';
+import { fixNanosecondsPeriod } from './cpu';
 import { config, processProfile, log, INTERVAL, checkConfigured, uploadProfile, } from './index';
 let _isWallProfilingRunning = false;
 export function isWallProfilingRunning() {
@@ -9,8 +10,6 @@ export async function collectWall(seconds) {
         throw 'Pyroscope is not configured. Please call init() first.';
     }
     try {
-        ;
-        process._startProfilerIdleNotifier();
         _isWallProfilingRunning = true;
         const profile = await pprof.time.profile({
             lineNumbers: true,
@@ -19,7 +18,7 @@ export async function collectWall(seconds) {
             intervalMicros: 10000,
         });
         stopWallProfiling();
-        const newProfile = processProfile(profile);
+        const newProfile = processProfile(fixNanosecondsPeriod(profile));
         if (newProfile) {
             return pprof.encode(newProfile);
         }
@@ -32,11 +31,13 @@ export async function collectWall(seconds) {
         return Buffer.from('', 'utf8');
     }
 }
+export function processCpuProfile(profile) {
+    return { ...profile, period: 10000000 };
+}
 export function startWallProfiling() {
     checkConfigured();
     log('Pyroscope has started Wall Profiling');
     _isWallProfilingRunning = true;
-    process._startProfilerIdleNotifier();
     const profilingRound = () => {
         log('Collecting Wall Profile');
         pprof.time
@@ -52,7 +53,7 @@ export function startWallProfiling() {
                 setImmediate(profilingRound);
             }
             log('Wall Profile uploading');
-            return uploadProfile(profile);
+            return uploadProfile(fixNanosecondsPeriod(profile));
         })
             .then((d) => {
             log('Wall Profile has been uploaded');

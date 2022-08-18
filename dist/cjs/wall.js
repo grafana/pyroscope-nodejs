@@ -19,8 +19,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stopWallProfiling = exports.startWallProfiling = exports.collectWall = exports.isWallProfilingRunning = void 0;
+exports.stopWallProfiling = exports.startWallProfiling = exports.processCpuProfile = exports.collectWall = exports.isWallProfilingRunning = void 0;
 const pprof = __importStar(require("@datadog/pprof"));
+const cpu_1 = require("./cpu");
 const index_1 = require("./index");
 let _isWallProfilingRunning = false;
 function isWallProfilingRunning() {
@@ -32,8 +33,6 @@ async function collectWall(seconds) {
         throw 'Pyroscope is not configured. Please call init() first.';
     }
     try {
-        ;
-        process._startProfilerIdleNotifier();
         _isWallProfilingRunning = true;
         const profile = await pprof.time.profile({
             lineNumbers: true,
@@ -42,7 +41,7 @@ async function collectWall(seconds) {
             intervalMicros: 10000,
         });
         stopWallProfiling();
-        const newProfile = (0, index_1.processProfile)(profile);
+        const newProfile = (0, index_1.processProfile)((0, cpu_1.fixNanosecondsPeriod)(profile));
         if (newProfile) {
             return pprof.encode(newProfile);
         }
@@ -56,11 +55,14 @@ async function collectWall(seconds) {
     }
 }
 exports.collectWall = collectWall;
+function processCpuProfile(profile) {
+    return { ...profile, period: 10000000 };
+}
+exports.processCpuProfile = processCpuProfile;
 function startWallProfiling() {
     (0, index_1.checkConfigured)();
     (0, index_1.log)('Pyroscope has started Wall Profiling');
     _isWallProfilingRunning = true;
-    process._startProfilerIdleNotifier();
     const profilingRound = () => {
         (0, index_1.log)('Collecting Wall Profile');
         pprof.time
@@ -76,7 +78,7 @@ function startWallProfiling() {
                 setImmediate(profilingRound);
             }
             (0, index_1.log)('Wall Profile uploading');
-            return (0, index_1.uploadProfile)(profile);
+            return (0, index_1.uploadProfile)((0, cpu_1.fixNanosecondsPeriod)(profile));
         })
             .then((d) => {
             (0, index_1.log)('Wall Profile has been uploaded');
