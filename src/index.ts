@@ -22,7 +22,7 @@ export interface PyroscopeConfig {
 }
 
 // The Interval in which samples should be collected.
-const SAMPLING_INTERVAL_MS =  process.env['PYROSCOPE_SAMPLING_INTERVAL'] || 1000 // in milliseconds
+const SAMPLING_INTERVAL_MS =  process.env['PYROSCOPE_SAMPLING_INTERVAL'] || 10 // in milliseconds // e.g. 10ms will be equivalent to a frequency of 100Hz
 
 
 // The Duration for which a sample should be collected.
