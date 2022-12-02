@@ -21,14 +21,11 @@ export interface PyroscopeConfig {
   configured: boolean
 }
 
-// https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L37-L38
-// The Interval in which samples should be collected. (in microseconds)
-// converting to microseconds
+// The Interval in which samples should be collected.
 const SAMPLING_INTERVAL_MS =  process.env['PYROSCOPE_SAMPLING_INTERVAL'] || 1000 // in milliseconds
 
 
 // The Duration for which a sample should be collected.
-// https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L35-L36
 const SAMPLING_DURATION_MS =  process.env['PYROSCOPE_SAMPLING_DURATION'] || 10000 // in milliseconds
 
 
@@ -197,8 +194,8 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
     const profile = await pprof.time.profile({
       lineNumbers: true,
       sourceMapper: config.sm,
-      durationMillis: Number(SAMPLING_DURATION_MS),
-      intervalMicros: Number(SAMPLING_INTERVAL_MS)*1000,
+      durationMillis: Number(SAMPLING_DURATION_MS), // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L35-L36
+      intervalMicros: Number(SAMPLING_INTERVAL_MS)*1000, // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L37-L38
     })
 
     const newProfile = processProfile(profile)
