@@ -253,7 +253,7 @@ export function startWallProfiling(): void {
       .profile({
         lineNumbers: true,
         sourceMapper: config.sm,
-        durationMillis: SAMPLING_DURATION,
+        durationMillis: 1000 || SAMPLING_DURATION,
         intervalMicros: 10000 || SAMPLE_RATE,
       })
       .then((profile) => {
