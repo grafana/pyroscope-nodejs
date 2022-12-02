@@ -254,8 +254,8 @@ export function startWallProfiling(): void {
       .profile({
         lineNumbers: true,
         sourceMapper: config.sm,
-        durationMillis: SAMPLING_DURATION_MS,
-        intervalMicros: Number(SAMPLING_INTERVAL_MS)/1000,
+        durationMillis: Number(SAMPLING_DURATION_MS),
+        intervalMicros: Number(SAMPLING_INTERVAL_MS)*1000,
       })
       .then((profile) => {
         log('CPU Profile collected')
