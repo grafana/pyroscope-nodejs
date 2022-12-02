@@ -21,8 +21,8 @@ export interface PyroscopeConfig {
   configured: boolean
 }
 
-const INTERVAL = 10000
-const SAMPLERATE = 100
+const INTERVAL =  process.env['PYROSCOPE_INTERVAL_MS'] || 10000
+const SAMPLERATE =  process.env['PYROSCOPE_SAMPLE_RATE_HZ'] || 100
 
 const config: PyroscopeConfig = {
   serverAddress: process.env['PYROSCOPE_SERVER_ADDRESS'],
