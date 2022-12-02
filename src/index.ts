@@ -24,11 +24,12 @@ export interface PyroscopeConfig {
 // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L37-L38
 // The Interval in which samples should be collected. (in microseconds)
 // converting to microseconds
-const SAMPLE_RATE =  Number(process.env['PYROSCOPE_SAMPLE_RATE'])*10 || 10000 // in microseconds -> ex. 10000 microseconds --> 0.01 seconds --> 100Hz
+const SAMPLING_INTERVAL =  process.env['PYROSCOPE_SAMPLE_RATE'] || 1000 // in milliseconds
+
 
 // The Duration for which a sample should be collected.
 // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L35-L36
-const SAMPLING_DURATION =  process.env['PYROSCOPE_SAMPLING_DURATION'] || 100 // in milliseconds
+const SAMPLING_DURATION =  process.env['PYROSCOPE_SAMPLING_DURATION'] || 10000 // in milliseconds
 
 
 const config: PyroscopeConfig = {
@@ -167,7 +168,7 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
 
     const url = `${config.serverAddress}/ingest?name=${encodeURIComponent(
       config.appName
-    )}{${tagList}}&sampleRate=${SAMPLING_DURATION}&spyName=nodespy`
+    )}{${tagList}}&sampleRate=${1000/Number(SAMPLING_INTERVAL)}&spyName=nodespy` // 1000, because our sample rate is in milliseconds
     log(`Sending data to ${url}`)
     // send data to the server
     return axios(url, {
@@ -197,7 +198,7 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
       lineNumbers: true,
       sourceMapper: config.sm,
       durationMillis: (seconds || 10) * 1000 || SAMPLING_DURATION,
-      intervalMicros: 10000 || SAMPLE_RATE,
+      intervalMicros: Number(SAMPLING_INTERVAL)/1000,
     })
 
     const newProfile = processProfile(profile)
@@ -253,8 +254,8 @@ export function startWallProfiling(): void {
       .profile({
         lineNumbers: true,
         sourceMapper: config.sm,
-        durationMillis: 1000 || SAMPLING_DURATION,
-        intervalMicros: 10000 || SAMPLE_RATE,
+        durationMillis: SAMPLING_DURATION,
+        intervalMicros: Number(SAMPLING_INTERVAL)/1000,
       })
       .then((profile) => {
         log('CPU Profile collected')
@@ -325,7 +326,7 @@ export function startHeapProfiling(): void {
     const profile = pprof.heap.profile(undefined, config.sm)
     log('Heap profile collected...')
     uploadProfile(profile).then(() => log('Heap profile uploaded...'))
-  }, SAMPLE_RATE*10) // converting to milliseconds as setInterval expects milliseconds.
+  }, Number(SAMPLING_DURATION))
 }
 
 export function stopHeapCollecting() {
