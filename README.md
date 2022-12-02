@@ -18,7 +18,7 @@ or if not then see [the documentation](https://github.com/pyroscope-io/pyroscope
 
 The agent can be configured using following environment variables:
 
-- **PYROSCOPE_SAMPLE_RATE** - The interval in milliseconds between samples.
+- **PYROSCOPE_SAMPLING_INTERVAL** - The interval in milliseconds between samples.
 - **PYROSCOPE_SAMPLING_DURATION** - The duration in milliseconds for which you want to collect a sample.
 - **PYROSCOPE_SERVER_ADDRESS** - The address of the Pyroscope server. The default is http://localhost:4040
 - **PYROSCOPE_APPLICATION_NAME** - The application name used when uploading profiling data.
