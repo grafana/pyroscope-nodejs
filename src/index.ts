@@ -26,7 +26,7 @@ const SAMPLING_INTERVAL_MS =  process.env['PYROSCOPE_SAMPLING_INTERVAL'] || 10 /
 
 
 // The Duration for which a sample should be collected.
-const SAMPLING_DURATION_MS =  process.env['PYROSCOPE_SAMPLING_DURATION'] || 1000 // in milliseconds
+const SAMPLING_DURATION_MS =  process.env['PYROSCOPE_SAMPLING_DURATION'] || 10000 // in milliseconds
 
 
 const config: PyroscopeConfig = {
