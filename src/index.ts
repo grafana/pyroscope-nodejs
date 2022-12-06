@@ -194,7 +194,7 @@ export async function collectCpu(seconds?: number): Promise<Buffer> {
     const profile = await pprof.time.profile({
       lineNumbers: true,
       sourceMapper: config.sm,
-      durationMillis: Number(SAMPLING_DURATION_MS), // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L35-L36
+      durationMillis: (seconds || 10) * 1000 || Number(SAMPLING_DURATION_MS), // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L35-L36
       intervalMicros: Number(SAMPLING_INTERVAL_MS)*1000, // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L37-L38
     })
 
