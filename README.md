@@ -11,6 +11,16 @@ pyroscope server
 ```
 or if not then see [the documentation](https://github.com/pyroscope-io/pyroscope#add-pyroscope-server-locally-in-2-steps) for more info on how to start the server.
 
+## Configuration
+
+| env var                       | default                 | description                                                          |
+| ----------------------------- | ----------------------- | -------------------------------------------------------------------- |
+| `PYROSCOPE_SAMPLING_INTERVAL` | `10`                    | The interval in milliseconds between samples.                        |
+| `PYROSCOPE_SAMPLING_DURATION` | `10000` (10s)           | The duration in milliseconds for which you want to collect a sample. |
+| `PYROSCOPE_SERVER_ADDRESS`    | `http://localhost:4040` | The address of the Pyroscope server.                                 |
+| `PYROSCOPE_APPLICATION_NAME`  | `""`                    | The application name used when uploading profiling data.             |
+| `PYROSCOPE_AUTH_TOKEN`        | N/A                     | The authorization token used to upload profiling data.               |
+
 ## Modes
 
 Pyroscope supports two main operation modes: 
