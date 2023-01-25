@@ -4,6 +4,7 @@ import type perftools from 'pprof/proto/profile'
 import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
+import 'regenerator-runtime/runtime'
 
 type TagList = Record<string, any>
 
@@ -40,6 +41,12 @@ const config: PyroscopeConfig = {
 
 export function init(c: Partial<PyroscopeConfig> = {}): void {
   config.serverAddress = c.serverAddress || config.serverAddress
+  const adhocAddress = process.env['PYROSCOPE_ADHOC_SERVER_ADDRESS'] || ''
+  if (adhocAddress.length > 0) {
+    log(`Overwriting serverAddress with ${adhocAddress}`)
+    config.serverAddress = adhocAddress
+  }
+
   config.appName = c.appName || config.appName
   config.sourceMapPath = c.sourceMapPath || config.sourceMapPath
   config.authToken = c.authToken || config.authToken

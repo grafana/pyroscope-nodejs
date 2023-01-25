@@ -45,6 +45,7 @@
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
     "pprof": "^3.2.0",
+    "regenerator-runtime": "^0.13.11",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
