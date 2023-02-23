@@ -5,7 +5,8 @@ import {
   config,
   processProfile,
   log,
-  INTERVAL,
+  SAMPLING_INTERVAL_MS,
+  SAMPLING_DURATION_MS,
   checkConfigured,
   uploadProfile,
   emitter,
@@ -27,8 +28,8 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
     const profile = await pprof.time.profile({
       lineNumbers: true,
       sourceMapper: config.sm,
-      durationMillis: (seconds || 10) * 1000 || INTERVAL,
-      intervalMicros: 10000,
+      durationMillis: (seconds || 10) * 1000 || Number(SAMPLING_DURATION_MS), // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L35-L36
+      intervalMicros: Number(SAMPLING_INTERVAL_MS) * 1000, // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L37-L38
     })
     stopWallProfiling()
     const newProfile = processProfile(fixNanosecondsPeriod(profile))
@@ -62,8 +63,8 @@ export function startWallProfiling(): void {
       .profile({
         lineNumbers: true,
         sourceMapper: config.sm,
-        durationMillis: INTERVAL,
-        intervalMicros: 10000,
+        durationMillis: Number(SAMPLING_DURATION_MS),
+        intervalMicros: Number(SAMPLING_INTERVAL_MS)*1000,
       })
       .then((profile) => {
         log('Wall Profile collected')

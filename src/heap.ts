@@ -4,7 +4,7 @@ import {
   processProfile,
   checkConfigured,
   uploadProfile,
-  INTERVAL,
+  SAMPLING_DURATION_MS,
   log,
   emitter,
 } from './index'
@@ -65,7 +65,7 @@ export function startHeapProfiling(): void {
 
     log('Heap profile collected...')
     uploadProfile(profile).then(() => log('Heap profile uploaded...'))
-  }, INTERVAL)
+  }, Number(SAMPLING_DURATION_MS))
 }
 
 export function stopHeapCollecting() {

@@ -12,9 +12,9 @@ import {
   checkConfigured,
   config,
   emitter,
-  INTERVAL,
+  SAMPLING_INTERVAL_MS,
+  SAMPLING_DURATION_MS,
   processProfile,
-  SAMPLERATE,
   uploadProfile,
 } from './index'
 
@@ -30,7 +30,7 @@ export function startCpuProfiling() {
   checkConfigured()
 
   log('Pyroscope has started CPU Profiling')
-  cpuProfiler.start(SAMPLERATE)
+  cpuProfiler.start(Number(SAMPLING_INTERVAL_MS))
 
   if (cpuProfilingTimer) {
     log('Pyroscope has already started cpu profiling')
@@ -47,7 +47,7 @@ export function startCpuProfiling() {
     } else {
       log('Cpu profile collection failed')
     }
-  }, INTERVAL)
+  }, Number(SAMPLING_DURATION_MS))
 }
 
 export function stopCpuCollecting() {
@@ -87,7 +87,7 @@ export function collectCpu(seconds: number): Promise<Buffer> {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
   log('Pyroscope has started CPU Profiling')
-  cpuProfiler.start(100)
+  cpuProfiler.start(Number(SAMPLING_INTERVAL_MS))
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {

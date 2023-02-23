@@ -4,6 +4,7 @@ import type perftools from '@datadog/pprof/proto/profile'
 import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
+import 'regenerator-runtime/runtime'
 
 import { EventEmitter } from 'events'
 
@@ -25,8 +26,13 @@ export interface PyroscopeConfig {
   configured: boolean
 }
 
-export const INTERVAL = 10000
-export const SAMPLERATE = 100
+// The Interval in which samples should be collected.
+export const SAMPLING_INTERVAL_MS =
+  process.env['PYROSCOPE_SAMPLING_INTERVAL'] || 10 // in milliseconds // e.g. 10ms will be equivalent to a frequency of 100Hz
+
+// The Duration for which a sample should be collected.
+export const SAMPLING_DURATION_MS =
+  process.env['PYROSCOPE_SAMPLING_DURATION'] || 10000 // in milliseconds
 
 export const config: PyroscopeConfig = {
   serverAddress: process.env['PYROSCOPE_SERVER_ADDRESS'],
@@ -39,6 +45,12 @@ export const config: PyroscopeConfig = {
 
 export function init(c: Partial<PyroscopeConfig> = {}): void {
   config.serverAddress = c.serverAddress || config.serverAddress
+  const adhocAddress = process.env['PYROSCOPE_ADHOC_SERVER_ADDRESS'] || ''
+  if (adhocAddress.length > 0) {
+    log(`Overwriting serverAddress with ${adhocAddress}`)
+    config.serverAddress = adhocAddress
+  }
+
   config.appName = c.appName || config.appName
   config.sourceMapPath = c.sourceMapPath || config.sourceMapPath
   config.authToken = c.authToken || config.authToken
@@ -166,7 +178,9 @@ export async function uploadProfile(
 
     const url = `${config.serverAddress}/ingest?name=${encodeURIComponent(
       config.appName
-    )}{${tagList}}&sampleRate=${SAMPLERATE}&spyName=nodespy`
+    )}{${tagList}}&sampleRate=${
+      1000 / Number(SAMPLING_INTERVAL_MS)
+    }&spyName=nodespy` // 1000, because our sample rate is in milliseconds
     log(`Sending data to ${url}`)
     // send data to the server
     return axios(url, {
