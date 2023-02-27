@@ -57,12 +57,10 @@ export function stopCpuCollecting() {
 
 export function stopCpuProfiling(): void {
   if (cpuProfilingTimer !== undefined) {
+    clearInterval(cpuProfilingTimer)
     // stop profiler after processing everything the profiler posted
     setImmediate(() => {
       log('Stopping cpu profiling')
-      if (cpuProfilingTimer !== undefined) {
-        clearInterval(cpuProfilingTimer)
-      }
       cpuProfilingTimer = undefined
       const profile = fixNanosecondsPeriod(cpuProfiler.profile())
       if (profile) {
