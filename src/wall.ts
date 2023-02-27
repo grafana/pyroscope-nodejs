@@ -64,7 +64,7 @@ export function startWallProfiling(): void {
         lineNumbers: true,
         sourceMapper: config.sm,
         durationMillis: Number(SAMPLING_DURATION_MS),
-        intervalMicros: Number(SAMPLING_INTERVAL_MS)*1000,
+        intervalMicros: Number(SAMPLING_INTERVAL_MS) * 1000,
       })
       .then((profile) => {
         log('Wall Profile collected')

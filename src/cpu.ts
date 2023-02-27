@@ -30,7 +30,8 @@ export function startCpuProfiling() {
   checkConfigured()
 
   log('Pyroscope has started CPU Profiling')
-  cpuProfiler.start(Number(SAMPLING_INTERVAL_MS))
+  const freq = 1000.0 / Number(SAMPLING_INTERVAL_MS)
+  cpuProfiler.start(freq)
 
   if (cpuProfilingTimer) {
     log('Pyroscope has already started cpu profiling')
@@ -87,7 +88,8 @@ export function collectCpu(seconds: number): Promise<Buffer> {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
   log('Pyroscope has started CPU Profiling')
-  cpuProfiler.start(Number(SAMPLING_INTERVAL_MS))
+  const freq = 1000.0 / Number(SAMPLING_INTERVAL_MS)
+  cpuProfiler.start(freq)
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {
