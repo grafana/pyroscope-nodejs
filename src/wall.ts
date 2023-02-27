@@ -12,6 +12,14 @@ import {
   emitter,
 } from './index'
 
+const wallSampleTypeConfig = `{
+    "samples": {
+        "display-name": "wall",
+        "units": "samples",
+        "sampled": true
+    }
+}`
+
 let _isWallProfilingRunning = false
 
 export function isWallProfilingRunning(): boolean {
@@ -74,7 +82,10 @@ export function startWallProfiling(): void {
         }
         log('Wall Profile uploading')
 
-        return uploadProfile(fixNanosecondsPeriod(profile))
+        return uploadProfile(
+          fixNanosecondsPeriod(profile),
+          wallSampleTypeConfig
+        )
       })
       .then((d) => {
         log('Wall Profile has been uploaded')

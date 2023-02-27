@@ -154,7 +154,8 @@ export const processProfile = (
 }
 
 export async function uploadProfile(
-  profile: perftools.perftools.profiles.IProfile
+  profile: perftools.perftools.profiles.IProfile,
+  sampleTypeConfig?: string
 ) {
   // Apply labels to all samples
   const newProfile = processProfile(profile)
@@ -168,6 +169,12 @@ export async function uploadProfile(
       contentType: 'text/json',
       filename: 'profile',
     })
+    if (sampleTypeConfig) {
+      formData.append('sample_type_config', sampleTypeConfig, {
+        knownLength: sampleTypeConfig.length,
+        filename: 'sample_type_config.json',
+      })
+    }
 
     const tagList = config.tags
       ? Object.keys(config.tags).map(
