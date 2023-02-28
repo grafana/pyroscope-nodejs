@@ -64,7 +64,7 @@ describe('common behavour of profilers', () => {
         done()
     })
 
-    it('should not allow to start cpu and wall profiling at the same time', (done) => {
+    it('should allow to start cpu and wall profiling at the same time', (done) => {
         Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
         Pyroscope.startCpuProfiling();
         Pyroscope.startWallProfiling();
@@ -72,12 +72,11 @@ describe('common behavour of profilers', () => {
         setImmediate(() => {
             Pyroscope.stopWallProfiling();
             Pyroscope.stopCpuProfiling();
-            // And stop it without starting CPU
             setTimeout(done, 10000);
         });
-    })    
+    })
 
-    
+
     it("should have labels on cpu profile", (done) => {
         Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
         let a = 0;
