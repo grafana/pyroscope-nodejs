@@ -1,8 +1,8 @@
 import Pyroscope from '@pyroscope/nodejs'
-import express, { application } from 'express'
+import express from 'express'
 
 jest.setTimeout(15000)
-describe('common behavour of profilers', () => {
+describe('common behaviour of profilers', () => {
 
     it('should require server name and app name as options', (done) => {
         Pyroscope.init({})
@@ -81,8 +81,8 @@ describe('common behavour of profilers', () => {
         Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
         let a = 0;
         Pyroscope.emitter.once('profile', (profile) => {
-            expect(profile.stringTable).toContain('thisIsAnUniqueTag');
-            expect(profile.stringTable).toContain('label');
+            expect(profile.stringTable.strings).toContain('thisIsAnUniqueTag');
+            expect(profile.stringTable.strings).toContain('label');
             Pyroscope.stopCpuProfiling()
             setTimeout(done, 10);
         })

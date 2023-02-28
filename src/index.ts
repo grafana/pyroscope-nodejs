@@ -95,9 +95,7 @@ function handleError(error: AxiosError) {
   }
 }
 
-export const processProfile = (
-  p: pprofFormat.Profile
-): pprofFormat.Profile | undefined => {
+export const processProfile = (p: pprofFormat.Profile): pprofFormat.Profile => {
   const replacements = {
     objects: 'inuse_objects',
     space: 'inuse_space',
@@ -120,8 +118,9 @@ export const processProfile = (
   p.location.forEach((loc) => {
     loc.line.forEach((line) => {
       const functionID = line.functionId
-      const functionCtx: pprofFormat.Function | undefined =
-        p.function.find((x) => x.id == functionID)
+      const functionCtx: pprofFormat.Function | undefined = p.function.find(
+        (x) => x.id == functionID
+      )
       if (!functionCtx) {
         return
       }
