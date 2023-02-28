@@ -1,6 +1,5 @@
 import * as pprof from '@datadog/pprof'
-import { perftools } from '@datadog/pprof/proto/profile'
-import { fixNanosecondsPeriod } from './cpu'
+
 import {
   config,
   processProfile,
@@ -40,7 +39,7 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
       intervalMicros: Number(SAMPLING_INTERVAL_MS) * 1000, // https://github.com/google/pprof-nodejs/blob/0eabf2d9a4e13456e642c41786fcb880a9119f28/ts/src/time-profiler.ts#L37-L38
     })
     stopWallProfiling()
-    const newProfile = processProfile(fixNanosecondsPeriod(profile))
+    const newProfile = processProfile(profile)
     if (newProfile) {
       emitter.emit('profile', profile)
 
@@ -52,12 +51,6 @@ export async function collectWall(seconds?: number): Promise<Buffer> {
     log(e)
     return Buffer.from('', 'utf8')
   }
-}
-
-export function processCpuProfile(
-  profile?: perftools.profiles.IProfile
-): perftools.profiles.IProfile {
-  return { ...profile, period: 10000000 }
 }
 
 export function startWallProfiling(): void {
@@ -82,10 +75,7 @@ export function startWallProfiling(): void {
         }
         log('Wall Profile uploading')
 
-        return uploadProfile(
-          fixNanosecondsPeriod(profile),
-          wallSampleTypeConfig
-        )
+        return uploadProfile(profile, wallSampleTypeConfig)
       })
       .then((d) => {
         log('Wall Profile has been uploaded')
