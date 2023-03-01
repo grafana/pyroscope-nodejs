@@ -8,6 +8,7 @@ import {
   log,
   emitter,
 } from './index'
+import {Profile} from "pprof-format";
 
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
@@ -73,11 +74,25 @@ export function stopHeapCollecting() {
   isHeapCollectingStarted = false
 }
 
-export function stopHeapProfiling(): void {
-  if (heapProfilingTimer) {
-    log('Stopping heap profiling')
-    clearInterval(heapProfilingTimer)
-    heapProfilingTimer = undefined
-    stopHeapCollecting()
-  }
+export function stopHeapProfiling(): Promise<void> {
+  log('Stopping heap profiling')
+  return new Promise<void>(async (resolve, reject) => {
+    if (heapProfilingTimer) {
+      clearInterval(heapProfilingTimer)
+      try {
+        const profile = pprof.heap.profile(undefined, config.sm)
+        emitter.emit('profile', profile)
+        log(`uploading heap profile`)
+        await uploadProfile(profile)
+        log(`uploaded heap profile`)
+      } catch (e) {
+        log(`failed to capture last profile during stop: ${e}`)
+      }
+      heapProfilingTimer = undefined
+      stopHeapCollecting()
+      resolve()
+    } else {
+      reject()
+    }
+  })
 }
