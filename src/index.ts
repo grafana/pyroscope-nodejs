@@ -35,6 +35,13 @@ export const SAMPLING_INTERVAL_MS =
 export const SAMPLING_DURATION_MS =
   process.env['PYROSCOPE_SAMPLING_DURATION'] || 10000 // in milliseconds
 
+export const HEAP_INTERVAL_BYTES = Number(
+  process.env['PYROSCOPE_HEAP_INTERVAL'] || 1024 * 512
+)
+export const HEAP_STACK_DEPTH = Number(
+  process.env['PYROSCOPE_HEAP_STACK_DEPTH'] || 64
+)
+
 export const config: PyroscopeConfig = {
   serverAddress: process.env['PYROSCOPE_SERVER_ADDRESS'],
   appName: process.env['PYROSCOPE_APPLICATION_NAME'] || '',

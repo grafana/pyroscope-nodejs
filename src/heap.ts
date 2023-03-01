@@ -6,7 +6,7 @@ import {
   uploadProfile,
   SAMPLING_DURATION_MS,
   log,
-  emitter,
+  emitter, HEAP_INTERVAL_BYTES, HEAP_STACK_DEPTH,
 } from './index'
 import {Profile} from "pprof-format";
 
@@ -40,12 +40,9 @@ export function startHeapCollecting() {
     return
   }
 
-  const intervalBytes = 1024 * 512
-  const stackDepth = 32
-
   log('Pyroscope has started heap profiling')
 
-  pprof.heap.start(intervalBytes, stackDepth)
+  pprof.heap.start(HEAP_INTERVAL_BYTES, HEAP_STACK_DEPTH)
   isHeapCollectingStarted = true
 }
 
