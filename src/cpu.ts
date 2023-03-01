@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { CpuProfiler, encode } from '@datadog/pprof'
+import { Profile } from 'pprof-format'
 import debug from 'debug'
+import {
+  checkConfigured,
+  config,
+  emitter,
+  processProfile,
+  SAMPLING_DURATION_MS,
+  SAMPLING_INTERVAL_MS,
+  uploadProfile,
+} from './index'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ShamefulAny = any
 
 const log = debug('pyroscope::cpu')
-
-import {
-  checkConfigured,
-  config,
-  emitter,
-  SAMPLING_INTERVAL_MS,
-  SAMPLING_DURATION_MS,
-  processProfile,
-  uploadProfile,
-} from './index'
 
 const cpuProfiler = new CpuProfiler()
 
@@ -54,20 +54,27 @@ export function stopCpuCollecting() {
   cpuProfiler.stop()
 }
 
-export function stopCpuProfiling(): void {
+export async function stopCpuProfiling(): Promise<void> {
   if (cpuProfilingTimer !== undefined) {
     clearInterval(cpuProfilingTimer)
-    // stop profiler after processing everything the profiler posted
-    setImmediate(() => {
-      log('Stopping cpu profiling')
-      cpuProfilingTimer = undefined
-      const profile = cpuProfiler.profile()
-      if (profile) {
-        emitter.emit('profile', profile)
-        uploadProfile(profile).then(() => log('CPU profile uploaded...'))
-      }
-      stopCpuCollecting()
-    })
+    try {
+      // stop profiler asynchronously after processing everything the profiler posted
+      // https://github.com/DataDog/pprof-nodejs/blob/v2.0.0/bindings/profilers/cpu.cc#L96
+      const profile = await new Promise<Profile>((resolve, reject) => {
+        const profile = cpuProfiler.profile()
+        if (profile) {
+          emitter.emit('profile', profile)
+          resolve(profile)
+        } else {
+          reject()
+        }
+      })
+      await uploadProfile(profile)
+    } catch (e) {
+      log(`failed to capture last profile during stop: ${e}`)
+    }
+    cpuProfilingTimer = undefined
+    stopCpuCollecting()
   }
 }
 
