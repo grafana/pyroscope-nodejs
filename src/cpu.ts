@@ -54,28 +54,38 @@ export function stopCpuCollecting() {
   cpuProfiler.stop()
 }
 
-export async function stopCpuProfiling(): Promise<void> {
-  if (cpuProfilingTimer !== undefined) {
-    clearInterval(cpuProfilingTimer)
-    try {
-      // stop profiler asynchronously after processing everything the profiler posted
-      // https://github.com/DataDog/pprof-nodejs/blob/v2.0.0/bindings/profilers/cpu.cc#L96
-      const profile = await new Promise<Profile>((resolve, reject) => {
-        const profile = cpuProfiler.profile()
-        if (profile) {
-          emitter.emit('profile', profile)
-          resolve(profile)
-        } else {
-          reject()
-        }
-      })
-      await uploadProfile(profile)
-    } catch (e) {
-      log(`failed to capture last profile during stop: ${e}`)
+export function stopCpuProfiling(): Promise<void> {
+  log(`stopping cpuProfiling`)
+  return new Promise<void>(async (resolve, reject) => {
+    if (cpuProfilingTimer !== undefined) {
+      clearInterval(cpuProfilingTimer)
+      try {
+        // stop profiler asynchronously after processing everything the profiler posted
+        // https://github.com/DataDog/pprof-nodejs/blob/v2.0.0/bindings/profilers/cpu.cc#L96
+        const profile = await new Promise<Profile>((resolve, reject) => {
+          setImmediate(() => {
+            const profile = cpuProfiler.profile()
+            if (profile) {
+              emitter.emit('profile', profile)
+              resolve(profile)
+            } else {
+              reject()
+            }
+          })
+        })
+        log(`uploading cpu profile`)
+        await uploadProfile(profile)
+        log(`uploaded cpu profile`)
+      } catch (e) {
+        log(`failed to capture last profile during stop: ${e}`)
+      }
+      cpuProfilingTimer = undefined
+      stopCpuCollecting()
+      resolve()
+    } else {
+      reject()
     }
-    cpuProfilingTimer = undefined
-    stopCpuCollecting()
-  }
+  })
 }
 
 // This is in conflict with pprof typings. Not sure why
