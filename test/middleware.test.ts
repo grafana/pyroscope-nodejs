@@ -1,6 +1,6 @@
 import Pyroscope, { expressMiddleware } from '@pyroscope/nodejs';
 import request from 'supertest';
-import express, { Response } from 'express';
+import express from 'express';
 
 
 // You only need appName for the pull mode
@@ -13,7 +13,7 @@ describe('express middleware', () => {
     });
     it('should be a function', () => {
         expect(typeof expressMiddleware).toBe('function');
-        
+
     })
     it('should respond to cpu calls', async () => {
         const app = express();
@@ -62,7 +62,7 @@ describe('express middleware', () => {
                 .catch(result => {
                     expect(result.statusCode).toBe(200)
                 })
-    })    
+    })
     it('should respond to repetitive heap profiling calls', () => {
         const app = express();
         app.use(expressMiddleware());
@@ -72,7 +72,7 @@ describe('express middleware', () => {
                     expect(result.statusCode).toBe(200)
                 })
     })
-    
+
     it('should respond to simultaneous heap profiling calls', () => {
         const app = express();
         app.use(expressMiddleware());
@@ -109,6 +109,6 @@ describe('express middleware', () => {
                 expect(result.statusCode).toBe(200)
             })
     })
-    
+
 
 })

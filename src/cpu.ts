@@ -1,22 +1,21 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { CpuProfiler, encode } from '@datadog/pprof'
-import { perftools } from '@datadog/pprof/proto/profile'
+import { Profile } from 'pprof-format'
 import debug from 'debug'
+import {
+  checkConfigured,
+  config,
+  emitter,
+  processProfile,
+  SAMPLING_DURATION_MS,
+  SAMPLING_INTERVAL_MS,
+  uploadProfile,
+} from './index'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ShamefulAny = any
 
 const log = debug('pyroscope::cpu')
-
-import {
-  checkConfigured,
-  config,
-  emitter,
-  SAMPLING_INTERVAL_MS,
-  SAMPLING_DURATION_MS,
-  processProfile,
-  uploadProfile,
-} from './index'
 
 const cpuProfiler = new CpuProfiler()
 
@@ -30,7 +29,8 @@ export function startCpuProfiling() {
   checkConfigured()
 
   log('Pyroscope has started CPU Profiling')
-  cpuProfiler.start(Number(SAMPLING_INTERVAL_MS))
+  const freq = 1000.0 / Number(SAMPLING_INTERVAL_MS)
+  cpuProfiler.start(freq)
 
   if (cpuProfilingTimer) {
     log('Pyroscope has already started cpu profiling')
@@ -39,7 +39,7 @@ export function startCpuProfiling() {
 
   cpuProfilingTimer = setInterval(() => {
     log('Continously collecting cpu profile')
-    const profile = fixNanosecondsPeriod(cpuProfiler.profile())
+    const profile = cpuProfiler.profile()
     if (profile) {
       log('Continuous cpu profile collected. Going to upload')
       emitter.emit('profile', profile)
@@ -54,10 +54,25 @@ export function stopCpuCollecting() {
   cpuProfiler.stop()
 }
 
-export function stopCpuProfiling(): void {
+export async function stopCpuProfiling(): Promise<void> {
   if (cpuProfilingTimer !== undefined) {
-    log('Stopping cpu profiling')
     clearInterval(cpuProfilingTimer)
+    try {
+      // stop profiler asynchronously after processing everything the profiler posted
+      // https://github.com/DataDog/pprof-nodejs/blob/v2.0.0/bindings/profilers/cpu.cc#L96
+      const profile = await new Promise<Profile>((resolve, reject) => {
+        const profile = cpuProfiler.profile()
+        if (profile) {
+          emitter.emit('profile', profile)
+          resolve(profile)
+        } else {
+          reject()
+        }
+      })
+      await uploadProfile(profile)
+    } catch (e) {
+      log(`failed to capture last profile during stop: ${e}`)
+    }
     cpuProfilingTimer = undefined
     stopCpuCollecting()
   }
@@ -76,18 +91,13 @@ export function tag(key: string, value: number | string | undefined) {
   cpuProfiler.labels = { ...cpuProfiler.labels, [key]: value }
 }
 
-export function fixNanosecondsPeriod(
-  profile?: perftools.profiles.IProfile
-): perftools.profiles.IProfile {
-  return { ...profile, period: 10000000 }
-}
-
 export function collectCpu(seconds: number): Promise<Buffer> {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
   log('Pyroscope has started CPU Profiling')
-  cpuProfiler.start(Number(SAMPLING_INTERVAL_MS))
+  const freq = 1000.0 / Number(SAMPLING_INTERVAL_MS)
+  cpuProfiler.start(freq)
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -95,7 +105,7 @@ export function collectCpu(seconds: number): Promise<Buffer> {
       const profile = cpuProfiler.profile()
       if (profile) {
         log('Cpu profile collected. Now processing')
-        const newProfile = fixNanosecondsPeriod(processProfile(profile))
+        const newProfile = processProfile(profile)
         if (newProfile) {
           log('Processed profile. Now encoding to pprof format')
           emitter.emit('profile', newProfile)

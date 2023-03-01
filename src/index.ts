@@ -1,6 +1,7 @@
 import * as pprof from '@datadog/pprof'
 
-import type perftools from '@datadog/pprof/proto/profile'
+import * as pprofFormat from 'pprof-format'
+
 import debug from 'debug'
 import axios, { AxiosError } from 'axios'
 import FormData from 'form-data'
@@ -94,67 +95,50 @@ function handleError(error: AxiosError) {
   }
 }
 
-export const processProfile = (
-  profile: perftools.perftools.profiles.IProfile
-): perftools.perftools.profiles.IProfile | undefined => {
+export const processProfile = (p: pprofFormat.Profile): pprofFormat.Profile => {
   const replacements = {
     objects: 'inuse_objects',
     space: 'inuse_space',
     sample: 'samples',
   } as Record<string, string>
   // Replace the names of the samples to meet golang naming
-  const newStringTable = profile.stringTable
-    ?.slice(0, 5)
-    .map((s) => (replacements[s] ? replacements[s] : s))
-    .concat(profile.stringTable?.slice(5))
-
-  // Inject line numbers and file names into symbols table
-  const newProfile = profile.location?.reduce(
-    (a, location) => {
-      // location -> function -> name
-      if (location && location.line && a.stringTable) {
-        const functionId = location.line[0]?.functionId
-        // Find the function name
-        const functionCtx: perftools.perftools.profiles.IFunction | undefined =
-          a.function?.find((x) => x.id == functionId)
-
-        // Store the new position of injected function name
-        const newNameId = a.stringTable.length
-        // Get the function name
-        const functionName = a.stringTable[Number(functionCtx?.name)]
-        if (functionName.indexOf(':') === -1) {
-          // Build a new name by concatenating the file name and line number
-          const newName = (
-            `${a.stringTable[Number(functionCtx?.filename)]}:${
-              a.stringTable[Number(functionCtx?.name)]
-            }:${location?.line[0].line}` as string
-          ).replace(process.cwd(), '.')
-          // Store the new name
-          if (functionCtx) {
-            functionCtx.name = newNameId
-          }
-          // Update profile string table with the new name and location
-          return {
-            ...a,
-            location: [...(a.location || [])],
-            stringTable: [...(a.stringTable || []), newName],
-          }
-        } else {
-          return a
-        }
+  p.sampleType.forEach((st) => {
+    for (const replacementsKey in replacements) {
+      const replacementVal = replacements[replacementsKey]
+      const unit = p.stringTable.strings[st.unit as number]
+      if (unit === replacementsKey) {
+        st.unit = p.stringTable.dedup(replacementVal)
       }
-      return {}
-    },
-    {
-      ...profile,
-      stringTable: newStringTable,
-    } as perftools.perftools.profiles.IProfile
-  )
-  return newProfile
+      const type = p.stringTable.strings[st.type as number]
+      if (type === replacementsKey) {
+        st.type = p.stringTable.dedup(replacementVal)
+      }
+    }
+  })
+  p.location.forEach((loc) => {
+    loc.line.forEach((line) => {
+      const functionID = line.functionId
+      const functionCtx: pprofFormat.Function | undefined = p.function.find(
+        (x) => x.id == functionID
+      )
+      if (!functionCtx) {
+        return
+      }
+      const functionName = p.stringTable.strings[Number(functionCtx.name)]
+      if (functionName.indexOf(':') === -1) {
+        const fileName = p.stringTable.strings[Number(functionCtx.filename)]
+        const newName = `${fileName}:${functionName}:${line.line}` as string
+        functionCtx.name = p.stringTable.dedup(newName)
+      }
+    })
+  })
+
+  return p
 }
 
 export async function uploadProfile(
-  profile: perftools.perftools.profiles.IProfile
+  profile: pprofFormat.Profile,
+  sampleTypeConfig?: string
 ) {
   // Apply labels to all samples
   const newProfile = processProfile(profile)
@@ -168,6 +152,12 @@ export async function uploadProfile(
       contentType: 'text/json',
       filename: 'profile',
     })
+    if (sampleTypeConfig) {
+      formData.append('sample_type_config', sampleTypeConfig, {
+        knownLength: sampleTypeConfig.length,
+        filename: 'sample_type_config.json',
+      })
+    }
 
     const tagList = config.tags
       ? Object.keys(config.tags).map(

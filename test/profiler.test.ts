@@ -1,8 +1,8 @@
 import Pyroscope from '@pyroscope/nodejs'
-import express, { application } from 'express'
+import express from 'express'
 
 jest.setTimeout(15000)
-describe('common behavour of profilers', () => {
+describe('common behaviour of profilers', () => {
 
     it('should require server name and app name as options', (done) => {
         Pyroscope.init({})
@@ -64,7 +64,7 @@ describe('common behavour of profilers', () => {
         done()
     })
 
-    it('should not allow to start cpu and wall profiling at the same time', (done) => {
+    it('should allow to start cpu and wall profiling at the same time', (done) => {
         Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
         Pyroscope.startCpuProfiling();
         Pyroscope.startWallProfiling();
@@ -72,18 +72,17 @@ describe('common behavour of profilers', () => {
         setImmediate(() => {
             Pyroscope.stopWallProfiling();
             Pyroscope.stopCpuProfiling();
-            // And stop it without starting CPU
             setTimeout(done, 10000);
         });
-    })    
+    })
 
-    
+
     it("should have labels on cpu profile", (done) => {
         Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
         let a = 0;
         Pyroscope.emitter.once('profile', (profile) => {
-            expect(profile.stringTable).toContain('thisIsAnUniqueTag');
-            expect(profile.stringTable).toContain('label');
+            expect(profile.stringTable.strings).toContain('thisIsAnUniqueTag');
+            expect(profile.stringTable.strings).toContain('label');
             Pyroscope.stopCpuProfiling()
             setTimeout(done, 10);
         })
