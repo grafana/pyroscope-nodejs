@@ -41,11 +41,11 @@ describe('common behaviour of profilers', () => {
             Pyroscope.startHeapProfiling()
         });
         app.post('/ingest', (req, res) => {
-            Pyroscope.stopHeapProfiling()
             expect(req.query['spyName']).toEqual('nodespy');
             expect(req.query['name']).toEqual('nodejs{env=test env}');
 
-            setImmediate(() => {
+            setImmediate(async () => {
+                await Pyroscope.stopHeapProfiling()
                 server.close();
                 done()
             })
@@ -57,11 +57,14 @@ describe('common behaviour of profilers', () => {
         Pyroscope.init({serverAddress: "http://localhost:4444", appName: "nodejs"})
         Pyroscope.startHeapProfiling();
         Pyroscope.startHeapProfiling();
-        Pyroscope.stopHeapProfiling();
-        Pyroscope.stopHeapProfiling();
-        // And stop it without starting CPU
-        Pyroscope.stop();
-        done()
+        (async () => {
+          await Pyroscope.stopHeapProfiling();
+          await Pyroscope.stopHeapProfiling();
+          // And stop it without starting CPU
+          await Pyroscope.stop();
+          done()
+        })()
+
     })
 
     it('should allow to start cpu and wall profiling at the same time', (done) => {
@@ -69,9 +72,9 @@ describe('common behaviour of profilers', () => {
         Pyroscope.startCpuProfiling();
         Pyroscope.startWallProfiling();
 
-        setImmediate(() => {
+        setImmediate(async () => {
             Pyroscope.stopWallProfiling();
-            Pyroscope.stopCpuProfiling();
+            await Pyroscope.stopCpuProfiling();
             setTimeout(done, 10000);
         });
     })
@@ -83,8 +86,10 @@ describe('common behaviour of profilers', () => {
         Pyroscope.emitter.once('profile', (profile) => {
             expect(profile.stringTable.strings).toContain('thisIsAnUniqueTag');
             expect(profile.stringTable.strings).toContain('label');
-            Pyroscope.stopCpuProfiling()
-            setTimeout(done, 10);
+            setImmediate(async () => {
+              await Pyroscope.stopCpuProfiling()
+              setTimeout(done, 10);
+            })
         })
         Pyroscope.startCpuProfiling();
         Pyroscope.tagWrapper({ "label": "thisIsAnUniqueTag" }, function basicFunction() {

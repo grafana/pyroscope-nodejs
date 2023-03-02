@@ -212,9 +212,10 @@ export function start(): void {
   startHeapProfiling()
 }
 
-export function stop(): void {
-  stopCpuProfiling()
-  stopHeapProfiling()
+export function stop(): Promise<void> {
+  return Promise.all([stopCpuProfiling(), stopHeapProfiling()]).then(
+    () => undefined
+  )
 }
 // CPU Export
 import {
