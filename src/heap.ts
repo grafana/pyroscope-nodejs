@@ -6,9 +6,10 @@ import {
   uploadProfile,
   SAMPLING_DURATION_MS,
   log,
-  emitter, HEAP_INTERVAL_BYTES, HEAP_STACK_DEPTH,
+  emitter,
+  HEAP_INTERVAL_BYTES,
+  HEAP_STACK_DEPTH,
 } from './index'
-import {Profile} from "pprof-format";
 
 // Could be false or a function to stop heap profiling
 let heapProfilingTimer: undefined | NodeJS.Timer = undefined
