@@ -138,7 +138,10 @@ export const processProfile = (p: pprofFormat.Profile): pprofFormat.Profile => {
       const functionName = p.stringTable.strings[Number(functionCtx.name)]
       if (functionName.indexOf(':') === -1) {
         const fileName = p.stringTable.strings[Number(functionCtx.filename)]
-        const newName = `${fileName}:${functionName}:${line.line}` as string
+        const newName = `${fileName.replace(
+          process.cwd(),
+          '.'
+        )}:${functionName}:${line.line}` as string
         functionCtx.name = p.stringTable.dedup(newName)
       }
     })
