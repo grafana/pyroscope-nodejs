@@ -3,11 +3,9 @@ import * as pprof from '@datadog/pprof'
 import {
   config,
   processProfile,
-  log,
   SAMPLING_INTERVAL_MS,
   SAMPLING_DURATION_MS,
   checkConfigured,
-  uploadProfile,
   emitter,
 } from './index'
 import {
@@ -16,6 +14,9 @@ import {
   PyroscopeApiExporter,
 } from './continuous'
 import { Profile } from 'pprof-format'
+import debug from 'debug'
+
+const log = debug('pyroscope::wall')
 
 const wallSampleTypeConfig = `{
     "samples": {
@@ -43,6 +44,7 @@ class WallProfilerImpl implements ProfilerImpl {
   }
 
   start(): void {
+    log('start')
     this.stopCallback = pprof.time.start(
       this.samplingIntervalMicros,
       undefined,
@@ -56,6 +58,7 @@ class WallProfilerImpl implements ProfilerImpl {
       log('not started')
       return undefined
     }
+    log('stop')
     this.stopCallback(false)
     this.stopCallback = undefined
   }

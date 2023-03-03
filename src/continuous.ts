@@ -22,7 +22,7 @@ export class PyroscopeApiExporter implements Exporter {
   }
 
   export(p: Profile): Promise<void> {
-    return uploadProfile(p).then(() => undefined)
+    return uploadProfile(p, this.sampleTypeConfig).then(() => undefined)
   }
 }
 
