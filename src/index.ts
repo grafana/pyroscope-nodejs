@@ -21,6 +21,7 @@ export interface PyroscopeConfig {
   serverAddress?: string
   appName: string
   sourceMapPath?: string[]
+  // todo(korniltsev) why is it any?
   sm?: any
   tags: TagList
   authToken?: string
@@ -28,12 +29,14 @@ export interface PyroscopeConfig {
 }
 
 // The Interval in which samples should be collected.
-export const SAMPLING_INTERVAL_MS =
-  process.env['PYROSCOPE_SAMPLING_INTERVAL'] || 10 // in milliseconds // e.g. 10ms will be equivalent to a frequency of 100Hz
+export const SAMPLING_INTERVAL_MS = Number(
+  process.env['PYROSCOPE_SAMPLING_INTERVAL'] || 10
+) // in milliseconds // e.g. 10ms will be equivalent to a frequency of 100Hz
 
 // The Duration for which a sample should be collected.
-export const SAMPLING_DURATION_MS =
-  process.env['PYROSCOPE_SAMPLING_DURATION'] || 10000 // in milliseconds
+export const SAMPLING_DURATION_MS = Number(
+  process.env['PYROSCOPE_SAMPLING_DURATION'] || 10000
+) // in milliseconds
 
 export const HEAP_INTERVAL_BYTES = Number(
   process.env['PYROSCOPE_HEAP_INTERVAL'] || 1024 * 512
@@ -65,6 +68,7 @@ export function init(c: Partial<PyroscopeConfig> = {}): void {
   config.tags = c.tags || config.tags
 
   if (!!config.sourceMapPath) {
+    // todo(korniltsev) is it a race?
     pprof.SourceMapper.create(config.sourceMapPath)
       .then((sm) => (config.sm = sm))
       .catch((e) => {

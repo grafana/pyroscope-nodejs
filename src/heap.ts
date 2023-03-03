@@ -3,16 +3,67 @@ import {
   config,
   processProfile,
   checkConfigured,
-  uploadProfile,
   SAMPLING_DURATION_MS,
-  log,
-  emitter,
   HEAP_INTERVAL_BYTES,
   HEAP_STACK_DEPTH,
 } from './index'
+import {
+  ContinuousProfiler,
+  ProfilerImpl,
+  PyroscopeApiExporter,
+} from './continuous'
+import { Profile } from 'pprof-format'
+import debug from 'debug'
 
-// Could be false or a function to stop heap profiling
-let heapProfilingTimer: undefined | NodeJS.Timer = undefined
+export const log = debug('pyroscope::heap')
+
+export class HeapProfilerImpl implements ProfilerImpl {
+  private started = false
+
+  profile(): Profile {
+    log('profile')
+    return pprof.heap.profile(undefined, config.sm)
+  }
+
+  start(): void {
+    if (this.started) {
+      log('already started')
+      return
+    }
+    log('start')
+    this.started = true
+    pprof.heap.start(HEAP_INTERVAL_BYTES, HEAP_STACK_DEPTH)
+  }
+
+  stop(): void {
+    if (!this.started) {
+      log('not started')
+      return
+    }
+    log('stop')
+    this.started = false
+    pprof.heap.stop()
+  }
+}
+
+const heapProfilerImpl = new HeapProfilerImpl()
+
+const continuousHeapProfiler = new ContinuousProfiler({
+  profiler: heapProfilerImpl,
+  exporter: new PyroscopeApiExporter(),
+  name: 'heap',
+  duration: SAMPLING_DURATION_MS,
+})
+
+export function startHeapProfiling(): void {
+  checkConfigured()
+
+  continuousHeapProfiler.start()
+}
+
+export function stopHeapProfiling(): Promise<void> {
+  return continuousHeapProfiler.stop()
+}
 
 export async function collectHeap(): Promise<Buffer> {
   if (!config.configured) {
@@ -29,68 +80,14 @@ export async function collectHeap(): Promise<Buffer> {
   }
 }
 
-let isHeapCollectingStarted = false
-
 export function startHeapCollecting() {
   if (!config.configured) {
     throw 'Pyroscope is not configured. Please call init() first.'
   }
 
-  if (isHeapCollectingStarted) {
-    log('Heap collecting is already started')
-    return
-  }
-
-  log('Pyroscope has started heap profiling')
-
-  pprof.heap.start(HEAP_INTERVAL_BYTES, HEAP_STACK_DEPTH)
-  isHeapCollectingStarted = true
-}
-
-export function startHeapProfiling(): void {
-  checkConfigured()
-
-  if (heapProfilingTimer) {
-    log('Pyroscope has already started heap profiling')
-    return
-  }
-
-  startHeapCollecting()
-
-  heapProfilingTimer = setInterval(() => {
-    log('Collecting heap profile')
-    const profile = pprof.heap.profile(undefined, config.sm)
-    emitter.emit('profile', profile)
-
-    log('Heap profile collected...')
-    uploadProfile(profile).then(() => log('Heap profile uploaded...'))
-  }, Number(SAMPLING_DURATION_MS))
+  heapProfilerImpl.start()
 }
 
 export function stopHeapCollecting() {
-  pprof.heap.stop()
-  isHeapCollectingStarted = false
-}
-
-export function stopHeapProfiling(): Promise<void> {
-  log('Stopping heap profiling')
-  return new Promise<void>(async (resolve, reject) => {
-    if (heapProfilingTimer) {
-      clearInterval(heapProfilingTimer)
-      try {
-        const profile = pprof.heap.profile(undefined, config.sm)
-        emitter.emit('profile', profile)
-        log(`uploading heap profile`)
-        await uploadProfile(profile)
-        log(`uploaded heap profile`)
-      } catch (e) {
-        log(`failed to capture last profile during stop: ${e}`)
-      }
-      heapProfilingTimer = undefined
-      stopHeapCollecting()
-      resolve()
-    } else {
-      reject()
-    }
-  })
+  heapProfilerImpl.stop()
 }

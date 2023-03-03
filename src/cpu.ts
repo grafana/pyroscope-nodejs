@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { CpuProfiler, encode } from '@datadog/pprof'
-import { Profile } from 'pprof-format'
 import debug from 'debug'
 import {
   checkConfigured,
@@ -9,8 +8,13 @@ import {
   processProfile,
   SAMPLING_DURATION_MS,
   SAMPLING_INTERVAL_MS,
-  uploadProfile,
 } from './index'
+import {
+  ContinuousProfiler,
+  ProfilerImpl,
+  PyroscopeApiExporter,
+} from './continuous'
+import { Profile } from 'pprof-format'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ShamefulAny = any
@@ -19,73 +23,57 @@ const log = debug('pyroscope::cpu')
 
 const cpuProfiler = new CpuProfiler()
 
-let cpuProfilingTimer: NodeJS.Timer | undefined = undefined
+export class CPUProfilerImpl implements ProfilerImpl {
+  private profiler: any
+  private started = false
 
-export function isCpuProfilingRunning(): boolean {
-  return cpuProfilingTimer !== undefined
+  constructor(profiler: any) {
+    this.profiler = profiler
+  }
+
+  profile(): Profile | undefined {
+    log('profile')
+    return this.profiler.profile()
+  }
+
+  start(): void {
+    if (this.started) {
+      log('already started')
+      return
+    }
+    log('start')
+    this.started = true
+    const freq = 1000.0 / Number(SAMPLING_INTERVAL_MS)
+    this.profiler.start(freq)
+  }
+
+  stop(): void {
+    if (!this.started) {
+      log('not started')
+      return
+    }
+    log('stop')
+    this.started = false
+    // todo(korniltsev) it looks like this stop does not wait for the profiler interrupting thread to join
+    this.profiler.stop()
+  }
 }
+
+const continuousCpuProfiler = new ContinuousProfiler({
+  profiler: new CPUProfilerImpl(cpuProfiler),
+  exporter: new PyroscopeApiExporter(),
+  name: 'cpu',
+  duration: SAMPLING_DURATION_MS,
+})
 
 export function startCpuProfiling() {
   checkConfigured()
 
-  log('Pyroscope has started CPU Profiling')
-  const freq = 1000.0 / Number(SAMPLING_INTERVAL_MS)
-  cpuProfiler.start(freq)
-
-  if (cpuProfilingTimer) {
-    log('Pyroscope has already started cpu profiling')
-    return
-  }
-
-  cpuProfilingTimer = setInterval(() => {
-    log('Continously collecting cpu profile')
-    const profile = cpuProfiler.profile()
-    if (profile) {
-      log('Continuous cpu profile collected. Going to upload')
-      emitter.emit('profile', profile)
-      uploadProfile(profile).then(() => log('CPU profile uploaded...'))
-    } else {
-      log('Cpu profile collection failed')
-    }
-  }, Number(SAMPLING_DURATION_MS))
-}
-
-export function stopCpuCollecting() {
-  cpuProfiler.stop()
+  continuousCpuProfiler.start()
 }
 
 export function stopCpuProfiling(): Promise<void> {
-  log(`stopping cpuProfiling`)
-  return new Promise<void>(async (resolve, reject) => {
-    if (cpuProfilingTimer !== undefined) {
-      clearInterval(cpuProfilingTimer)
-      try {
-        // stop profiler asynchronously after processing everything the profiler posted
-        // https://github.com/DataDog/pprof-nodejs/blob/v2.0.0/bindings/profilers/cpu.cc#L96
-        const profile = await new Promise<Profile>((resolve, reject) => {
-          setImmediate(() => {
-            const profile = cpuProfiler.profile()
-            if (profile) {
-              emitter.emit('profile', profile)
-              resolve(profile)
-            } else {
-              reject()
-            }
-          })
-        })
-        log(`uploading cpu profile`)
-        await uploadProfile(profile)
-        log(`uploaded cpu profile`)
-      } catch (e) {
-        log(`failed to capture last profile during stop: ${e}`)
-      }
-      cpuProfilingTimer = undefined
-      stopCpuCollecting()
-      resolve()
-    } else {
-      reject()
-    }
-  })
+  return continuousCpuProfiler.stop()
 }
 
 // This is in conflict with pprof typings. Not sure why
@@ -99,6 +87,18 @@ export function getCpuLabels(): unknown {
 
 export function tag(key: string, value: number | string | undefined) {
   cpuProfiler.labels = { ...cpuProfiler.labels, [key]: value }
+}
+
+export function tagWrapper(
+  tags: Record<string, string | number | undefined>,
+  fn: () => void,
+  ...args: unknown[]
+) {
+  cpuProfiler.labels = { ...cpuProfiler.labels, ...tags }
+  ;(fn as ShamefulAny)(...args)
+  Object.keys(tags).forEach((key) => {
+    cpuProfiler.labels = { ...cpuProfiler.labels, [key]: undefined }
+  })
 }
 
 export function collectCpu(seconds: number): Promise<Buffer> {
@@ -138,17 +138,5 @@ export function collectCpu(seconds: number): Promise<Buffer> {
       cpuProfiler.stop()
       reject(new Buffer('', 'utf-8'))
     }, seconds * 1000)
-  })
-}
-
-export function tagWrapper(
-  tags: Record<string, string | number | undefined>,
-  fn: () => void,
-  ...args: unknown[]
-) {
-  cpuProfiler.labels = { ...cpuProfiler.labels, ...tags }
-  ;(fn as ShamefulAny)(...args)
-  Object.keys(tags).forEach((key) => {
-    cpuProfiler.labels = { ...cpuProfiler.labels, [key]: undefined }
   })
 }
