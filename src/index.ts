@@ -2,7 +2,7 @@ import * as pprof from 'pprof'
 
 import type perftools from 'pprof/proto/profile'
 import debug from 'debug'
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosBasicCredentials, AxiosError } from 'axios'
 import FormData from 'form-data'
 import 'regenerator-runtime/runtime'
 
@@ -19,6 +19,9 @@ export interface PyroscopeConfig {
   sm?: any
   tags: TagList
   authToken?: string
+  basicAuthUser?: string
+  basicAuthPassword?: string
+  scopeOrgID?: string
   configured: boolean
 }
 
@@ -36,6 +39,9 @@ const config: PyroscopeConfig = {
   sm: undefined,
   tags: {},
   authToken: process.env['PYROSCOPE_AUTH_TOKEN'],
+  basicAuthUser: process.env['PYROSCOPE_BASIC_AUTH_USER'],
+  basicAuthPassword: process.env['PYROSCOPE_BASIC_AUTH_PASSWORD'],
+  scopeOrgID: process.env['PYROSCOPE_SCOPE_ORGID'],
   configured: false,
 }
 
@@ -50,6 +56,9 @@ export function init(c: Partial<PyroscopeConfig> = {}): void {
   config.appName = c.appName || config.appName
   config.sourceMapPath = c.sourceMapPath || config.sourceMapPath
   config.authToken = c.authToken || config.authToken
+  config.basicAuthUser = c.basicAuthUser || config.basicAuthUser
+  config.basicAuthPassword = c.basicAuthPassword || config.basicAuthPassword
+  config.scopeOrgID = c.scopeOrgID || config.scopeOrgID
   config.tags = c.tags || config.tags
 
   if (!!config.sourceMapPath) {
@@ -170,20 +179,34 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
         )
       : ''
 
-    const url = `${config.serverAddress}/ingest?name=${encodeURIComponent(
+    let serverAddress = config.serverAddress
+    if (serverAddress?.endsWith('/')) {
+      serverAddress = serverAddress.slice(0, -1)
+    }
+    const url = `${serverAddress}/ingest?name=${encodeURIComponent(
       config.appName
     )}{${tagList}}&sampleRate=${1000/Number(SAMPLING_INTERVAL_MS)}&spyName=nodespy` // 1000, because our sample rate is in milliseconds
     log(`Sending data to ${url}`)
     // send data to the server
+    const headers = formData.getHeaders()
+    if (config.authToken) {
+      headers['Authorization'] = `Bearer ${config.authToken}`
+    }
+    if (config.scopeOrgID) {
+      headers['X-Scope-OrgID'] = config.scopeOrgID
+    }
+    const auth: AxiosBasicCredentials | undefined =
+      config.basicAuthUser && config.basicAuthPassword
+        ? {
+            username: config.basicAuthUser,
+            password: config.basicAuthPassword,
+          }
+        : undefined
     return axios(url, {
       method: 'POST',
-      headers: config.authToken
-        ? {
-            ...formData.getHeaders(),
-            Authorization: `Bearer ${config.authToken}`,
-          }
-        : formData.getHeaders(),
+      headers: headers,
       data: formData as any,
+      auth: auth,
     }).catch(handleError)
   }
 }
