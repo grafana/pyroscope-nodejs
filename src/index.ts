@@ -21,7 +21,7 @@ export interface PyroscopeConfig {
   authToken?: string
   basicAuthUser?: string
   basicAuthPassword?: string
-  scopeOrgID?: string
+  tenantID?: string
   configured: boolean
 }
 
@@ -41,7 +41,7 @@ const config: PyroscopeConfig = {
   authToken: process.env['PYROSCOPE_AUTH_TOKEN'],
   basicAuthUser: process.env['PYROSCOPE_BASIC_AUTH_USER'],
   basicAuthPassword: process.env['PYROSCOPE_BASIC_AUTH_PASSWORD'],
-  scopeOrgID: process.env['PYROSCOPE_SCOPE_ORGID'],
+  tenantID: process.env['PYROSCOPE_TENANT_ID'],
   configured: false,
 }
 
@@ -58,7 +58,7 @@ export function init(c: Partial<PyroscopeConfig> = {}): void {
   config.authToken = c.authToken || config.authToken
   config.basicAuthUser = c.basicAuthUser || config.basicAuthUser
   config.basicAuthPassword = c.basicAuthPassword || config.basicAuthPassword
-  config.scopeOrgID = c.scopeOrgID || config.scopeOrgID
+  config.tenantID = c.tenantID || config.tenantID
   config.tags = c.tags || config.tags
 
   if (!!config.sourceMapPath) {
@@ -192,8 +192,8 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
     if (config.authToken) {
       headers['Authorization'] = `Bearer ${config.authToken}`
     }
-    if (config.scopeOrgID) {
-      headers['X-Scope-OrgID'] = config.scopeOrgID
+    if (config.tenantID) {
+      headers['X-Scope-OrgID'] = config.tenantID
     }
     const auth: AxiosBasicCredentials | undefined =
       config.basicAuthUser && config.basicAuthPassword
