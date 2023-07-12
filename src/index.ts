@@ -4,7 +4,7 @@ import type perftools from 'pprof/proto/profile'
 import debug from 'debug'
 import axios, { AxiosBasicCredentials, AxiosError } from 'axios'
 import FormData from 'form-data'
-import 'regenerator-runtime/runtime'
+import 'regenerator-runtime/runtime.js'
 
 type TagList = Record<string, any>
 
