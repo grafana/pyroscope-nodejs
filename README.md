@@ -39,18 +39,18 @@ Module is available for both CommonJS and ESM variants, so you can use it the wa
 ### Javascript
 
 ```javascript
-const Pyroscope = require('pyroscope');
+const Pyroscope = require('@pyroscope/nodejs');
 
 Pyroscope.init({serverAddress: 'http://pyroscope:4040', appName: 'nodejs'});
-Pyroscope.start()
+Pyroscope.start();
 ```
 
 ### Typescript:
 ```typescript
-import Pyroscope from 'pyroscope';
+import Pyroscope from '@pyroscope/nodejs';
 
 Pyroscope.init({serverAddress: 'http://pyroscope:4040', appName: 'nodejs'});
-Pyroscope.start()
+Pyroscope.start();
 ```
 
 Both params `appName` and `serverAddress` are mandatory. Once you `init` you may `startCpuProfiling()`, `startWallProfiling()` and/or `startHeapProfiling()`. `start()` starts both memory and CPU profiling
