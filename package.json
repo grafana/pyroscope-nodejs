@@ -41,7 +41,7 @@
     "url": "https://github.com/pyroscope-io/pyroscope-nodejs/issues"
   },
   "dependencies": {
-    "@datadog/pprof": "^2.0.0",
+    "@datadog/pprof": "^4.0.1",
     "axios": "^0.26.1",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
@@ -65,6 +65,7 @@
     "husky": "^7.0.2",
     "jest": "^27.2.0",
     "pinst": "^2.1.6",
+    "pprof-format": "^2.0.7",
     "prettier": "^2.4.0",
     "supertest": "^6.2.3",
     "ts-jest": "^27.0.5",
