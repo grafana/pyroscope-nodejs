@@ -30,15 +30,15 @@
     "dist"
   ],
   "keywords": [],
-  "author": "Pyroscope Team <hello@pyroscope.io>",
+  "author": "Grafana Labs",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/pyroscope-io/pyroscope-nodejs",
+  "homepage": "https://github.com/grafana/pyroscope-nodejs",
   "repository": {
     "type": "git",
-    "url": "git@github.com:pyroscope-io/pyroscope-nodejs.git"
+    "url": "git@github.com:grafana/pyroscope-nodejs.git"
   },
   "bugs": {
-    "url": "https://github.com/pyroscope-io/pyroscope-nodejs/issues"
+    "url": "https://github.com/grafana/pyroscope-nodejs/issues"
   },
   "dependencies": {
     "axios": "^0.26.1",
