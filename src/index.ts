@@ -212,7 +212,7 @@ async function uploadProfile(profile: perftools.perftools.profiles.IProfile) {
 }
 
 // Could be false or a function to stop heap profiling
-let heapProfilingTimer: string | number | NodeJS.Timeout | undefined = undefined
+let heapProfilingTimer: NodeJS.Timeout | undefined = undefined
 let isWallProfilingRunning = false
 
 export async function collectCpu(seconds?: number): Promise<Buffer> {
