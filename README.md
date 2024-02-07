@@ -1,15 +1,8 @@
 # Pyroscope nodejs package
 
-## Running Pyroscope server
-In order to send data from your node application to Pyroscope, you'll first need to run the Pyroscope server. If on a mac you can simply do this with
-```
-# install pyroscope
-brew install pyroscope-io/brew/pyroscope
+Enhance your Node.js application’s performance with our Node.js Profiler. Seamlessly integrated with Pyroscope, it provides real-time insights into your application’s operation, helping you identify and resolve performance bottlenecks. This integration is key for Node.js developers aiming to boost efficiency, reduce latency, and maintain optimal application performance.
 
-# start pyroscope server:
-pyroscope server
-```
-or if not then see [the documentation](https://github.com/pyroscope-io/pyroscope#add-pyroscope-server-locally-in-2-steps) for more info on how to start the server.
+For more detailed information, please refer to our [documentation page](https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs) on using the Node.js language SDK 
 
 ## Configuration
 
