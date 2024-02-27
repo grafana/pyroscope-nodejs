@@ -38,7 +38,10 @@ export default function expressMiddleware(): (
     if (req.method === 'GET' && req.path === '/debug/pprof/profile') {
       return handlerCpu(req, res).then(() => next())
     }
-    if (req.method === 'GET' && req.path === '/debug/pprof/heap') {
+    if (
+      req.method === 'GET' &&
+      ['/debug/pprof/heap', '/debug/pprof/allocs'].includes(req.path)
+    ) {
       return handlerHeap(req, res).then(() => next())
     }
     next()
