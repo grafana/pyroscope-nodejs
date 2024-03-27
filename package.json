@@ -30,27 +30,28 @@
     "dist"
   ],
   "keywords": [],
-  "author": "Pyroscope Team <hello@pyroscope.io>",
+  "author": "Grafana Labs",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/pyroscope-io/pyroscope-nodejs",
+  "homepage": "https://github.com/grafana/pyroscope-nodejs",
   "repository": {
     "type": "git",
-    "url": "git@github.com:pyroscope-io/pyroscope-nodejs.git"
+    "url": "git@github.com:grafana/pyroscope-nodejs.git"
   },
   "bugs": {
-    "url": "https://github.com/pyroscope-io/pyroscope-nodejs/issues"
+    "url": "https://github.com/grafana/pyroscope-nodejs/issues"
   },
   "dependencies": {
     "@datadog/pprof": "^4.0.1",
-    "axios": "^0.26.1",
+    "axios": "^0.28.0",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
+    "pprof": "^4.0.0",
     "regenerator-runtime": "^0.13.11",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "^13.1.0",
-    "@commitlint/config-conventional": "^13.1.0",
+    "@commitlint/cli": "^18",
+    "@commitlint/config-conventional": "^18",
     "@types/debug": "^4.1.7",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.0.1",
@@ -75,6 +76,6 @@
     "webpack-cli": "^4.8.0"
   },
   "engines": {
-    "node": "^12.20.0 || >=14.13.1"
+    "node": ">=v18"
   }
 }
