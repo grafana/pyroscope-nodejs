@@ -22,7 +22,7 @@ Pyroscope supports two main operation modes:
 
 Push mode means the package itself uploads profile data to a pyroscope server, when pull mode means you provide pyroscope server with an endponts to scrape profile data
 
-NodeJS Pyroscope module supports collecting wall-time and heap. More details you may find [here](https://cloud.google.com/profiler/docs/concepts-profiling)
+NodeJS Pyroscope module supports collecting cpu, wall-time and heap. More details you may find [here](https://cloud.google.com/profiler/docs/concepts-profiling)
 
 ## Push mode
 
@@ -46,7 +46,22 @@ Pyroscope.init({serverAddress: 'http://pyroscope:4040', appName: 'nodejs'});
 Pyroscope.start();
 ```
 
-Both params `appName` and `serverAddress` are mandatory. Once you `init` you may `startCpuProfiling()` and/or `startHeapProfiling()`. `start()` starts both memory and CPU profiling
+Both params `appName` and `serverAddress` are mandatory. Once you `init` you may `startCpuProfiling()`, `startWallProfiling()` and/or `startHeapProfiling()`. `start()` starts both memory and CPU profiling
+
+### Dynamic tags
+You may assign certain labels to certain parts of your code by using wrapper function `tagWrapper(tags: Record<string, string | number | undefined>, fn: Function)`. Please note that this only 
+available for cpu profiling.
+
+```typescript
+...
+
+app.get('/scooter', function scooterSearchHandler(req, res) {
+  Pyroscope.tagWrapper({'vehicle':'scooter'}, () =>
+    genericSearchHandler(0.1)(req, res)
+  );
+});
+
+```
 
 ## Pull Mode
 
@@ -111,7 +126,7 @@ then you also need to configure your pyroscope server by providing config file
 log-level: debug
 scrape-configs:
   - job-name: testing            # any name 
-    enabled-profiles: [cpu, mem] # cpu and mem for wall and heap
+    enabled-profiles: [cpu, mem] # cpu and mem for cpu and heap
     static-configs:
       - application: rideshare
         spy-name: nodespy        # make pyroscope know it's node profiles
@@ -137,10 +152,10 @@ init(c : PyroscopeConfig)
 Configuration options
 ```typescript
 interface PyroscopeConfig {
-    serverAddress?: string;          // Server address for push mode
+    serverAddress?: string;         // Server address for push mode
     sourceMapPath?: string[];       // Sourcemaps directories (optional)
-    appName?: string;                // Application name
-    tags?: Record<string, any>;     // Tags 
+    appName?: string;               // Application name
+    tags?: Record<string, any>;     // Static tags 
     authToken?: string              // Auth token for cloud version
 }
 ```
@@ -156,6 +171,17 @@ Pyroscope.stopCpuProfiling()
 // Or do it manually
 Pyroscope.collectCpu(seconds?:number);
 ```
+
+### Wall Profiling
+```javascript
+// Start collecting for 10s and push to server
+Pyroscope.startWallProfiling()
+Pyroscope.stopWallProfiling()
+
+// Or do it manually
+Pyroscope.collectWall(seconds?:number);
+```
+
 ### Heap Profiling
 ```javascript
 // Start heap profiling and upload to server
