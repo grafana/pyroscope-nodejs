@@ -23,6 +23,10 @@ export function processConfig(
       samplingIntervalMicros:
         config.wall?.samplingIntervalMicros ?? env.wallSamplingIntervalMicros,
     },
+    sourceMapper: config.sourceMapper,
+    basicAuthUser: config.basicAuthUser,
+    basicAuthPassword: config.basicAuthPassword,
+    tenantID: config.tenantID,
   }
 
   return processedConfig

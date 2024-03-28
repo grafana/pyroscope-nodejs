@@ -1,4 +1,4 @@
-import { time } from '@datadog/pprof'
+import { time, SourceMapper } from '@datadog/pprof'
 import { Profile } from 'pprof-format'
 
 import { ProfileExport } from '../profile-exporter'
@@ -12,6 +12,7 @@ const log = debug('pyroscope::profiler::wall')
 export interface WallProfilerStartArgs {
   samplingDurationMs: number
   samplingIntervalMicros: number
+  sourceMapper: SourceMapper | undefined
 }
 
 export class WallProfiler implements Profiler<WallProfilerStartArgs> {
@@ -44,6 +45,7 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
       this.lastProfiledAt = new Date()
       this.lastSamplingIntervalMicros = args.samplingDurationMs
       time.start({
+        sourceMapper: args.sourceMapper,
         durationMillis: args.samplingDurationMs,
         intervalMicros: args.samplingIntervalMicros,
         withContexts: true,

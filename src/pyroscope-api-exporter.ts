@@ -1,13 +1,14 @@
 import { URL } from 'node:url'
 
 import { encode } from '@datadog/pprof'
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosBasicCredentials, AxiosError } from 'axios'
 import FormData, { Headers } from 'form-data'
 import { Profile } from 'pprof-format'
 import { ProfileExport, ProfileExporter } from './profile-exporter'
 import { dateToUnixTimestamp } from './utils/date-to-unix-timestamp'
 import { processProfile } from './utils/process-profile'
 import debug from 'debug'
+import { PyroscopeConfig } from './pyroscope-config'
 
 const log = debug('pyroscope')
 
@@ -15,15 +16,18 @@ export class PyroscopeApiExporter implements ProfileExporter {
   private readonly applicationName: string
   private readonly authToken: string | undefined
   private readonly serverAddress: string
+  private readonly config: PyroscopeConfig
 
   constructor(
     applicationName: string,
     authToken: string | undefined,
-    serverAddress: string
+    serverAddress: string,
+    config: PyroscopeConfig
   ) {
     this.applicationName = applicationName
     this.authToken = authToken
     this.serverAddress = serverAddress
+    this.config = config
   }
 
   public async export(profileExport: ProfileExport): Promise<void> {
@@ -59,6 +63,10 @@ export class PyroscopeApiExporter implements ProfileExporter {
 
     if (this.authToken !== undefined) {
       headers['authorization'] = `Bearer ${this.authToken}`
+    }
+
+    if (this.config.tenantID) {
+      headers['X-Scope-OrgID'] = this.config.tenantID
     }
 
     return headers
@@ -104,11 +112,20 @@ export class PyroscopeApiExporter implements ProfileExporter {
       profileExport.profile
     )
 
+    const auth: AxiosBasicCredentials | undefined =
+      this.config.basicAuthUser && this.config.basicAuthPassword
+        ? {
+            username: this.config.basicAuthUser,
+            password: this.config.basicAuthPassword,
+          }
+        : undefined
+
     try {
       await axios(this.buildEndpointUrl(profileExport).toString(), {
         data: formData,
         headers: this.buildRequestHeaders(formData),
         method: 'POST',
+        auth: auth,
       })
     } catch (error: unknown) {
       this.handleAxiosError(error as AxiosError)

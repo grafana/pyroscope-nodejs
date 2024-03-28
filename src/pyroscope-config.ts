@@ -1,3 +1,5 @@
+import { SourceMapper } from '@datadog/pprof'
+
 export interface PyroscopeConfig {
   appName?: string | undefined
   authToken?: string | undefined
@@ -6,6 +8,10 @@ export interface PyroscopeConfig {
   serverAddress?: string | undefined
   tags?: TagList | undefined
   wall?: PyroscopeWallConfig | undefined
+  sourceMapper?: SourceMapper | undefined
+  basicAuthUser?: string | undefined
+  basicAuthPassword?: string | undefined
+  tenantID?: string | undefined
 }
 
 export interface PyroscopeWallConfig {

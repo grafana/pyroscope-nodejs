@@ -11,6 +11,7 @@ import { checkPyroscopeConfig } from './utils/check-pyroscope-config'
 import { getProfiler, setProfiler } from './utils/pyroscope-profiler'
 import { processConfig } from './utils/process-config'
 import { getEnv } from './utils/get-env'
+import { SourceMapper } from '@datadog/pprof'
 
 export function init(config: PyroscopeConfig = {}): void {
   checkPyroscopeConfig(config)
@@ -32,7 +33,17 @@ function startWallProfiling(): void {
   getProfiler().wallProfiler.start()
 }
 
+// here for backwards compatibility
+function startCpuProfiling(): void {
+  getProfiler().wallProfiler.start()
+}
+
 async function stopWallProfiling(): Promise<void> {
+  await getProfiler().wallProfiler.stop()
+}
+
+// here for backwards compatibility
+async function stopCpuProfiling(): Promise<void> {
   await getProfiler().wallProfiler.stop()
 }
 
@@ -58,6 +69,7 @@ export {
   PyroscopeConfig,
   PyroscopeHeapConfig,
   PyroscopeWallConfig,
+  SourceMapper,
 }
 
 export default {
@@ -67,9 +79,9 @@ export default {
   start,
   startHeapProfiling,
   startWallProfiling,
-  startCpuProfiling: startWallProfiling,
+  startCpuProfiling,
   stop,
   stopHeapProfiling,
   stopWallProfiling,
-  stopCpuProfiling: stopWallProfiling,
+  stopCpuProfiling,
 }

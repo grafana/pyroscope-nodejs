@@ -59,7 +59,8 @@ export class PyroscopeProfiler {
     return new PyroscopeApiExporter(
       this.buildApplicationName(config),
       config.authToken,
-      config.serverAddress ?? DEFAULT_SERVER_ADDRESS
+      config.serverAddress ?? DEFAULT_SERVER_ADDRESS,
+      config
     )
   }
 
@@ -92,6 +93,7 @@ export class PyroscopeProfiler {
       flushIntervalMs: flushIntervalMs,
       profiler: new WallProfiler(),
       startArgs: {
+        sourceMapper: config.sourceMapper,
         samplingDurationMs:
           config.wall?.samplingDurationMs ?? DEFAULT_SAMPLING_DURATION_MS,
         samplingIntervalMicros:
