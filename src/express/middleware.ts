@@ -68,8 +68,8 @@ function profileExpressHandler(
 ): RequestHandler {
   return async (
     req: Request,
-    res: Response,
-    next: NextFunction
+    res: Response
+    // next: NextFunction
   ): Promise<void> => {
     log(`Fetching ${profileKind} Profile`)
     try {
@@ -80,8 +80,6 @@ function profileExpressHandler(
       res.sendStatus(500)
     }
     res.end()
-
-    next()
   }
 }
 
@@ -91,7 +89,7 @@ const heapHandler: RequestHandler = profileExpressHandler('Heap', () =>
 
 const wallHandler: RequestHandler = profileExpressHandler(
   'Wall',
-  (req: Request) => collectWall(Number(req.query.seconds))
+  (req: Request) => collectWall(1000 * Number(req.query.seconds))
 )
 
 export default function expressMiddleware(): (

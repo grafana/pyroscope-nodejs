@@ -18,14 +18,14 @@ describe('typescript env', () => {
     const profile = Profile.decode(fs.readFileSync('./test/profile1.data'))
     const newProfile = processProfile(profile)
 
-    expect(newProfile.stringTable.strings.length).toBe(20)
+    expect(newProfile.stringTable.strings.length).toBe(19)
 
     // Check we're receiving right data
     expect(newProfile.stringTable.strings).toContain(
-      'node:internal/main/run_main_module:(anonymous):1'
+      'node:internal/modules/run_main'
     )
     expect(newProfile.stringTable.strings).toContain(
-      '/home/korniltsev/WebstormProjects/pyro-playground/index.js:fib:36'
+      '/home/korniltsev/pyroscope/pyroscope-nodejs/dist/cjs/cpu.js'
     )
 
     // // Check profiles replacement works
