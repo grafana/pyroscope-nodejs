@@ -152,11 +152,12 @@ init(c : PyroscopeConfig)
 Configuration options
 ```typescript
 interface PyroscopeConfig {
-    serverAddress?: string;         // Server address for push mode
-    sourceMapPath?: string[];       // Sourcemaps directories (optional)
-    appName?: string;               // Application name
-    tags?: Record<string, any>;     // Static tags 
-    authToken?: string              // Auth token for cloud version
+    serverAddress?: string;                // Server address for push mode
+    appName?: string;                      // Application name
+    tags?: Record<string, any>;            // Static tags 
+    sourceMapper?: SourceMapper;           // Source maps
+    basicAuthUser?: string;                // Grafana Cloud Authentification
+    basicAuthPassword?: string;            // Grafana Cloud Authentification
 }
 ```
 
