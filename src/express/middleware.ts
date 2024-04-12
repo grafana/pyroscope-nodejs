@@ -79,7 +79,6 @@ function profileExpressHandler(
       log(`Error collecting ${profileKind}`, error)
       res.sendStatus(500)
     }
-    res.end()
   }
 }
 
@@ -106,5 +105,6 @@ export default function expressMiddleware(): (
         return wallHandler(req, res, next)
       }
     }
+    next()
   }
 }
