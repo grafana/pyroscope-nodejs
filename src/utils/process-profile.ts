@@ -19,7 +19,7 @@ function adjustCwdPaths(profile: Profile): void {
     for (const line of location.line) {
       const functionId = Number(line.functionId)
       const contextFunction: PprofFunction | undefined =
-        profile.function[functionId]
+        profile.function[functionId - 1]
 
       if (contextFunction !== undefined) {
         const functionName: string | undefined =
