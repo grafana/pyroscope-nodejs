@@ -18,7 +18,7 @@ describe('typescript env', () => {
     const profile = Profile.decode(fs.readFileSync('./test/profile1.data'))
     const newProfile = processProfile(profile)
 
-    expect(newProfile.stringTable.strings.length).toBe(19)
+    expect(newProfile.stringTable.strings.length).toBe(20)
 
     // Check we're receiving right data
     expect(newProfile.stringTable.strings).toContain(
