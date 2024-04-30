@@ -64,15 +64,11 @@ export async function stop(): Promise<void> {
   await Promise.all([stopWallProfiling(), stopHeapProfiling()])
 }
 
-export {
-  expressMiddleware,
-  PyroscopeConfig,
-  PyroscopeHeapConfig,
-  PyroscopeWallConfig,
-  SourceMapper,
-}
+export { PyroscopeConfig, PyroscopeHeapConfig, PyroscopeWallConfig }
 
 export default {
+  SourceMapper,
+  expressMiddleware,
   getWallLabels,
   init,
   setWallLabels,
