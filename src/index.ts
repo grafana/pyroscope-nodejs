@@ -11,7 +11,7 @@ import { checkPyroscopeConfig } from './utils/check-pyroscope-config'
 import { getProfiler, setProfiler } from './utils/pyroscope-profiler'
 import { processConfig } from './utils/process-config'
 import { getEnv } from './utils/get-env'
-import { SourceMapper } from '@datadog/pprof'
+import { SourceMapper, setLogger } from '@datadog/pprof'
 
 export function init(config: PyroscopeConfig = {}): void {
   checkPyroscopeConfig(config)
@@ -80,4 +80,5 @@ export default {
   stopHeapProfiling,
   stopWallProfiling,
   stopCpuProfiling,
+  setLogger,
 }
