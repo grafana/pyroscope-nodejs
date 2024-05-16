@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import { Profile } from 'pprof-format'
-import Pyroscope, { expressMiddleware } from '../src'
+import Pyroscope from '../src'
 import { processProfile } from '../src/utils/process-profile'
 
 describe('typescript env', () => {
@@ -11,7 +11,7 @@ describe('typescript env', () => {
     expect(Pyroscope.startHeapProfiling).toBeInstanceOf(Function)
     expect(Pyroscope.stopHeapProfiling).toBeInstanceOf(Function)
 
-    expect(expressMiddleware).toBeInstanceOf(Function)
+    expect(Pyroscope.expressMiddleware).toBeInstanceOf(Function)
   })
 
   it('can process profile', () => {

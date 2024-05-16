@@ -2,7 +2,7 @@
 
 Enhance your Node.js application’s performance with our Node.js Profiler. Seamlessly integrated with Pyroscope, it provides real-time insights into your application’s operation, helping you identify and resolve performance bottlenecks. This integration is key for Node.js developers aiming to boost efficiency, reduce latency, and maintain optimal application performance.
 
-For more detailed information, please refer to our [documentation page](https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs) on using the Node.js language SDK 
+For more detailed information, please refer to our [documentation page](https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs) on using the Node.js language SDK
 
 ## Configuration
 
@@ -16,7 +16,7 @@ For more detailed information, please refer to our [documentation page](https://
 
 ## Modes
 
-Pyroscope supports two main operation modes: 
+Pyroscope supports two main operation modes:
  * Push mode
  * Pull mode
 
@@ -49,7 +49,9 @@ Pyroscope.start();
 Both params `appName` and `serverAddress` are mandatory. Once you `init` you may `startCpuProfiling()`, `startWallProfiling()` and/or `startHeapProfiling()`. `start()` starts both memory and CPU profiling
 
 ### Dynamic tags
-You may assign certain labels to certain parts of your code by using wrapper function `tagWrapper(tags: Record<string, string | number | undefined>, fn: Function)`. Please note that this only available for cpu profiling.
+
+You may assign certain labels to certain parts of your code by using wrapper function `tagWrapper(tags: Record<string, string | number | undefined>, fn: Function)`. Please note that this is only available for cpu profiling.
+
 
 ```typescript
 ...
@@ -108,30 +110,30 @@ app.get('/debug/pprof/profile', async function handler(req, res) {
 });
 ```
 
-or you may use express middleware. 
+or you may use express middleware.
 
 ```javascript
-import Pyroscope, { expressMiddleware } from '@pyroscope/nodejs'
+import Pyroscope from '@pyroscope/nodejs'
 
 Pyroscope.init()
 const app = express()
-app.use(expressMiddleware());
+app.use(Pyroscope.expressMiddleware());
 ```
 
-then you also need to configure your pyroscope server by providing config file 
+then you also need to configure your pyroscope server by providing config file
 
 ```yaml
 ---
 log-level: debug
 scrape-configs:
-  - job-name: testing            # any name 
+  - job-name: testing            # any name
     enabled-profiles: [cpu, mem] # cpu and mem for cpu and heap
     static-configs:
       - application: rideshare
         spy-name: nodespy        # make pyroscope know it's node profiles
         targets:
           - localhost:3000       # address of your scrape target
-        labels:     
+        labels:
           env: dev               # labels
 
 ```
@@ -153,7 +155,7 @@ Configuration options
 interface PyroscopeConfig {
     serverAddress?: string;                // Server address for push mode
     appName?: string;                      // Application name
-    tags?: Record<string, any>;            // Static tags 
+    tags?: Record<string, any>;            // Static tags
     sourceMapper?: SourceMapper;           // Source maps
     basicAuthUser?: string;                // Grafana Cloud Authentification
     basicAuthPassword?: string;            // Grafana Cloud Authentification
