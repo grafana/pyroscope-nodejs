@@ -20,13 +20,13 @@ Pyroscope supports two main operation modes:
  * Push mode
  * Pull mode
 
-Push mode means the package itself uploads profile data to a pyroscope server, when pull mode means you provide pyroscope server with an endponts to scrape profile data
+Push mode means the package itself uploads profile data to a pyroscope server, while pull mode means you provide pyroscope server with an endpoint(s) to scrape profile data
 
-NodeJS Pyroscope module supports collecting cpu, wall-time and heap. More details you may find [here](https://cloud.google.com/profiler/docs/concepts-profiling)
+NodeJS Pyroscope module supports collecting cpu, wall-time, and heap. More details you may find [here](https://cloud.google.com/profiler/docs/concepts-profiling)
 
 ## Push mode
 
-Usage is differs for first you need to import and init pyroscope module.
+Usage differs, first you need to import and init pyroscope module.
 Module is available for both CommonJS and ESM variants, so you can use it the way it fits your project.
 
 ### Javascript
@@ -49,8 +49,9 @@ Pyroscope.start();
 Both params `appName` and `serverAddress` are mandatory. Once you `init` you may `startCpuProfiling()`, `startWallProfiling()` and/or `startHeapProfiling()`. `start()` starts both memory and CPU profiling
 
 ### Dynamic tags
-You may assign certain labels to certain parts of your code by using wrapper function `tagWrapper(tags: Record<string, string | number | undefined>, fn: Function)`. Please note that this only
-available for cpu profiling.
+
+You may assign certain labels to certain parts of your code by using wrapper function `tagWrapper(tags: Record<string, string | number | undefined>, fn: Function)`. Please note that this is only available for cpu profiling.
+
 
 ```typescript
 ...
@@ -65,7 +66,7 @@ app.get('/scooter', function scooterSearchHandler(req, res) {
 
 ## Pull Mode
 
-In order to enable pull mode you need to implement follwing endpoints:
+In order to enable pull mode you need to implement the following endpoints:
  * `/debug/pprof/profile` -- for wall-time profiling
  * `/debug/pprof/heap` -- for heap profiling
 
@@ -90,7 +91,7 @@ Parameter `appName` is mandatory in pull mode.
 
 ## Pull Mode
 
-In order to enable pull mode you need to implement follwing endpoints:
+In order to enable pull mode you need to implement the following endpoints:
  * `/debug/pprof/profile` -- for wall-time profiling
  * `/debug/pprof/heap` -- for heap profiling
 
@@ -138,7 +139,7 @@ scrape-configs:
 ```
 ### Debugging
 
-Use `DEBUG` env var set to `pyroscope` to enable debugging messages. Otherwise all messages will be suppressed.
+Use `DEBUG` env var set to `pyroscope` to enable debugging messages. Otherwise, all messages will be suppressed.
 
 `DEBUG=pyroscope node index.js`
 ## API
