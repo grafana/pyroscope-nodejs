@@ -1,6 +1,6 @@
 {
   "name": "@pyroscope/nodejs",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "pyroscope nodejs package",
   "exports": {
     ".": {
@@ -41,7 +41,7 @@
     "url": "https://github.com/grafana/pyroscope-nodejs/issues"
   },
   "dependencies": {
-    "@datadog/pprof": "^4.0.1",
+    "@datadog/pprof": "^5.3.0",
     "axios": "^0.28.0",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
@@ -65,7 +65,7 @@
     "husky": "^7.0.2",
     "jest": "^27.2.0",
     "pinst": "^2.1.6",
-    "pprof-format": "^2.0.7",
+    "pprof-format": "^2.1.0",
     "prettier": "^2.4.0",
     "supertest": "^6.2.3",
     "ts-jest": "^27.0.5",
