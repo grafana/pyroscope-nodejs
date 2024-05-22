@@ -13,6 +13,7 @@ export interface WallProfilerStartArgs {
   samplingDurationMs: number
   samplingIntervalMicros: number
   sourceMapper: SourceMapper | undefined
+  collectCpuTime: boolean
 }
 
 export class WallProfiler implements Profiler<WallProfilerStartArgs> {
@@ -50,6 +51,7 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
         intervalMicros: args.samplingIntervalMicros,
         withContexts: true,
         workaroundV8Bug: true,
+        collectCpuTime: args.collectCpuTime,
       })
       time.setContext({})
     }

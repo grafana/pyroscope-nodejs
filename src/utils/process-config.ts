@@ -22,6 +22,7 @@ export function processConfig(
         config.wall?.samplingDurationMs ?? env.wallSamplingDurationMs,
       samplingIntervalMicros:
         config.wall?.samplingIntervalMicros ?? env.wallSamplingIntervalMicros,
+      collectCpuTime: config.wall?.collectCpuTime ?? false,
     },
     sourceMapper: config.sourceMapper,
     basicAuthUser: config.basicAuthUser,

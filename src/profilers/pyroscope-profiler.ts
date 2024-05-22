@@ -99,6 +99,7 @@ export class PyroscopeProfiler {
         samplingIntervalMicros:
           config.wall?.samplingIntervalMicros ??
           DEFAULT_SAMPLING_INTERVAL_MICROS,
+        collectCpuTime: config.wall?.collectCpuTime ?? false,
       },
     })
   }
