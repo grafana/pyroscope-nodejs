@@ -14,23 +14,29 @@ export interface HeapProfilerStartArgs {
 }
 
 export class HeapProfiler implements Profiler<HeapProfilerStartArgs> {
-  private labels: Record<string, number | string>
   private lastProfiledAt: Date
   private sourceMapper: SourceMapper | undefined
 
   constructor() {
-    this.labels = {}
     this.lastProfiledAt = new Date()
   }
 
   public getLabels(): Record<string, number | string> {
-    return this.labels
+    throw new Error("heap profiler doesn't support labels")
+  }
+
+  public wrapWithLabels(): void {
+    throw new Error("heap profiler doesn't support labels")
   }
 
   public profile(): ProfileExport {
     log('profile')
 
-    const profile: Profile = heap.profile(undefined, this.sourceMapper, undefined)
+    const profile: Profile = heap.profile(
+      undefined,
+      this.sourceMapper,
+      undefined
+    )
 
     const lastProfileStartedAt: Date = this.lastProfiledAt
     this.lastProfiledAt = new Date()
@@ -42,8 +48,8 @@ export class HeapProfiler implements Profiler<HeapProfilerStartArgs> {
     }
   }
 
-  public setLabels(labels: Record<string, number | string>): void {
-    this.labels = labels
+  public setLabels(): void {
+    throw new Error("heap profiler doesn't support labels")
   }
 
   public start(args: HeapProfilerStartArgs): void {

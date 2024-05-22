@@ -29,6 +29,14 @@ function setWallLabels(labels: Record<string, number | string>): void {
   getProfiler().wallProfiler.profiler.setLabels(labels)
 }
 
+export function wrapWithWallLabels(
+  lbls: Record<string, string | number>,
+  fn: () => void,
+  ...args: unknown[]
+): void {
+  getProfiler().wallProfiler.profiler.wrapWithLabels(lbls, fn, ...args)
+}
+
 function startWallProfiling(): void {
   getProfiler().wallProfiler.start()
 }
@@ -69,9 +77,10 @@ export { PyroscopeConfig, PyroscopeHeapConfig, PyroscopeWallConfig }
 export default {
   SourceMapper,
   expressMiddleware,
-  getWallLabels,
   init,
+  getWallLabels,
   setWallLabels,
+  wrapWithWallLabels,
   start,
   startHeapProfiling,
   startWallProfiling,
