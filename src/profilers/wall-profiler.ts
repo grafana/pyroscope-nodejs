@@ -1,4 +1,4 @@
-import { time, SourceMapper } from '@datadog/pprof'
+import { time, SourceMapper, LabelSet, TimeProfileNode } from '@datadog/pprof'
 import { Profile } from 'pprof-format'
 
 import { ProfileExport } from '../profile-exporter'
@@ -16,18 +16,36 @@ export interface WallProfilerStartArgs {
   collectCpuTime: boolean
 }
 
+export interface GenerateTimeLabelsArgs {
+  node: TimeProfileNode
+  context?: TimeProfileNodeContext
+}
+
+export interface TimeProfileNodeContext {
+  context: ProfilerContext
+  timestamp: bigint
+  cpuTime: number
+}
+
+export interface ProfilerContext {
+  labels?: LabelSet
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyWrappedCallback = any
+
 export class WallProfiler implements Profiler<WallProfilerStartArgs> {
-  private labels: Record<string, number | string>
   private lastProfiledAt: Date
+  private lastContext: ProfilerContext
   private lastSamplingIntervalMicros!: number
 
   constructor() {
-    this.labels = {}
+    this.lastContext = {}
     this.lastProfiledAt = new Date()
   }
 
-  public getLabels(): Record<string, number | string> {
-    return this.labels
+  public getLabels(): LabelSet {
+    return this.lastContext.labels ?? {}
   }
 
   public profile(): ProfileExport {
@@ -35,8 +53,26 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
     return this.innerProfile(true)
   }
 
-  public setLabels(labels: Record<string, number | string>): void {
-    this.labels = labels
+  public wrapWithLabels(
+    lbls: LabelSet,
+    fn: () => void,
+    ...args: unknown[]
+  ): void {
+    const oldLabels = this.getLabels()
+    this.setLabels({
+      ...oldLabels,
+      ...lbls,
+    })
+    ;(fn as AnyWrappedCallback)(...args)
+    this.setLabels({
+      ...oldLabels,
+    })
+  }
+
+  public setLabels(labels: LabelSet): void {
+    this.newContext({
+      labels: labels,
+    })
   }
 
   public start(args: WallProfilerStartArgs): void {
@@ -53,7 +89,7 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
         workaroundV8Bug: true,
         collectCpuTime: args.collectCpuTime,
       })
-      time.setContext({})
+      this.newContext({})
     }
   }
 
@@ -62,13 +98,18 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
     return this.innerProfile(false)
   }
 
-  private innerProfile(restart: boolean): ProfileExport {
-    time.setContext({})
+  private newContext(o: ProfilerContext) {
+    this.lastContext = o
+    time.setContext(o)
+  }
 
-    const profile: Profile = time.stop(
-      restart,
-      (): Record<string, number | string> => this.labels
-    )
+  private generateLabels(args: GenerateTimeLabelsArgs): LabelSet {
+    return { ...(args.context?.context.labels ?? {}) }
+  }
+
+  private innerProfile(restart: boolean): ProfileExport {
+    this.newContext({})
+    const profile: Profile = time.stop(restart, this.generateLabels)
 
     const lastProfileStartedAt: Date = this.lastProfiledAt
     this.lastProfiledAt = new Date()
