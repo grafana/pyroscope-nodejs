@@ -1,4 +1,5 @@
-import { SourceMapper } from '@datadog/pprof'
+import { SourceMapper, LabelSet } from '@datadog/pprof'
+export { LabelSet } from '@datadog/pprof'
 
 export interface PyroscopeConfig {
   appName?: string | undefined
@@ -6,7 +7,7 @@ export interface PyroscopeConfig {
   flushIntervalMs?: number | undefined
   heap?: PyroscopeHeapConfig | undefined
   serverAddress?: string | undefined
-  tags?: TagList | undefined
+  tags?: LabelSet | undefined
   wall?: PyroscopeWallConfig | undefined
   sourceMapper?: SourceMapper | undefined
   basicAuthUser?: string | undefined
@@ -25,4 +26,5 @@ export interface PyroscopeHeapConfig {
   stackDepth?: number | undefined
 }
 
-export type TagList = Record<string, number | string>
+// deprecated: use LabelSet instead
+export type TagList = LabelSet
