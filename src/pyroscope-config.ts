@@ -17,6 +17,7 @@ export interface PyroscopeConfig {
 export interface PyroscopeWallConfig {
   samplingDurationMs?: number | undefined
   samplingIntervalMicros?: number | undefined
+  collectCpuTime?: boolean | undefined
 }
 
 export interface PyroscopeHeapConfig {
