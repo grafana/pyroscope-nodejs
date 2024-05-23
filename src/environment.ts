@@ -8,4 +8,5 @@ export interface Environment {
   serverAddress: string | undefined
   wallSamplingDurationMs: number | undefined
   wallSamplingIntervalMicros: number | undefined
+  wallCollectCpuTime: boolean | undefined
 }
