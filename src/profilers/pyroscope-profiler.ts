@@ -75,6 +75,7 @@ export class PyroscopeProfiler {
       flushIntervalMs: flushIntervalMs,
       profiler: new HeapProfiler(),
       startArgs: {
+        sourceMapper: config.sourceMapper,
         samplingIntervalBytes:
           config.heap?.samplingIntervalBytes ?? DEFAULT_SAMPLING_INTERVAL_BYTES,
         stackDepth: config.heap?.stackDepth ?? DEFAULT_STACK_DEPTH,

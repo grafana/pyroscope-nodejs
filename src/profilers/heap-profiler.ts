@@ -1,4 +1,4 @@
-import { heap } from '@datadog/pprof'
+import { heap, SourceMapper } from '@datadog/pprof'
 import { Profile } from 'pprof-format'
 
 import { ProfileExport } from '../profile-exporter'
@@ -10,11 +10,13 @@ const log = debug('pyroscope::profiler::heap')
 export interface HeapProfilerStartArgs {
   samplingIntervalBytes: number
   stackDepth: number
+  sourceMapper: SourceMapper | undefined
 }
 
 export class HeapProfiler implements Profiler<HeapProfilerStartArgs> {
   private labels: Record<string, number | string>
   private lastProfiledAt: Date
+  private sourceMapper: SourceMapper | undefined
 
   constructor() {
     this.labels = {}
@@ -28,7 +30,7 @@ export class HeapProfiler implements Profiler<HeapProfilerStartArgs> {
   public profile(): ProfileExport {
     log('profile')
 
-    const profile: Profile = heap.profile()
+    const profile: Profile = heap.profile(undefined, this.sourceMapper, undefined)
 
     const lastProfileStartedAt: Date = this.lastProfiledAt
     this.lastProfiledAt = new Date()
@@ -48,6 +50,7 @@ export class HeapProfiler implements Profiler<HeapProfilerStartArgs> {
     log('start')
 
     this.lastProfiledAt = new Date()
+    this.sourceMapper = args.sourceMapper
     heap.start(args.samplingIntervalBytes, args.stackDepth)
   }
 
