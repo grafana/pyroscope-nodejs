@@ -21,3 +21,8 @@ Visit [docs](https://pyroscope.io/docs/java/) page for usage and configuration d
 [v8-prof]:https://v8.dev/docs/profile
 [docs]:https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs
 [releases]:https://www.npmjs.com/package/@pyroscope/nodejs
+
+## Maintainers
+
+This package is maintained by [@grafana/pyroscope-nodejs](https://github.com/orgs/grafana/teams/pyroscope-nodejs).
+Mention this team on issues or PRs for feedback.
