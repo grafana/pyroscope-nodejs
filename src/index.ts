@@ -11,7 +11,9 @@ import { checkPyroscopeConfig } from './utils/check-pyroscope-config'
 import { getProfiler, setProfiler } from './utils/pyroscope-profiler'
 import { processConfig } from './utils/process-config'
 import { getEnv } from './utils/get-env'
-import { SourceMapper, setLogger } from '@datadog/pprof'
+import { setLogger as datadogSetLogger } from '@datadog/pprof'
+import { setLogger as ourSetLogger, Logger } from './logger'
+import { SourceMapper } from './sourcemapper'
 
 export function init(config: PyroscopeConfig = {}): void {
   checkPyroscopeConfig(config)
@@ -65,6 +67,11 @@ export async function stop(): Promise<void> {
 }
 
 export { PyroscopeConfig, PyroscopeHeapConfig, PyroscopeWallConfig }
+
+function setLogger(logger: Logger): void {
+  datadogSetLogger(logger)
+  ourSetLogger(logger)
+}
 
 export default {
   SourceMapper,
