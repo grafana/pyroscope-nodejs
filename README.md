@@ -14,7 +14,7 @@ Visit the [npm package][releases] to find the latest version of this package.
 
 ## Usage
 
-Visit [docs](https://pyroscope.io/docs/java/) page for usage and configuration documentation.
+Visit [docs](https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs/) page for usage and configuration documentation.
 
 [Grafana Pyroscope]:https://grafana.com/oss/pyroscope/
 [@datadog/pprof]:https://github.com/DataDog/pprof-nodejs
