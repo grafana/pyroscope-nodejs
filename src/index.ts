@@ -23,12 +23,30 @@ export function init(config: PyroscopeConfig = {}): void {
   setProfiler(new PyroscopeProfiler(processedConfig))
 }
 
+// deprecated: please use getLabels
 function getWallLabels(): Record<string, number | string> {
+  return getLabels()
+}
+
+// deprecated: please use setLabels
+function setWallLabels(labels: Record<string, number | string>): void {
+  return setLabels(labels)
+}
+
+function getLabels(): Record<string, number | string> {
   return getProfiler().wallProfiler.profiler.getLabels()
 }
 
-function setWallLabels(labels: Record<string, number | string>): void {
+function setLabels(labels: Record<string, number | string>): void {
   getProfiler().wallProfiler.profiler.setLabels(labels)
+}
+
+export function wrapWithLabels(
+  lbls: Record<string, string | number>,
+  fn: () => void,
+  ...args: unknown[]
+): void {
+  getProfiler().wallProfiler.profiler.wrapWithLabels(lbls, fn, ...args)
 }
 
 function startWallProfiling(): void {
@@ -76,9 +94,12 @@ function setLogger(logger: Logger): void {
 export default {
   SourceMapper,
   expressMiddleware,
-  getWallLabels,
   init,
+  getWallLabels,
   setWallLabels,
+  getLabels,
+  setLabels,
+  wrapWithLabels,
   start,
   startHeapProfiling,
   startWallProfiling,
