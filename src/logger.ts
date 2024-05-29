@@ -30,33 +30,27 @@ export interface Logger {
 }
 
 export class NullLogger implements Logger {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
   info(...args: Array<{}>): void {
     return
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
   error(...args: Array<{}>): void {
     return
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
   trace(...args: Array<{}>): void {
     return
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
   warn(...args: Array<{}>): void {
     return
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
   fatal(...args: Array<{}>): void {
     return
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
   debug(...args: Array<{}>): void {
     return
   }

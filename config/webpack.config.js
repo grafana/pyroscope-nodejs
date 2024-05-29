@@ -1,4 +1,4 @@
-const path = require('path')
+import 'path'
 
 module.exports = {
   mode: 'production',
