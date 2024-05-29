@@ -31,7 +31,7 @@ jobs:
           node-version: 22.x
       - name: Install modules
         run: yarn
-      - name: Install modules
+      - name: Lint code base
         run: yarn lint
   test:
     runs-on: ${{ matrix.os }}
