@@ -193,7 +193,7 @@ describe('common behaviour of profilers', () => {
       extractProfile(req, res, (p: Profile) => {
         const s = (idx: Numeric): string => p.stringTable.strings[Number(idx)]
 
-        // aggreagte per labels
+        // aggregate per labels
         p.sample.forEach((x) => {
           const key: string = JSON.stringify(
             x.label.reduce(
