@@ -16,11 +16,11 @@ Visit the [npm package][releases] to find the latest version of this package.
 
 Visit [docs](https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs/) page for usage and configuration documentation.
 
-[Grafana Pyroscope]:https://grafana.com/oss/pyroscope/
-[@datadog/pprof]:https://github.com/DataDog/pprof-nodejs
-[v8-prof]:https://v8.dev/docs/profile
-[docs]:https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs
-[releases]:https://www.npmjs.com/package/@pyroscope/nodejs
+[Grafana Pyroscope]: https://grafana.com/oss/pyroscope/
+[@datadog/pprof]: https://github.com/DataDog/pprof-nodejs
+[v8-prof]: https://v8.dev/docs/profile
+[docs]: https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs
+[releases]: https://www.npmjs.com/package/@pyroscope/nodejs
 
 ## Maintainers
 
