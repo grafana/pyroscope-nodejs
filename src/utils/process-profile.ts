@@ -25,7 +25,10 @@ function adjustCwdPaths(profile: Profile): void {
         const functionName: string | undefined =
           profile.stringTable.strings[Number(contextFunction.name)]
 
-        if (!(functionName?.includes(':') ?? false)) {
+        if (
+          !functionName?.includes(':') ||
+          functionName?.startsWith('(anonymous')
+        ) {
           const fileName: string = profile.stringTable.strings[
             Number(contextFunction.filename)
           ] as string
