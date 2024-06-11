@@ -1,19 +1,19 @@
-import { ProfileExport } from '../profile-exporter'
+import { ProfileExport } from '../profile-exporter';
 
 export interface Profiler<TStartArgs> {
-  getLabels(): Record<string, number | string>
+  getLabels(): Record<string, number | string>;
 
-  setLabels(labels: Record<string, number | string>): void
+  setLabels(labels: Record<string, number | string>): void;
 
   wrapWithLabels(
     labels: Record<string, number | string>,
     fn: () => void,
     ...args: unknown[]
-  ): void
+  ): void;
 
-  start(args: TStartArgs): void
+  start(args: TStartArgs): void;
 
-  stop(): ProfileExport | null
+  stop(): ProfileExport | null;
 
-  profile(): ProfileExport
+  profile(): ProfileExport;
 }

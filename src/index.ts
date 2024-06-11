@@ -1,44 +1,44 @@
-import 'regenerator-runtime/runtime'
+import 'regenerator-runtime/runtime';
 
-import expressMiddleware from './express/middleware'
-import { PyroscopeProfiler } from './profilers/pyroscope-profiler'
+import expressMiddleware from './express/middleware';
+import { PyroscopeProfiler } from './profilers/pyroscope-profiler';
 import {
   PyroscopeConfig,
   PyroscopeHeapConfig,
   PyroscopeWallConfig,
-} from './pyroscope-config'
-import { checkPyroscopeConfig } from './utils/check-pyroscope-config'
-import { getProfiler, setProfiler } from './utils/pyroscope-profiler'
-import { processConfig } from './utils/process-config'
-import { getEnv } from './utils/get-env'
-import { setLogger as datadogSetLogger } from '@datadog/pprof'
-import { setLogger as ourSetLogger, Logger } from './logger'
-import { SourceMapper } from './sourcemapper'
+} from './pyroscope-config';
+import { checkPyroscopeConfig } from './utils/check-pyroscope-config';
+import { getProfiler, setProfiler } from './utils/pyroscope-profiler';
+import { processConfig } from './utils/process-config';
+import { getEnv } from './utils/get-env';
+import { setLogger as datadogSetLogger } from '@datadog/pprof';
+import { setLogger as ourSetLogger, Logger } from './logger';
+import { SourceMapper } from './sourcemapper';
 
 export function init(config: PyroscopeConfig = {}): void {
-  checkPyroscopeConfig(config)
+  checkPyroscopeConfig(config);
 
-  const processedConfig: PyroscopeConfig = processConfig(config, getEnv())
+  const processedConfig: PyroscopeConfig = processConfig(config, getEnv());
 
-  setProfiler(new PyroscopeProfiler(processedConfig))
+  setProfiler(new PyroscopeProfiler(processedConfig));
 }
 
 // deprecated: please use getLabels
 function getWallLabels(): Record<string, number | string> {
-  return getLabels()
+  return getLabels();
 }
 
 // deprecated: please use setLabels
 function setWallLabels(labels: Record<string, number | string>): void {
-  return setLabels(labels)
+  return setLabels(labels);
 }
 
 function getLabels(): Record<string, number | string> {
-  return getProfiler().wallProfiler.profiler.getLabels()
+  return getProfiler().wallProfiler.profiler.getLabels();
 }
 
 function setLabels(labels: Record<string, number | string>): void {
-  getProfiler().wallProfiler.profiler.setLabels(labels)
+  getProfiler().wallProfiler.profiler.setLabels(labels);
 }
 
 export function wrapWithLabels(
@@ -46,49 +46,49 @@ export function wrapWithLabels(
   fn: () => void,
   ...args: unknown[]
 ): void {
-  getProfiler().wallProfiler.profiler.wrapWithLabels(lbls, fn, ...args)
+  getProfiler().wallProfiler.profiler.wrapWithLabels(lbls, fn, ...args);
 }
 
 function startWallProfiling(): void {
-  getProfiler().wallProfiler.start()
+  getProfiler().wallProfiler.start();
 }
 
 // here for backwards compatibility
 function startCpuProfiling(): void {
-  getProfiler().wallProfiler.start()
+  getProfiler().wallProfiler.start();
 }
 
 async function stopWallProfiling(): Promise<void> {
-  await getProfiler().wallProfiler.stop()
+  await getProfiler().wallProfiler.stop();
 }
 
 // here for backwards compatibility
 async function stopCpuProfiling(): Promise<void> {
-  await getProfiler().wallProfiler.stop()
+  await getProfiler().wallProfiler.stop();
 }
 
 function startHeapProfiling(): void {
-  getProfiler().heapProfiler.start()
+  getProfiler().heapProfiler.start();
 }
 
 async function stopHeapProfiling(): Promise<void> {
-  await getProfiler().heapProfiler.stop()
+  await getProfiler().heapProfiler.stop();
 }
 
 export function start(): void {
-  startWallProfiling()
-  startHeapProfiling()
+  startWallProfiling();
+  startHeapProfiling();
 }
 
 export async function stop(): Promise<void> {
-  await Promise.all([stopWallProfiling(), stopHeapProfiling()])
+  await Promise.all([stopWallProfiling(), stopHeapProfiling()]);
 }
 
-export { PyroscopeConfig, PyroscopeHeapConfig, PyroscopeWallConfig }
+export { PyroscopeConfig, PyroscopeHeapConfig, PyroscopeWallConfig };
 
 function setLogger(logger: Logger): void {
-  datadogSetLogger(logger)
-  ourSetLogger(logger)
+  datadogSetLogger(logger);
+  ourSetLogger(logger);
 }
 
 export default {
@@ -109,4 +109,4 @@ export default {
   stopWallProfiling,
   stopCpuProfiling,
   setLogger,
-}
+};

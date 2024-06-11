@@ -1,4 +1,4 @@
-import 'path'
+import 'path';
 
 module.exports = {
   mode: 'production',
@@ -27,4 +27,4 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
-}
+};
