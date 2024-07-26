@@ -1,4 +1,4 @@
-import { Environment } from '../environment'
+import { Environment } from '../environment';
 
 export function getEnv(): Environment {
   return {
@@ -22,13 +22,13 @@ export function getEnv(): Environment {
     wallCollectCpuTime: parseBooleanEnv(
       process.env['PYROSCOPE_WALL_COLLECT_CPU_TIME']
     ),
-  }
+  };
 }
 
 function parseNumericEnv(envVal: string | undefined) {
-  return envVal === undefined ? envVal : Number(envVal)
+  return envVal === undefined ? envVal : Number(envVal);
 }
 
 function parseBooleanEnv(envVal: string | undefined) {
-  return envVal === undefined ? envVal : envVal === 'true' || envVal === '1'
+  return envVal === undefined ? envVal : envVal === 'true' || envVal === '1';
 }

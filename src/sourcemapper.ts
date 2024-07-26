@@ -20,39 +20,39 @@
 // Modified to map from generated code to source code, rather than from source
 // code to generated code.
 
-import * as fs from 'fs'
-import * as path from 'path'
-import * as sourceMap from 'source-map'
-import { logger } from './logger'
-import pLimit from 'p-limit'
+import * as fs from 'fs';
+import * as path from 'path';
+import * as sourceMap from 'source-map';
+import { logger } from './logger';
+import pLimit from 'p-limit';
 
-const readFile = fs.promises.readFile
+const readFile = fs.promises.readFile;
 
-const CONCURRENCY = 10
-const MAP_EXT = '.map'
+const CONCURRENCY = 10;
+const MAP_EXT = '.map';
 
 function error(msg: string) {
-  logger.debug(`Error: ${msg}`)
-  return new Error(msg)
+  logger.debug(`Error: ${msg}`);
+  return new Error(msg);
 }
 
 export interface MapInfoCompiled {
-  mapFileDir: string
-  mapConsumer: sourceMap.RawSourceMap
+  mapFileDir: string;
+  mapConsumer: sourceMap.RawSourceMap;
 }
 
 export interface GeneratedLocation {
-  file: string
-  name?: string
-  line: number
-  column: number
+  file: string;
+  name?: string;
+  line: number;
+  column: number;
 }
 
 export interface SourceLocation {
-  file?: string
-  name?: string
-  line?: number
-  column?: number
+  file?: string;
+  name?: string;
+  line?: number;
+  column?: number;
 }
 
 /**
@@ -70,15 +70,15 @@ async function processSourceMap(
   // this handles the case when the path is undefined, null, or
   // the empty string
   if (!mapPath) {
-    throw error(`The path "${mapPath}" does not specify a source map file`)
+    throw error(`The path "${mapPath}" does not specify a source map file`);
   }
-  mapPath = path.normalize(mapPath)
+  mapPath = path.normalize(mapPath);
 
-  let contents
+  let contents;
   try {
-    contents = await readFile(mapPath, 'utf8')
+    contents = await readFile(mapPath, 'utf8');
   } catch (e) {
-    throw error('Could not read source map file ' + mapPath + ': ' + e)
+    throw error('Could not read source map file ' + mapPath + ': ' + e);
   }
 
   // if map path doesn't end with .map
@@ -87,16 +87,16 @@ async function processSourceMap(
     // and extract base64 string
     const base64Match = contents.match(
       /\/\/# sourceMappingURL=data:application\/json;base64,([^ ]*)/
-    )
+    );
     if (base64Match) {
-      contents = Buffer.from(base64Match[1], 'base64').toString()
+      contents = Buffer.from(base64Match[1], 'base64').toString();
     } else {
-      logger.debug(`The path "${mapPath}" does not specify a source map file`)
-      return
+      logger.debug(`The path "${mapPath}" does not specify a source map file`);
+      return;
     }
   }
 
-  let consumer: sourceMap.RawSourceMap
+  let consumer: sourceMap.RawSourceMap;
   try {
     // TODO: Determine how to reconsile the type conflict where `consumer`
     //       is constructed as a SourceMapConsumer but is used as a
@@ -108,7 +108,7 @@ async function processSourceMap(
       // eslint-disable-next-line @typescript-eslint/ban-types
       contents as {} as sourceMap.RawSourceMap
       // eslint-disable-next-line @typescript-eslint/ban-types
-    )) as {} as sourceMap.RawSourceMap
+    )) as {} as sourceMap.RawSourceMap;
   } catch (e) {
     throw error(
       'An error occurred while reading the ' +
@@ -116,7 +116,7 @@ async function processSourceMap(
         mapPath +
         ': ' +
         e
-    )
+    );
   }
 
   /* If the source map file defines a "file" attribute, use it as
@@ -135,41 +135,41 @@ async function processSourceMap(
    * exists and if it does not, check if generated file exists alongside the
    * source map file.
    */
-  const dir = path.dirname(mapPath)
-  const generatedPathCandidates = []
+  const dir = path.dirname(mapPath);
+  const generatedPathCandidates = [];
   if (consumer.file) {
-    generatedPathCandidates.push(path.resolve(dir, consumer.file))
+    generatedPathCandidates.push(path.resolve(dir, consumer.file));
   }
-  const samePath = path.resolve(dir, path.basename(mapPath, MAP_EXT))
+  const samePath = path.resolve(dir, path.basename(mapPath, MAP_EXT));
   if (
     generatedPathCandidates.length === 0 ||
     generatedPathCandidates[0] !== samePath
   ) {
-    generatedPathCandidates.push(samePath)
+    generatedPathCandidates.push(samePath);
   }
 
   for (const generatedPath of generatedPathCandidates) {
     try {
-      await fs.promises.access(generatedPath, fs.constants.F_OK)
-      infoMap.set(generatedPath, { mapFileDir: dir, mapConsumer: consumer })
+      await fs.promises.access(generatedPath, fs.constants.F_OK);
+      infoMap.set(generatedPath, { mapFileDir: dir, mapConsumer: consumer });
       if (debug) {
-        logger.debug(`Loaded source map for ${generatedPath} => ${mapPath}`)
+        logger.debug(`Loaded source map for ${generatedPath} => ${mapPath}`);
       }
-      return
+      return;
     } catch (err) {
       if (debug) {
-        logger.debug(`Generated path ${generatedPath} does not exist`)
+        logger.debug(`Generated path ${generatedPath} does not exist`);
       }
     }
   }
   if (debug) {
-    logger.debug(`Unable to find generated file for ${mapPath}`)
+    logger.debug(`Unable to find generated file for ${mapPath}`);
   }
 }
 
 export class SourceMapper {
-  infoMap: Map<string, MapInfoCompiled>
-  debug: boolean
+  infoMap: Map<string, MapInfoCompiled>;
+  debug: boolean;
 
   static async create(
     searchDirs: string[],
@@ -178,31 +178,31 @@ export class SourceMapper {
     if (debug) {
       logger.debug(
         `Looking for source map files in dirs: [${searchDirs.join(', ')}]`
-      )
+      );
     }
-    const mapFiles: string[] = []
+    const mapFiles: string[] = [];
     for (const dir of searchDirs) {
       try {
-        const mf = await getMapFiles(dir)
+        const mf = await getMapFiles(dir);
         mf.forEach((mapFile) => {
-          mapFiles.push(path.resolve(dir, mapFile))
-        })
+          mapFiles.push(path.resolve(dir, mapFile));
+        });
       } catch (e) {
-        throw error(`failed to get source maps from ${dir}: ${e}`)
+        throw error(`failed to get source maps from ${dir}: ${e}`);
       }
       try {
-        const sf = await getSourceCodeFiles(dir)
+        const sf = await getSourceCodeFiles(dir);
         sf.forEach((sourceCodeFile) => {
-          mapFiles.push(path.resolve(dir, sourceCodeFile))
-        })
+          mapFiles.push(path.resolve(dir, sourceCodeFile));
+        });
       } catch (e) {
-        throw error(`failed to get source maps from ${dir}: ${e}`)
+        throw error(`failed to get source maps from ${dir}: ${e}`);
       }
     }
     if (debug) {
-      logger.debug(`Found source map files: [${mapFiles.join(', ')}]`)
+      logger.debug(`Found source map files: [${mapFiles.join(', ')}]`);
     }
-    return createFromMapFiles(mapFiles, debug)
+    return createFromMapFiles(mapFiles, debug);
   }
 
   /**
@@ -214,8 +214,8 @@ export class SourceMapper {
    * @constructor
    */
   constructor(debug = false) {
-    this.infoMap = new Map()
-    this.debug = debug
+    this.infoMap = new Map();
+    this.debug = debug;
   }
 
   /**
@@ -231,9 +231,9 @@ export class SourceMapper {
    */
   private getMappingInfo(inputPath: string): MapInfoCompiled | null {
     if (this.infoMap.has(path.normalize(inputPath))) {
-      return this.infoMap.get(inputPath) as MapInfoCompiled
+      return this.infoMap.get(inputPath) as MapInfoCompiled;
     }
-    return null
+    return null;
   }
 
   /**
@@ -250,7 +250,7 @@ export class SourceMapper {
    *  relative to the process's current working directory.
    */
   hasMappingInfo(inputPath: string): boolean {
-    return this.getMappingInfo(inputPath) !== null
+    return this.getMappingInfo(inputPath) !== null;
   }
 
   /**
@@ -273,35 +273,35 @@ export class SourceMapper {
    *   with it then the input location is returned.
    */
   mappingInfo(location: GeneratedLocation): SourceLocation {
-    const inputPath = path.normalize(location.file)
-    const entry = this.getMappingInfo(inputPath)
+    const inputPath = path.normalize(location.file);
+    const entry = this.getMappingInfo(inputPath);
     if (entry === null) {
       if (this.debug) {
         logger.debug(
           `Source map lookup failed: no map found for ${location.file} (normalized: ${inputPath})`
-        )
+        );
       }
-      return location
+      return location;
     }
 
     const generatedPos = {
       line: location.line,
       column: location.column > 0 ? location.column - 1 : 0, // SourceMapConsumer expects column to be 0-based
-    }
+    };
 
     // TODO: Determine how to remove the explicit cast here.
     const consumer: sourceMap.SourceMapConsumer =
       // eslint-disable-next-line @typescript-eslint/ban-types
-      entry.mapConsumer as {} as sourceMap.SourceMapConsumer
+      entry.mapConsumer as {} as sourceMap.SourceMapConsumer;
 
-    const pos = consumer.originalPositionFor(generatedPos)
+    const pos = consumer.originalPositionFor(generatedPos);
     if (pos.source === null) {
       if (this.debug) {
         logger.debug(
           `Source map lookup failed for ${location.name}(${location.file}:${location.line}:${location.column})`
-        )
+        );
       }
-      return location
+      return location;
     }
 
     const loc = {
@@ -309,14 +309,14 @@ export class SourceMapper {
       line: pos.line || undefined,
       name: pos.name || location.name,
       column: pos.column === null ? undefined : pos.column + 1, // convert column back to 1-based
-    }
+    };
 
     if (this.debug) {
       logger.debug(
         `Source map lookup succeeded for ${location.name}(${location.file}:${location.line}:${location.column}) => ${loc.name}(${loc.file}:${loc.line}:${loc.column})`
-      )
+      );
     }
-    return loc
+    return loc;
   }
 }
 
@@ -324,29 +324,31 @@ async function createFromMapFiles(
   mapFiles: string[],
   debug: boolean
 ): Promise<SourceMapper> {
-  const limit = pLimit(CONCURRENCY)
-  const mapper = new SourceMapper(debug)
+  const limit = pLimit(CONCURRENCY);
+  const mapper = new SourceMapper(debug);
   const promises: Array<Promise<void>> = mapFiles.map((mapPath) =>
     limit(() => processSourceMap(mapper.infoMap, mapPath, debug))
-  )
+  );
   try {
-    await Promise.all(promises)
+    await Promise.all(promises);
   } catch (err) {
-    throw error('An error occurred while processing the source map files' + err)
+    throw error(
+      'An error occurred while processing the source map files' + err
+    );
   }
-  return mapper
+  return mapper;
 }
 
 function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
-  return e instanceof Error && 'code' in e
+  return e instanceof Error && 'code' in e;
 }
 
 function isNonFatalError(error: unknown) {
-  const nonFatalErrors = ['ENOENT', 'EPERM', 'EACCES', 'ELOOP']
+  const nonFatalErrors = ['ENOENT', 'EPERM', 'EACCES', 'ELOOP'];
 
   return (
     isErrnoException(error) && error.code && nonFatalErrors.includes(error.code)
-  )
+  );
 }
 
 async function* walk(
@@ -359,49 +361,49 @@ async function* walk(
   async function* walkRecursive(dir: string): AsyncIterable<string> {
     try {
       for await (const d of await fs.promises.opendir(dir)) {
-        const entry = path.join(dir, d.name)
+        const entry = path.join(dir, d.name);
         if (d.isDirectory() && directoryFilter(dir, d.name)) {
-          yield* walkRecursive(entry)
+          yield* walkRecursive(entry);
         } else if (d.isFile() && fileFilter(d.name)) {
           // check that the file is readable
-          await fs.promises.access(entry, fs.constants.R_OK)
-          yield entry
+          await fs.promises.access(entry, fs.constants.R_OK);
+          yield entry;
         }
       }
     } catch (error) {
       if (!isNonFatalError(error)) {
-        throw error
+        throw error;
       } else {
-        logger.debug(() => `Non fatal error: ${error}`)
+        logger.debug(() => `Non fatal error: ${error}`);
       }
     }
   }
 
-  yield* walkRecursive(dir)
+  yield* walkRecursive(dir);
 }
 
 async function getMapFiles(baseDir: string): Promise<string[]> {
-  const mapFiles: string[] = []
+  const mapFiles: string[] = [];
   for await (const entry of walk(
     baseDir,
     (filename) => /\.[cm]?js\.map$/.test(filename),
     (root, dirname) =>
       root !== '/proc' && dirname !== '.git' && dirname !== 'node_modules'
   )) {
-    mapFiles.push(path.relative(baseDir, entry))
+    mapFiles.push(path.relative(baseDir, entry));
   }
-  return mapFiles
+  return mapFiles;
 }
 
 async function getSourceCodeFiles(baseDir: string): Promise<string[]> {
-  const mapFiles: string[] = []
+  const mapFiles: string[] = [];
   for await (const entry of walk(
     baseDir,
     (filename) => /\.[cm]?js$/.test(filename),
     (root, dirname) =>
       root !== '/proc' && dirname !== '.git' && dirname !== 'node_modules'
   )) {
-    mapFiles.push(path.relative(baseDir, entry))
+    mapFiles.push(path.relative(baseDir, entry));
   }
-  return mapFiles
+  return mapFiles;
 }

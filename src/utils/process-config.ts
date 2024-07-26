@@ -1,5 +1,5 @@
-import { Environment } from '../environment'
-import { PyroscopeConfig } from '../pyroscope-config'
+import { Environment } from '../environment';
+import { PyroscopeConfig } from '../pyroscope-config';
 
 export function processConfig(
   config: PyroscopeConfig,
@@ -28,7 +28,7 @@ export function processConfig(
     basicAuthUser: config.basicAuthUser,
     basicAuthPassword: config.basicAuthPassword,
     tenantID: config.tenantID,
-  }
+  };
 
-  return processedConfig
+  return processedConfig;
 }
