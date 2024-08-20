@@ -1,8 +1,8 @@
-import { PyroscopeApiExporter } from '../pyroscope-api-exporter';
-import { ContinuousProfiler } from './continuous-profiler';
-import { WallProfiler, WallProfilerStartArgs } from './wall-profiler';
-import { HeapProfiler, HeapProfilerStartArgs } from './heap-profiler';
-import { PyroscopeConfig } from '../pyroscope-config';
+import { PyroscopeApiExporter } from '../pyroscope-api-exporter.js';
+import { ContinuousProfiler } from './continuous-profiler.js';
+import { WallProfiler, WallProfilerStartArgs } from './wall-profiler.js';
+import { HeapProfiler, HeapProfilerStartArgs } from './heap-profiler.js';
+import { PyroscopeConfig } from '../pyroscope-config.js';
 
 const MICROS_PER_SECOND = 1e6;
 const MS_PER_SECOND = 1e3;

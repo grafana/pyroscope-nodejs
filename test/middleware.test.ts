@@ -1,4 +1,4 @@
-import Pyroscope from '../src';
+import Pyroscope from '../src/index.js';
 import request from 'supertest';
 import express from 'express';
 

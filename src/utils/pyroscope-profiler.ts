@@ -1,4 +1,4 @@
-import { PyroscopeProfiler } from '../profilers/pyroscope-profiler';
+import { PyroscopeProfiler } from '../profilers/pyroscope-profiler.js';
 
 let pyroscopeProfiler: PyroscopeProfiler | undefined;
 

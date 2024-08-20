@@ -1,8 +1,8 @@
 import { time, SourceMapper, LabelSet, TimeProfileNode } from '@datadog/pprof';
 import { Profile } from 'pprof-format';
 
-import { ProfileExport } from '../profile-exporter';
-import { Profiler } from './profiler';
+import { ProfileExport } from '../profile-exporter.js';
+import { Profiler } from './profiler.js';
 import debug from 'debug';
 
 const MICROS_PER_SECOND = 1e6;

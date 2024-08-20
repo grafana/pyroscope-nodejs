@@ -1,12 +1,12 @@
 import debug from 'debug';
 import { NextFunction, Request, Response, RequestHandler } from 'express';
 import { Profile } from 'pprof-format';
-import { Profiler } from '../profilers/profiler';
-import { PyroscopeProfiler } from '../profilers/pyroscope-profiler';
-import { WallProfilerStartArgs } from '../profilers/wall-profiler';
-import { getProfiler } from '../utils/pyroscope-profiler';
+import { Profiler } from '../profilers/profiler.js';
+import { PyroscopeProfiler } from '../profilers/pyroscope-profiler.js';
+import { WallProfilerStartArgs } from '../profilers/wall-profiler.js';
+import { getProfiler } from '../utils/pyroscope-profiler.js';
 import { encode } from '@datadog/pprof';
-import { HeapProfilerStartArgs } from '../profilers/heap-profiler';
+import { HeapProfilerStartArgs } from '../profilers/heap-profiler.js';
 
 const log = debug('pyroscope');
 

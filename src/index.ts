@@ -1,19 +1,19 @@
-import 'regenerator-runtime/runtime';
+import 'regenerator-runtime/runtime.js';
 
-import expressMiddleware from './express/middleware';
-import { PyroscopeProfiler } from './profilers/pyroscope-profiler';
+import expressMiddleware from './express/middleware.js';
+import { PyroscopeProfiler } from './profilers/pyroscope-profiler.js';
 import {
   PyroscopeConfig,
   PyroscopeHeapConfig,
   PyroscopeWallConfig,
-} from './pyroscope-config';
-import { checkPyroscopeConfig } from './utils/check-pyroscope-config';
-import { getProfiler, setProfiler } from './utils/pyroscope-profiler';
-import { processConfig } from './utils/process-config';
-import { getEnv } from './utils/get-env';
+} from './pyroscope-config.js';
+import { checkPyroscopeConfig } from './utils/check-pyroscope-config.js';
+import { getProfiler, setProfiler } from './utils/pyroscope-profiler.js';
+import { processConfig } from './utils/process-config.js';
+import { getEnv } from './utils/get-env.js';
 import { setLogger as datadogSetLogger } from '@datadog/pprof';
-import { setLogger as ourSetLogger, Logger } from './logger';
-import { SourceMapper } from './sourcemapper';
+import { setLogger as ourSetLogger, Logger } from './logger.js';
+import { SourceMapper } from './sourcemapper.js';
 
 export function init(config: PyroscopeConfig = {}): void {
   checkPyroscopeConfig(config);

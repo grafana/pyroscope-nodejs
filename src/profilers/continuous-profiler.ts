@@ -1,6 +1,6 @@
 import debug from 'debug';
-import { ProfileExport, ProfileExporter } from '../profile-exporter';
-import { Profiler } from './profiler';
+import { ProfileExport, ProfileExporter } from '../profile-exporter.js';
+import { Profiler } from './profiler.js';
 
 const log = debug('pyroscope::profiler');
 

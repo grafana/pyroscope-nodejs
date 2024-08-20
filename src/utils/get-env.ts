@@ -1,4 +1,4 @@
-import { Environment } from '../environment';
+import { Environment } from '../environment.js';
 
 export function getEnv(): Environment {
   return {

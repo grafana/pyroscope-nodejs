@@ -4,11 +4,11 @@ import { encode } from '@datadog/pprof';
 import axios, { AxiosBasicCredentials, AxiosError } from 'axios';
 import FormData, { Headers } from 'form-data';
 import { Profile } from 'pprof-format';
-import { ProfileExport, ProfileExporter } from './profile-exporter';
-import { dateToUnixTimestamp } from './utils/date-to-unix-timestamp';
-import { processProfile } from './utils/process-profile';
+import { ProfileExport, ProfileExporter } from './profile-exporter.js';
+import { dateToUnixTimestamp } from './utils/date-to-unix-timestamp.js';
+import { processProfile } from './utils/process-profile.js';
 import debug from 'debug';
-import { PyroscopeConfig } from './pyroscope-config';
+import { PyroscopeConfig } from './pyroscope-config.js';
 
 const log = debug('pyroscope');
 
