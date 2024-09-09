@@ -9,14 +9,12 @@
     }
   },
   "main": "./dist/cjs/index.js",
-  "types": "dist/types/index.d.js",
   "scripts": {
     "prepublishOnly": "pinst --disable",
     "postpublish": "pinst --enable",
-    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json",
     "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && echo '{\"type\":\"module\"}' >./dist/esm/package.json",
-    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json",
     "clean": "node tools/cleanup",
     "package": "npm run build && npm pack",
     "format:fix": "prettier --write .",
