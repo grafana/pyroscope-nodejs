@@ -1,9 +1,10 @@
+import { describe, it, expect } from 'vitest';
+
 import Pyroscope from '../src';
 import express from 'express';
 import busboy from 'busboy';
 import { Profile } from 'pprof-format';
 import zlib from 'zlib';
-import { describe, it, expect } from 'vitest';
 
 type Numeric = number | bigint;
 

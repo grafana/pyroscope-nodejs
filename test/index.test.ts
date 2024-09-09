@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import fs from 'node:fs';
 import { Profile } from 'pprof-format';
 import Pyroscope from '../src';

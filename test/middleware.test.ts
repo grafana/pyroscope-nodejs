@@ -1,7 +1,8 @@
+import { describe, it, expect } from 'vitest';
+
 import Pyroscope from '../src';
 import request from 'supertest';
 import express from 'express';
-import { describe, it, expect } from 'vitest';
 
 // You only need appName for the pull mode
 Pyroscope.init();
