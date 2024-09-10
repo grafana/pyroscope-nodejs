@@ -8,4 +8,4 @@ module.exports = {
     'prettier/prettier': 'error',
   },
   plugins: ['@typescript-eslint', 'prettier'],
-}
+};
