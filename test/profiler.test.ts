@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 import Pyroscope from '../src';
 import express from 'express';
 import busboy from 'busboy';
@@ -114,7 +116,7 @@ describe('common behaviour of profilers', () => {
     });
   });
 
-  it('should allow to call start profiling twice', (done) => {
+  it('should allow to call start profiling twice', async () => {
     // Simulate memory usage
     const timer: NodeJS.Timeout = setInterval(() => {
       // Use some memory
@@ -139,16 +141,13 @@ describe('common behaviour of profilers', () => {
     });
     Pyroscope.startHeapProfiling();
     Pyroscope.startHeapProfiling();
-    (async () => {
-      await Pyroscope.stopHeapProfiling();
-      await Pyroscope.stopHeapProfiling();
-      // And stop it without starting CPU
-      await Pyroscope.stop();
 
-      clearInterval(timer);
+    await Pyroscope.stopHeapProfiling();
+    await Pyroscope.stopHeapProfiling();
+    // And stop it without starting CPU
+    await Pyroscope.stop();
 
-      done();
-    })();
+    clearInterval(timer);
   });
 
   it('should have dynamic labels on wall profile', (done) => {

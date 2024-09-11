@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 import Pyroscope from '../src';
 import request from 'supertest';
 import express from 'express';
@@ -6,9 +8,6 @@ import express from 'express';
 Pyroscope.init();
 
 describe('express middleware', () => {
-  afterAll(async () => {
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 500)); // avoid jest open handle error
-  });
   it('should be a function', () => {
     expect(typeof Pyroscope.expressMiddleware).toBe('function');
   });
