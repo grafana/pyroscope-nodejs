@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 
 import fs from 'node:fs';
 import { Profile } from 'pprof-format';
-import Pyroscope from '../src';
-import { processProfile } from '../src/utils/process-profile';
+import Pyroscope from '../src/index.ts';
+import { processProfile } from '../src/utils/process-profile.ts';
 
 describe('typescript env', () => {
   it('has correct imports', () => {

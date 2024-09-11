@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import Pyroscope from '../src';
+import Pyroscope from '../src/index.js';
 import express from 'express';
 import busboy from 'busboy';
 import { Profile } from 'pprof-format';

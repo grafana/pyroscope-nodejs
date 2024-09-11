@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import Pyroscope from '../src';
+import Pyroscope from '../src/index.js';
 import request from 'supertest';
 import express from 'express';
 

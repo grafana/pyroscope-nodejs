@@ -1,5 +1,5 @@
-import { Environment } from '../environment';
-import { PyroscopeConfig } from '../pyroscope-config';
+import { Environment } from '../environment.js';
+import { PyroscopeConfig } from '../pyroscope-config.js';
 
 export function processConfig(
   config: PyroscopeConfig,

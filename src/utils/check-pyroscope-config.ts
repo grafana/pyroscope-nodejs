@@ -2,7 +2,7 @@ import {
   PyroscopeConfig,
   PyroscopeHeapConfig,
   PyroscopeWallConfig,
-} from '../pyroscope-config';
+} from '../pyroscope-config.js';
 
 export function checkPyroscopeConfig(
   config: unknown

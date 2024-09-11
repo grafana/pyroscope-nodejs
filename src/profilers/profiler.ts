@@ -1,4 +1,4 @@
-import { ProfileExport } from '../profile-exporter';
+import { ProfileExport } from '../profile-exporter.js';
 
 export interface Profiler<TStartArgs> {
   getLabels(): Record<string, number | string>;
