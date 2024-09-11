@@ -123,7 +123,9 @@ export class PyroscopeProfiler {
    * @param sourceMapper A Pyroscope `SourceMapper`.
    * @return A DataDog `SourceMapper`.
    */
-  private toDDSourceMapper(sourceMapper: SourceMapper | undefined): DDSourceMapper | undefined {
+  private toDDSourceMapper(
+    sourceMapper: SourceMapper | undefined
+  ): DDSourceMapper | undefined {
     if (!sourceMapper) {
       return undefined;
     }
