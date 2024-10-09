@@ -46,6 +46,7 @@
     "axios": "^0.28.0",
     "debug": "^4.3.3",
     "form-data": "^4.0.0",
+    "p-limit": "^3.1.0",
     "regenerator-runtime": "^0.13.11",
     "source-map": "^0.7.3"
   },
