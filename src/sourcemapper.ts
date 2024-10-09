@@ -180,6 +180,7 @@ export class SourceMapper {
         `Looking for source map files in dirs: [${searchDirs.join(', ')}]`
       );
     }
+
     const mapFiles: string[] = [];
     for (const dir of searchDirs) {
       try {
@@ -190,6 +191,7 @@ export class SourceMapper {
       } catch (e) {
         throw error(`failed to get source maps from ${dir}: ${e}`);
       }
+
       try {
         const sf = await getSourceCodeFiles(dir);
         sf.forEach((sourceCodeFile) => {
@@ -199,9 +201,11 @@ export class SourceMapper {
         throw error(`failed to get source maps from ${dir}: ${e}`);
       }
     }
+
     if (debug) {
       logger.debug(`Found source map files: [${mapFiles.join(', ')}]`);
     }
+
     return createFromMapFiles(mapFiles, debug);
   }
 
