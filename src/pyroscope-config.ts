@@ -1,4 +1,6 @@
-import { SourceMapper, LabelSet } from '@datadog/pprof';
+import { LabelSet } from '@datadog/pprof';
+import { SourceMapper } from './sourcemapper.js';
+
 export { LabelSet } from '@datadog/pprof';
 
 export interface PyroscopeConfig {

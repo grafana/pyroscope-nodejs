@@ -1,8 +1,11 @@
+import { SourceMapper as DDSourceMapper } from '@datadog/pprof';
+
 import { PyroscopeApiExporter } from '../pyroscope-api-exporter.js';
-import { ContinuousProfiler } from './continuous-profiler.js';
-import { WallProfiler, WallProfilerStartArgs } from './wall-profiler.js';
-import { HeapProfiler, HeapProfilerStartArgs } from './heap-profiler.js';
 import { PyroscopeConfig } from '../pyroscope-config.js';
+import { SourceMapper } from '../sourcemapper.js';
+import { ContinuousProfiler } from './continuous-profiler.js';
+import { HeapProfiler, HeapProfilerStartArgs } from './heap-profiler.js';
+import { WallProfiler, WallProfilerStartArgs } from './wall-profiler.js';
 
 const MICROS_PER_SECOND = 1e6;
 const MS_PER_SECOND = 1e3;
@@ -76,7 +79,7 @@ export class PyroscopeProfiler {
       flushIntervalMs: flushIntervalMs,
       profiler: new HeapProfiler(),
       startArgs: {
-        sourceMapper: config.sourceMapper,
+        sourceMapper: this.toDDSourceMapper(config.sourceMapper),
         samplingIntervalBytes:
           config.heap?.samplingIntervalBytes ?? DEFAULT_SAMPLING_INTERVAL_BYTES,
         stackDepth: config.heap?.stackDepth ?? DEFAULT_STACK_DEPTH,
@@ -95,7 +98,7 @@ export class PyroscopeProfiler {
       flushIntervalMs: flushIntervalMs,
       profiler: new WallProfiler(),
       startArgs: {
-        sourceMapper: config.sourceMapper,
+        sourceMapper: this.toDDSourceMapper(config.sourceMapper),
         samplingDurationMs:
           config.wall?.samplingDurationMs ?? DEFAULT_SAMPLING_DURATION_MS,
         samplingIntervalMicros:
@@ -104,5 +107,29 @@ export class PyroscopeProfiler {
         collectCpuTime: config.wall?.collectCpuTime ?? false,
       },
     });
+  }
+
+  /**
+   * Converts a (Pyroscope) `SourceMapper` to a (DataDog) `SourceMapper`. These
+   * two types have the same shape, but since the DataDog SourceMapper has a
+   * private field `getMappingInfo`, we cannot use these two classes
+   * interchangeably.
+   *
+   * For a more detailed explanation as to why the private method makes the
+   * typical TypeScript type conversion impossible, see:
+   *
+   * https://github.com/microsoft/TypeScript/issues/7755#issuecomment-204161372
+   *
+   * @param sourceMapper A Pyroscope `SourceMapper`.
+   * @return A DataDog `SourceMapper`.
+   */
+  private toDDSourceMapper(
+    sourceMapper: SourceMapper | undefined
+  ): DDSourceMapper | undefined {
+    if (!sourceMapper) {
+      return undefined;
+    }
+
+    return sourceMapper as unknown as DDSourceMapper;
   }
 }
