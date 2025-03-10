@@ -1,8 +1,6 @@
 import { URL } from 'node:url';
 
 import { encode } from '@datadog/pprof';
-import axios, { AxiosBasicCredentials, AxiosError } from 'axios';
-import FormData, { Headers } from 'form-data';
 import { Profile } from 'pprof-format';
 import { ProfileExport, ProfileExporter } from './profile-exporter.js';
 import { dateToUnixTimestamp } from './utils/date-to-unix-timestamp.js';
@@ -58,15 +56,22 @@ export class PyroscopeApiExporter implements ProfileExporter {
     return endpointUrl;
   }
 
-  private buildRequestHeaders(formData: FormData): Headers {
-    const headers: Headers = formData.getHeaders();
+  private buildRequestHeaders(): Headers {
+    const headers: Headers = new Headers();
 
     if (this.authToken !== undefined) {
-      headers['authorization'] = `Bearer ${this.authToken}`;
+      headers.set('authorization', `Bearer ${this.authToken}`);
+    } else if (this.config.basicAuthUser && this.config.basicAuthPassword) {
+      headers.set(
+        'authorization',
+        Buffer.from(
+          `${this.config.basicAuthUser}:${this.config.basicAuthPassword}`
+        ).toString('base64')
+      );
     }
 
     if (this.config.tenantID) {
-      headers['X-Scope-OrgID'] = this.config.tenantID;
+      headers.set('X-Scope-OrgID', this.config.tenantID);
     }
 
     return headers;
@@ -81,30 +86,9 @@ export class PyroscopeApiExporter implements ProfileExporter {
 
     const formData: FormData = new FormData();
 
-    formData.append('profile', profileBuffer, {
-      contentType: 'text/json',
-      filename: 'profile',
-      knownLength: profileBuffer.byteLength,
-    });
+    formData.append('profile', new Blob([profileBuffer]), 'profile');
 
     return formData;
-  }
-
-  private handleAxiosError(error: AxiosError): void {
-    if (error.response !== undefined) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      log('Pyroscope received error while ingesting data to server');
-      log(error.response.data);
-    } else if (error.request !== undefined) {
-      // The request was made but no response was received
-      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-      // http.ClientRequest in node.js
-      log('Error when ingesting data to server:', error.message);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      log('Error', error.message);
-    }
   }
 
   private async uploadProfile(profileExport: ProfileExport): Promise<void> {
@@ -112,23 +96,26 @@ export class PyroscopeApiExporter implements ProfileExporter {
       profileExport.profile
     );
 
-    const auth: AxiosBasicCredentials | undefined =
-      this.config.basicAuthUser && this.config.basicAuthPassword
-        ? {
-            username: this.config.basicAuthUser,
-            password: this.config.basicAuthPassword,
-          }
-        : undefined;
-
     try {
-      await axios(this.buildEndpointUrl(profileExport).toString(), {
-        data: formData,
-        headers: this.buildRequestHeaders(formData),
-        method: 'POST',
-        auth: auth,
-      });
+      const response = await fetch(
+        this.buildEndpointUrl(profileExport).toString(),
+        {
+          body: formData,
+          headers: this.buildRequestHeaders(),
+          method: 'POST',
+        }
+      );
+
+      if (!response.ok) {
+        log('Server rejected data ingest: HTTP %d', response.status);
+        log(await response.text());
+      }
     } catch (error: unknown) {
-      this.handleAxiosError(error as AxiosError);
+      if (error instanceof Error) {
+        log('Error sending data ingest: %s', error.message);
+      } else {
+        log('Unknown error sending data ingest');
+      }
     }
   }
 }
