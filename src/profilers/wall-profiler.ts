@@ -104,7 +104,7 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
   }
 
   private generateLabels(args: GenerateTimeLabelsArgs): LabelSet {
-    return { ...(args.context?.context.labels ?? {}) };
+    return { ...(args.context?.context?.labels ?? {}) };
   }
 
   private innerProfile(restart: boolean): ProfileExport {
