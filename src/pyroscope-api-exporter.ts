@@ -64,9 +64,9 @@ export class PyroscopeApiExporter implements ProfileExporter {
     } else if (this.config.basicAuthUser && this.config.basicAuthPassword) {
       headers.set(
         'authorization',
-        Buffer.from(
+        `Basic ${Buffer.from(
           `${this.config.basicAuthUser}:${this.config.basicAuthPassword}`
-        ).toString('base64')
+        ).toString('base64')}`
       );
     }
 
