@@ -6,18 +6,23 @@ import busboy from 'busboy';
 import { Profile } from 'pprof-format';
 import zlib from 'zlib';
 
-// create a backend returns two promises: the http port it is listening on and the first call it receives
-const createBackend = (handler): Promise<number> => {
+// createBackend creates an Express server with an /ingest endpoint and returns a promise 
+// that resolves to the HTTP port the server is listening on
+const createBackend = (handler: express.RequestHandler): Promise<number> => {
   const server = express();
-  const port = new Promise<number>((resolvePort) => {
+  const port = new Promise<number>((resolvePort, rejectPort) => {
     const httpServer = server.listen(0, () => {
-      resolvePort(httpServer.address().port);
+      const address = httpServer.address();
+      if (address && typeof address === 'object') {
+        resolvePort(address.port);
+      } else {
+        rejectPort('Could not resolve port');
+      }
     });
   });
   server.post('/ingest', handler);
   return port;
 };
-
 type Numeric = number | bigint;
 
 const extractProfile = (
