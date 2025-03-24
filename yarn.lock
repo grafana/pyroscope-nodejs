@@ -46,10 +46,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@datadog/pprof@^5.4.1":
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-5.4.1.tgz#08c9bcf5d8efb2eeafdfc9f5bb5402f79fb41266"
-  integrity sha512-IvpL96e/cuh8ugP5O8Czdup7XQOLHeIDgM5pac5W7Lc1YzGe5zTtebKFpitvb1CPw1YY+1qFx0pWGgKP2kOfHg==
+"@datadog/pprof@^5.6.0":
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-5.6.0.tgz#b6f5c566512ba5e55c6dbf46e9f0f020cfd5c6b5"
+  integrity sha512-x7yN0s4wMnRqv3PWQ6eXKH5XE5qvCOwWbOsXqpT2Irbsc7Wcl5w5JrJUcbPCdSJGihpIh6kAeIrS6w/ZCcHy2Q==
   dependencies:
     delay "^5.0.0"
     node-gyp-build "<4.0"
@@ -948,7 +948,7 @@ define-data-property@^1.1.1:
 
 delay@^5.0.0:
   version "5.0.0"
-  resolved "https://registry.npmjs.org/delay/-/delay-5.0.0.tgz"
+  resolved "https://registry.yarnpkg.com/delay/-/delay-5.0.0.tgz#137045ef1b96e5071060dd5be60bf9334436bd1d"
   integrity sha512-ReEBKkIfe4ya47wlPYf/gu5ib6yUG0/Aez0JQZQz94kiWtRQvZIQbTiehsnwHvLSWJnQdhVeqYue7Id1dKr0qw==
 
 delayed-stream@~1.0.0:
@@ -1833,7 +1833,7 @@ negotiator@0.6.3:
 
 node-gyp-build@<4.0:
   version "3.9.0"
-  resolved "https://registry.npmjs.org/node-gyp-build/-/node-gyp-build-3.9.0.tgz"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-3.9.0.tgz#53a350187dd4d5276750da21605d1cb681d09e25"
   integrity sha512-zLcTg6P4AbcHPq465ZMFNXx7XpKKJh+7kkN699NiQWisR2uWYOWNWqRHAmbnmKiL4e9aLSlmy5U7rEMUXV59+A==
 
 npm-run-path@^5.1.0:
