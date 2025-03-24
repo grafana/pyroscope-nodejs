@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, onTestFinished } from 'vitest';
 
 import Pyroscope from '../src/index.js';
 import express from 'express';
@@ -6,7 +6,7 @@ import busboy from 'busboy';
 import { Profile } from 'pprof-format';
 import zlib from 'zlib';
 
-// createBackend creates an Express server with an /ingest endpoint and returns a promise 
+// createBackend creates an Express server with an /ingest endpoint and returns a promise
 // that resolves to the HTTP port the server is listening on
 const createBackend = (handler: express.RequestHandler): Promise<number> => {
   const server = express();
@@ -18,6 +18,9 @@ const createBackend = (handler: express.RequestHandler): Promise<number> => {
       } else {
         rejectPort('Could not resolve port');
       }
+    });
+    onTestFinished(() => {
+      httpServer.close();
     });
   });
   server.post('/ingest', handler);
