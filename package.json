@@ -44,6 +44,7 @@
   "dependencies": {
     "@datadog/pprof": "5.4.1",
     "debug": "^4.3.3",
+    "koa": "^2.16.1",
     "p-limit": "^3.1.0",
     "regenerator-runtime": "^0.13.11",
     "source-map": "^0.7.3"
@@ -52,6 +53,7 @@
     "@types/busboy": "^1.5.4",
     "@types/debug": "^4.1.7",
     "@types/express": "^4.17.13",
+    "@types/koa": "^2.15.0",
     "@types/source-map": "^0.5.7",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^7.10.0",
