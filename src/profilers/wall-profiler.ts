@@ -22,9 +22,10 @@ export interface GenerateTimeLabelsArgs {
 }
 
 export interface TimeProfileNodeContext {
-  context: ProfilerContext;
+  context?: object;
   timestamp: bigint;
-  cpuTime: number;
+  cpuTime?: number;
+  asyncId?: number;
 }
 
 export interface ProfilerContext {
@@ -104,7 +105,8 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
   }
 
   private generateLabels(args: GenerateTimeLabelsArgs): LabelSet {
-    return { ...(args.context?.context?.labels ?? {}) };
+    const context = args.context?.context as ProfilerContext | undefined;
+    return { ...(context?.labels ?? {}) };
   }
 
   private innerProfile(restart: boolean): ProfileExport {
