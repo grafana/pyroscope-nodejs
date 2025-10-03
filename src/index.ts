@@ -95,6 +95,7 @@ export default {
   SourceMapper,
   expressMiddleware,
   init,
+  getProfiler,
   getWallLabels,
   setWallLabels,
   getLabels,

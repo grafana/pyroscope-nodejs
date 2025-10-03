@@ -1,0 +1,70 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContinuousProfiler = void 0;
+const debug_1 = __importDefault(require("debug"));
+const log = (0, debug_1.default)('pyroscope::profiler');
+class ContinuousProfiler {
+    profiler;
+    exporter;
+    flushIntervalMs;
+    startArgs;
+    timer;
+    lastExport;
+    constructor(input) {
+        this.exporter = input.exporter;
+        this.flushIntervalMs = input.flushIntervalMs;
+        this.profiler = input.profiler;
+        this.startArgs = input.startArgs;
+    }
+    start() {
+        if (this.timer !== undefined) {
+            log('already started');
+            return;
+        }
+        log('start');
+        this.profiler.start(this.startArgs);
+        this.scheduleProfilingRound();
+    }
+    async stop() {
+        if (this.timer === undefined) {
+            log('already stopped');
+            return;
+        }
+        log('stopping');
+        clearTimeout(this.timer);
+        this.timer = undefined;
+        if (this.lastExport !== undefined) {
+            await this.lastExport;
+        }
+        try {
+            const profileExport = this.profiler.stop();
+            if (profileExport !== null) {
+                log('profile exporting');
+                await this.exporter.export(profileExport);
+            }
+        }
+        catch (e) {
+            log(`failed to capture last profile during stop: ${e}`);
+        }
+    }
+    scheduleProfilingRound() {
+        this.timer = setTimeout(() => {
+            setImmediate(() => {
+                void this.profilingRound();
+                this.scheduleProfilingRound();
+            });
+        }, this.flushIntervalMs);
+    }
+    async profilingRound() {
+        const profileExport = this.profiler.profile();
+        if (this.lastExport === undefined) {
+            this.lastExport = this.exporter.export(profileExport).catch();
+            await this.lastExport;
+            this.lastExport = undefined;
+        }
+    }
+}
+exports.ContinuousProfiler = ContinuousProfiler;
