@@ -40,15 +40,15 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-1.0.2.tgz#bbe12dca5b4ef983a0d0af4b07b9bc90ea0ababa"
   integrity sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==
 
-"@datadog/pprof@5.9.0":
-  version "5.9.0"
-  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-5.9.0.tgz#beacd1507304e3490900ff39ea108e7ea772921b"
-  integrity sha512-7KretVkHUANWe31u9cGJpxmUkyrXsCD+fmlZQUz/zk9mtQNC4uBIKX53VUFfrVj/bxAhEEIPw5XTYiMc5RJLsw==
+"@datadog/pprof@5.11.1":
+  version "5.11.1"
+  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-5.11.1.tgz#3eea3fb815b2d06111954d66dfaf6197fd874576"
+  integrity sha512-DX3F0v0BVOuP7RUBiu7bDhuGfFfICJRcElB+ZrEykMvkvBXe7FdVXoybYFviLH177hulwYTtW9Rcly7NXGarTw==
   dependencies:
     delay "^5.0.0"
     node-gyp-build "<4.0"
     p-limit "^3.1.0"
-    pprof-format "^2.1.0"
+    pprof-format "^2.2.1"
     source-map "^0.7.4"
 
 "@esbuild/aix-ppc64@0.25.1":
@@ -2016,10 +2016,10 @@ postcss@^8.5.3:
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
 
-pprof-format@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/pprof-format/-/pprof-format-2.1.0.tgz#acc8d7773bcf4faf0a3d3df11bceefba7ac06664"
-  integrity sha512-0+G5bHH0RNr8E5hoZo/zJYsL92MhkZjwrHp3O2IxmY8RJL9ooKeuZ8Tm0ZNBw5sGZ9TiM71sthTjWoR2Vf5/xw==
+pprof-format@^2.1.0, pprof-format@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/pprof-format/-/pprof-format-2.2.1.tgz#64d32207fb46990349eb52825defb449d6ccc9b4"
+  integrity sha512-p4tVN7iK19ccDqQv8heyobzUmbHyds4N2FI6aBMcXz6y99MglTWDxIyhFkNaLeEXs6IFUEzT0zya0icbSLLY0g==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
