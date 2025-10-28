@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "github>grafana/grafana-renovate-config/renovate.json"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "rangeStrategy": "bump"
+    }
+  ]
+}
