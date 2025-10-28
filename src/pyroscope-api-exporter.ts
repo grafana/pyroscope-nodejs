@@ -86,7 +86,25 @@ export class PyroscopeApiExporter implements ProfileExporter {
 
     const formData: FormData = new FormData();
 
-    formData.append('profile', new Blob([profileBuffer]), 'profile');
+    // Convert Node Buffer -> *definitely* an ArrayBuffer for TS 5.9 DOM typings.
+    // Buffer.buffer is ArrayBufferLike (ArrayBuffer | SharedArrayBuffer).
+    // Narrow at runtime; if it's a SharedArrayBuffer, copy into a new ArrayBuffer.
+    let arrayBuffer: ArrayBuffer;
+    const { buffer, byteOffset, byteLength } = profileBuffer;
+    if (buffer instanceof ArrayBuffer) {
+      // Safe: returns ArrayBuffer
+      arrayBuffer = buffer.slice(byteOffset, byteOffset + byteLength);
+    } else {
+      // SharedArrayBuffer path: copy to a new ArrayBuffer
+      const copy = new Uint8Array(byteLength);
+      copy.set(profileBuffer);
+      arrayBuffer = copy.buffer; // ArrayBuffer
+    }
+    formData.append(
+      'profile',
+      new Blob([arrayBuffer], { type: 'application/octet-stream' }),
+      'profile'
+    );
 
     return formData;
   }
