@@ -67,7 +67,7 @@
     "pprof-format": "^2.1.0",
     "prettier": "^2.4.0",
     "supertest": "^6.2.3",
-    "typescript": "^4.4.3",
+    "typescript": "^5.0.0",
     "vitest": "^3.0.9"
   },
   "engines": {
