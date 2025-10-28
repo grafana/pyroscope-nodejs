@@ -35,6 +35,7 @@ jobs:
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # 6.0.0
         with:
           node-version: 23.x
+          package-manager-cache: false
       - name: Install modules
         run: yarn
       - name: Lint code base
@@ -55,6 +56,7 @@ jobs:
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # 6.0.0
         with:
           node-version: ${{ matrix.node }}
+          package-manager-cache: false
       - name: Install modules
         run: yarn
       - name: Run build
