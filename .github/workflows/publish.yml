@@ -8,25 +8,25 @@ on:
       - 'v*'
 
 jobs:
-  release:
-    runs-on: ubuntu-x64-small
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: 'false'
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4 TODO this is unmaintained
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
+#  release:
+#    runs-on: ubuntu-x64-small
+#    permissions:
+#      contents: write
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+#        with:
+#          persist-credentials: 'false'
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4 TODO this is unmaintained
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: ${{ github.ref }}
+#          draft: false
+#          prerelease: false
 
   publish:
     runs-on: ubuntu-x64-small
