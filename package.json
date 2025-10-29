@@ -36,7 +36,7 @@
   "homepage": "https://github.com/grafana/pyroscope-nodejs",
   "repository": {
     "type": "git",
-    "url": "git@github.com:grafana/pyroscope-nodejs.git"
+    "url": "http://github.com/grafana/pyroscope-nodejs.git"
   },
   "bugs": {
     "url": "https://github.com/grafana/pyroscope-nodejs/issues"
