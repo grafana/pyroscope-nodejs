@@ -9,7 +9,7 @@ on:
 
 jobs:
 #  release:
-#    runs-on: ubuntu-x64-small
+#    runs-on: ubuntu-latest
 #    permissions:
 #      contents: write
 #    steps:
@@ -29,7 +29,7 @@ jobs:
 #          prerelease: false
 
   publish:
-    runs-on: ubuntu-x64-small
+    runs-on: ubuntu-latest
     environment: 'NPM Trusted Publishing'
     permissions:
       contents: read
