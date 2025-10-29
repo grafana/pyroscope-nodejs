@@ -30,6 +30,8 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
+    # Extra guard to make sure publishing is only on main branch which is protected.
+    if: startsWith(github.ref, 'refs/tags/') && github.event.base_ref == 'refs/heads/main'
     environment: 'NPM Trusted Publishing'
     permissions:
       contents: read
