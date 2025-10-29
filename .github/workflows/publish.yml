@@ -49,4 +49,4 @@ jobs:
       - name: Build
         run: yarn build
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --tag pre
