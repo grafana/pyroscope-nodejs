@@ -77,15 +77,7 @@ export class PyroscopeApiExporter implements ProfileExporter {
     return headers;
   }
 
-  private async buildUploadProfileFormData(
-    profile: Profile
-  ): Promise<FormData> {
-    const processedProfile: Profile = processProfile(profile);
-
-    const profileBuffer: Buffer = await encode(processedProfile);
-
-    const formData: FormData = new FormData();
-
+  private buildArrayBuffer(profileBuffer: Buffer): ArrayBuffer {
     // Convert Node Buffer -> *definitely* an ArrayBuffer for TS 5.9 DOM typings.
     // Buffer.buffer is ArrayBufferLike (ArrayBuffer | SharedArrayBuffer).
     // Narrow at runtime; if it's a SharedArrayBuffer, copy into a new ArrayBuffer.
@@ -100,6 +92,18 @@ export class PyroscopeApiExporter implements ProfileExporter {
       copy.set(profileBuffer);
       arrayBuffer = copy.buffer; // ArrayBuffer
     }
+
+    return arrayBuffer;
+  }
+
+  private async buildUploadProfileFormData(
+    profile: Profile
+  ): Promise<FormData> {
+    const processedProfile: Profile = processProfile(profile);
+    const profileBuffer: Buffer = await encode(processedProfile);
+
+    const formData: FormData = new FormData();
+    const arrayBuffer: ArrayBuffer = this.buildArrayBuffer(profileBuffer);
     formData.append(
       'profile',
       new Blob([arrayBuffer], { type: 'application/octet-stream' }),
