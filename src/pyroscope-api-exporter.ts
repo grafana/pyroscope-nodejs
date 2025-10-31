@@ -77,16 +77,32 @@ export class PyroscopeApiExporter implements ProfileExporter {
     return headers;
   }
 
+  private buildArrayBuffer(profileBuffer: Buffer): Uint8Array<ArrayBuffer> {
+    // A narrowing conversion since the profileBuffer can be an ArrayBuffer or SharedArrayBuffer
+    // (in practice, it's expected to be an ArrayBuffer).
+    let arrayBuffer: Uint8Array<ArrayBuffer>;
+    const { buffer, byteOffset, byteLength } = profileBuffer;
+    if (buffer instanceof ArrayBuffer) {
+      // Avoid a copy
+      arrayBuffer = new Uint8Array(buffer, byteOffset, byteLength);
+    } else {
+      // Need a copy if underlying buffer is shared
+      arrayBuffer = new Uint8Array(buffer, byteOffset, byteLength).slice();
+    }
+
+    return arrayBuffer;
+  }
+
   private async buildUploadProfileFormData(
     profile: Profile
   ): Promise<FormData> {
     const processedProfile: Profile = processProfile(profile);
-
     const profileBuffer: Buffer = await encode(processedProfile);
+    const arrayBuffer: Uint8Array<ArrayBuffer> =
+      this.buildArrayBuffer(profileBuffer);
 
     const formData: FormData = new FormData();
-
-    formData.append('profile', new Blob([profileBuffer]), 'profile');
+    formData.append('profile', new Blob([arrayBuffer]), 'profile');
 
     return formData;
   }
