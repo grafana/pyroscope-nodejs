@@ -77,20 +77,17 @@ export class PyroscopeApiExporter implements ProfileExporter {
     return headers;
   }
 
-  private buildArrayBuffer(profileBuffer: Buffer): ArrayBuffer {
-    // Convert Node Buffer -> *definitely* an ArrayBuffer for TS 5.9 DOM typings.
-    // Buffer.buffer is ArrayBufferLike (ArrayBuffer | SharedArrayBuffer).
-    // Narrow at runtime; if it's a SharedArrayBuffer, copy into a new ArrayBuffer.
-    let arrayBuffer: ArrayBuffer;
+  private buildArrayBuffer(profileBuffer: Buffer): Uint8Array<ArrayBuffer> {
+    // A narrowing conversion since the profileBuffer can be an ArrayBuffer or SharedArrayBuffer
+    // (in practice, it's expected to be an ArrayBuffer).
+    let arrayBuffer: Uint8Array<ArrayBuffer>;
     const { buffer, byteOffset, byteLength } = profileBuffer;
     if (buffer instanceof ArrayBuffer) {
-      // Safe: returns ArrayBuffer
-      arrayBuffer = buffer.slice(byteOffset, byteOffset + byteLength);
+      // Avoid a copy
+      arrayBuffer = new Uint8Array(buffer, byteOffset, byteLength);
     } else {
-      // SharedArrayBuffer path: copy to a new ArrayBuffer
-      const copy = new Uint8Array(byteLength);
-      copy.set(profileBuffer);
-      arrayBuffer = copy.buffer; // ArrayBuffer
+      // Need a copy if underlying buffer is shared
+      arrayBuffer = new Uint8Array(buffer, byteOffset, byteLength).slice();
     }
 
     return arrayBuffer;
@@ -101,14 +98,11 @@ export class PyroscopeApiExporter implements ProfileExporter {
   ): Promise<FormData> {
     const processedProfile: Profile = processProfile(profile);
     const profileBuffer: Buffer = await encode(processedProfile);
+    const arrayBuffer: Uint8Array<ArrayBuffer> =
+      this.buildArrayBuffer(profileBuffer);
 
     const formData: FormData = new FormData();
-    const arrayBuffer: ArrayBuffer = this.buildArrayBuffer(profileBuffer);
-    formData.append(
-      'profile',
-      new Blob([arrayBuffer], { type: 'application/octet-stream' }),
-      'profile'
-    );
+    formData.append('profile', new Blob([arrayBuffer]), 'profile');
 
     return formData;
   }
