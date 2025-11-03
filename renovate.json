@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "github>grafana/grafana-renovate-config/renovate.json"
-  ],
+  "extends": ["config:best-practices"],
   "packageRules": [
     {
       "matchManagers": ["npm"],
