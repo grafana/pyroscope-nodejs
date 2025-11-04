@@ -105,9 +105,9 @@ async function processSourceMap(
     //       type is expected to be of `RawSourceMap` but the existing
     //       working code uses a string.)
     consumer = (await new sourceMap.SourceMapConsumer(
-      // eslint-disable-next-line @typescript-eslint/ban-types
+      // eslint-disable-next-line @typescript-eslint/no-empty-object-type
       contents as {} as sourceMap.RawSourceMap
-      // eslint-disable-next-line @typescript-eslint/ban-types
+      // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     )) as {} as sourceMap.RawSourceMap;
   } catch (e) {
     throw error(
@@ -295,7 +295,7 @@ export class SourceMapper {
 
     // TODO: Determine how to remove the explicit cast here.
     const consumer: sourceMap.SourceMapConsumer =
-      // eslint-disable-next-line @typescript-eslint/ban-types
+      // eslint-disable-next-line @typescript-eslint/no-empty-object-type
       entry.mapConsumer as {} as sourceMap.SourceMapConsumer;
 
     const pos = consumer.originalPositionFor(generatedPos);
