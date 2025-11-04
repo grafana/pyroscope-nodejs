@@ -156,7 +156,7 @@ async function processSourceMap(
         logger.debug(`Loaded source map for ${generatedPath} => ${mapPath}`);
       }
       return;
-    } catch (err) {
+    } catch {
       if (debug) {
         logger.debug(`Generated path ${generatedPath} does not exist`);
       }
