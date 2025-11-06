@@ -1,7 +1,6 @@
 import 'regenerator-runtime/runtime.js';
 
 import { setLogger as datadogSetLogger } from '@datadog/pprof';
-import expressMiddleware from './express/middleware.js';
 import { Logger, setLogger as ourSetLogger } from './logger.js';
 import { PyroscopeProfiler } from './profilers/pyroscope-profiler.js';
 import {
@@ -91,9 +90,8 @@ function setLogger(logger: Logger): void {
   ourSetLogger(logger);
 }
 
-export default {
+const BaseImport: any = {
   SourceMapper,
-  expressMiddleware,
   init,
   getWallLabels,
   setWallLabels,
@@ -109,4 +107,22 @@ export default {
   stopWallProfiling,
   stopCpuProfiling,
   setLogger,
-};
+}
+
+await (async () => {
+  try {
+    const expressMiddleware = (await import('./middleware/express.js')).default;
+    BaseImport.expressMiddleware = expressMiddleware;
+  } catch (error) {
+    console.debug('Error loading express middleware:', error);
+  }
+
+  try {
+    const fastifyMiddleware = (await import('./middleware/fastify.js')).default;
+    BaseImport.fastifyMiddleware = fastifyMiddleware;
+  } catch (error) {
+    console.debug('Error loading fastify middleware:', error);
+  }
+})();
+
+export default BaseImport;
