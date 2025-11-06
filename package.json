@@ -65,7 +65,7 @@
     "husky": "^9.1.7",
     "pinst": "^3.0.0",
     "pprof-format": "^2.1.0",
-    "prettier": "^2.4.0",
+    "prettier": "^3.6.2",
     "supertest": "^7.1.4",
     "typescript": "^5.0.0",
     "vitest": "^4.0.0"
