@@ -62,7 +62,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^4.0.0",
     "express": "^5.1.0",
-    "husky": "^7.0.2",
+    "husky": "^9.1.7",
     "pinst": "^3.0.0",
     "pprof-format": "^2.1.0",
     "prettier": "^2.4.0",
