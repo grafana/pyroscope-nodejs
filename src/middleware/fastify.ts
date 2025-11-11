@@ -1,5 +1,9 @@
 import debug from 'debug';
-import type { FastifyRequest, FastifyReply, FastifyPluginCallback } from 'fastify';
+import type {
+  FastifyRequest,
+  FastifyReply,
+  FastifyPluginCallback,
+} from 'fastify';
 import { Profile } from 'pprof-format';
 import { Profiler } from '../profilers/profiler.js';
 import { PyroscopeProfiler } from '../profilers/pyroscope-profiler.js';
@@ -92,13 +96,17 @@ async function wallHandler(
 }
 
 const fastifyMiddleware = (): FastifyPluginCallback => {
-  const plugin: FastifyPluginCallback = (fastify: any, _options: any, done: any) => {
+  const plugin: FastifyPluginCallback = (
+    fastify: any,
+    _options: any,
+    done: any
+  ) => {
     // Registrar ruta para heap profiling
     fastify.get('/debug/pprof/heap', heapHandler);
-    
+
     // Registrar ruta para wall/CPU profiling
     fastify.get('/debug/pprof/profile', wallHandler);
-    
+
     done();
   };
   return plugin;

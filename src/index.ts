@@ -107,7 +107,7 @@ const BaseImport: any = {
   stopWallProfiling,
   stopCpuProfiling,
   setLogger,
-}
+};
 
 await (async () => {
   try {

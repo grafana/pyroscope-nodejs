@@ -15,7 +15,7 @@ describe('fastify middleware', () => {
     await app.register(Pyroscope.fastifyMiddleware());
     const response = await app.inject({
       method: 'GET',
-      url: '/debug/pprof/profile?seconds=1'
+      url: '/debug/pprof/profile?seconds=1',
     });
     expect(response.statusCode).toBe(200);
   });
@@ -24,7 +24,7 @@ describe('fastify middleware', () => {
     await app.register(Pyroscope.fastifyMiddleware());
     const response = await app.inject({
       method: 'GET',
-      url: '/debug/pprof/profile?seconds=1'
+      url: '/debug/pprof/profile?seconds=1',
     });
     expect(response.statusCode).toBe(200);
   });
@@ -51,7 +51,7 @@ describe('fastify middleware', () => {
     await app.register(Pyroscope.fastifyMiddleware());
     const response = await app.inject({
       method: 'GET',
-      url: '/debug/pprof/heap'
+      url: '/debug/pprof/heap',
     });
     expect(response.statusCode).toBe(200);
   });
@@ -60,7 +60,7 @@ describe('fastify middleware', () => {
     await app.register(Pyroscope.fastifyMiddleware());
     const response = await app.inject({
       method: 'GET',
-      url: '/debug/pprof/heap'
+      url: '/debug/pprof/heap',
     });
     expect(response.statusCode).toBe(200);
   });
@@ -71,11 +71,11 @@ describe('fastify middleware', () => {
     const [response1, response2] = await Promise.all([
       app.inject({
         method: 'GET',
-        url: '/debug/pprof/heap?seconds=1'
+        url: '/debug/pprof/heap?seconds=1',
       }),
       app.inject({
         method: 'GET',
-        url: '/debug/pprof/heap?seconds=1'
+        url: '/debug/pprof/heap?seconds=1',
       }),
     ]);
     expect(response1.statusCode).toBe(200);
@@ -91,13 +91,13 @@ describe('fastify middleware', () => {
 
     const response1 = await app.inject({
       method: 'GET',
-      url: '/debug/pprof/heap'
+      url: '/debug/pprof/heap',
     });
     expect(response1.statusCode).toBe(200);
 
     const response2 = await app2.inject({
       method: 'GET',
-      url: '/debug/pprof/heap'
+      url: '/debug/pprof/heap',
     });
     expect(response2.statusCode).toBe(200);
   });
