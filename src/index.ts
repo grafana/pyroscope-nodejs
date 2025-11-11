@@ -90,6 +90,7 @@ function setLogger(logger: Logger): void {
   ourSetLogger(logger);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BaseImport: any = {
   SourceMapper,
   init,
