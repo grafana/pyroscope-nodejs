@@ -61,8 +61,6 @@
     "eslint": "^8.5.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
-    "express": "^5.1.0",
-    "fastify": "^5.6.1",
     "husky": "^9.1.7",
     "pinst": "^3.0.0",
     "pprof-format": "^2.2.1",
@@ -70,6 +68,18 @@
     "supertest": "^7.1.4",
     "typescript": "^5.9.3",
     "vitest": "^4.0.6"
+  },
+  "peerDependencies": {
+    "express": "^5.1.0",
+    "fastify": "^5.6.1"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=v18"
