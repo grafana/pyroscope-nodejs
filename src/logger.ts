@@ -15,42 +15,42 @@
  */
 
 export interface Logger {
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   error(...args: Array<{}>): void;
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   trace(...args: Array<{}>): void;
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   debug(...args: Array<{}>): void;
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   info(...args: Array<{}>): void;
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   warn(...args: Array<{}>): void;
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   fatal(...args: Array<{}>): void;
 }
 
 export class NullLogger implements Logger {
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
   info(...args: Array<{}>): void {
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
   error(...args: Array<{}>): void {
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
   trace(...args: Array<{}>): void {
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
   warn(...args: Array<{}>): void {
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
   fatal(...args: Array<{}>): void {
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
   debug(...args: Array<{}>): void {
     return;
   }
