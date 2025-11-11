@@ -97,10 +97,10 @@ async function wallHandler(
 
 const fastifyMiddleware = (): FastifyPluginCallback => {
   const plugin: FastifyPluginCallback = (fastify, _options, done) => {
-    // Registrar ruta para heap profiling
+    // Register route for heap profiling
     fastify.get('/debug/pprof/heap', heapHandler);
 
-    // Registrar ruta para wall/CPU profiling
+    // Register route for wall/CPU profiling
     fastify.get('/debug/pprof/profile', wallHandler);
 
     done();
