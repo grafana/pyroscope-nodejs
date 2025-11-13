@@ -1,7 +1,8 @@
 import 'regenerator-runtime/runtime.js';
 
 import { setLogger as datadogSetLogger } from '@datadog/pprof';
-import expressMiddleware from './express/middleware.js';
+import expressMiddleware from './middleware/express.js';
+import fastifyMiddleware from './middleware/fastify.js';
 import { Logger, setLogger as ourSetLogger } from './logger.js';
 import { PyroscopeProfiler } from './profilers/pyroscope-profiler.js';
 import {
@@ -94,6 +95,7 @@ function setLogger(logger: Logger): void {
 export default {
   SourceMapper,
   expressMiddleware,
+  fastifyMiddleware,
   init,
   getWallLabels,
   setWallLabels,
