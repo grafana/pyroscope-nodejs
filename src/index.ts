@@ -1,6 +1,8 @@
 import 'regenerator-runtime/runtime.js';
 
 import { setLogger as datadogSetLogger } from '@datadog/pprof';
+import expressMiddleware from './middleware/express.js';
+import fastifyMiddleware from './middleware/fastify.js';
 import { Logger, setLogger as ourSetLogger } from './logger.js';
 import { PyroscopeProfiler } from './profilers/pyroscope-profiler.js';
 import {
@@ -90,9 +92,10 @@ function setLogger(logger: Logger): void {
   ourSetLogger(logger);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const BaseImport: any = {
+export default {
   SourceMapper,
+  expressMiddleware,
+  fastifyMiddleware,
   init,
   getWallLabels,
   setWallLabels,
@@ -109,21 +112,3 @@ const BaseImport: any = {
   stopCpuProfiling,
   setLogger,
 };
-
-await (async () => {
-  try {
-    const expressMiddleware = (await import('./middleware/express.js')).default;
-    BaseImport.expressMiddleware = expressMiddleware;
-  } catch (error) {
-    console.debug('Error loading express middleware:', error);
-  }
-
-  try {
-    const fastifyMiddleware = (await import('./middleware/fastify.js')).default;
-    BaseImport.fastifyMiddleware = fastifyMiddleware;
-  } catch (error) {
-    console.debug('Error loading fastify middleware:', error);
-  }
-})();
-
-export default BaseImport;
