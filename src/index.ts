@@ -94,36 +94,9 @@ function setLogger(logger: Logger): void {
 let expressMiddleware: (() => unknown) | undefined;
 let fastifyMiddleware: (() => unknown) | undefined;
 
-// Load middleware asynchronously without blocking module export
-// For CJS: use synchronous require() if available
-// For ESM: use dynamic import()
-// This pattern works for both module systems
-const loadMiddleware = (() => {
-  // Try synchronous require first (works in CJS)
-  if (typeof require !== 'undefined') {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const expressModule = require('./middleware/express.js');
-      if (expressModule?.default) {
-        expressMiddleware = expressModule.default;
-      }
-    } catch (error) {
-      // Will fall back to async import
-    }
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const fastifyModule = require('./middleware/fastify.js');
-      if (fastifyModule?.default) {
-        fastifyMiddleware = fastifyModule.default;
-      }
-    } catch (error) {
-      // Will fall back to async import
-    }
-  }
-
-  // Start async loading (for ESM or if require failed)
-  // This doesn't block the module export
-  void Promise.allSettled([
+// Load middleware before creating BaseImport to eliminate race conditions
+await (async () => {
+  await Promise.allSettled([
     import('./middleware/express.js')
       .then((module) => {
         expressMiddleware = module.default;
