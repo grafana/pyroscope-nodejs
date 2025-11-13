@@ -90,6 +90,30 @@ function setLogger(logger: Logger): void {
   ourSetLogger(logger);
 }
 
+// Load middleware eagerly - this ensures middleware is loaded before the module exports
+let expressMiddleware: (() => unknown) | undefined;
+let fastifyMiddleware: (() => unknown) | undefined;
+
+// Load middleware before creating BaseImport to eliminate race conditions
+await (async () => {
+  await Promise.allSettled([
+    import('./middleware/express.js')
+      .then((module) => {
+        expressMiddleware = module.default;
+      })
+      .catch((error) => {
+        console.debug('Error loading express middleware:', error);
+      }),
+    import('./middleware/fastify.js')
+      .then((module) => {
+        fastifyMiddleware = module.default;
+      })
+      .catch((error) => {
+        console.debug('Error loading fastify middleware:', error);
+      }),
+  ]);
+})();
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BaseImport: any = {
   SourceMapper,
@@ -108,22 +132,22 @@ const BaseImport: any = {
   stopWallProfiling,
   stopCpuProfiling,
   setLogger,
+  get expressMiddleware() {
+    if (expressMiddleware === undefined) {
+      throw new Error(
+        'Express middleware failed to load. Please ensure express is installed as a peer dependency.'
+      );
+    }
+    return expressMiddleware;
+  },
+  get fastifyMiddleware() {
+    if (fastifyMiddleware === undefined) {
+      throw new Error(
+        'Fastify middleware failed to load. Please ensure fastify is installed as a peer dependency.'
+      );
+    }
+    return fastifyMiddleware;
+  },
 };
-
-await (async () => {
-  try {
-    const expressMiddleware = (await import('./middleware/express.js')).default;
-    BaseImport.expressMiddleware = expressMiddleware;
-  } catch (error) {
-    console.debug('Error loading express middleware:', error);
-  }
-
-  try {
-    const fastifyMiddleware = (await import('./middleware/fastify.js')).default;
-    BaseImport.fastifyMiddleware = fastifyMiddleware;
-  } catch (error) {
-    console.debug('Error loading fastify middleware:', error);
-  }
-})();
 
 export default BaseImport;
