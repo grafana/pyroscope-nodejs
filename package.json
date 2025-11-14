@@ -85,5 +85,8 @@
   },
   "engines": {
     "node": ">=v18"
+  },
+  "resolutions": {
+    "brace-expansion": "^1.1.12 || ^2.0.2"
   }
 }
