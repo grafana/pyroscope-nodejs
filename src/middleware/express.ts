@@ -101,7 +101,11 @@ export default function expressMiddleware(): (
   res: ExpressResponse,
   next: ExpressNextFunction
 ) => void {
-  return (req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => {
+  return (
+    req: ExpressRequest,
+    res: ExpressResponse,
+    next: ExpressNextFunction
+  ) => {
     if (req.method === 'GET') {
       if (req.path === '/debug/pprof/heap') {
         return heapHandler(req, res, next);

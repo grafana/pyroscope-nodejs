@@ -45,10 +45,7 @@ export type FastifyDoneCallback = (err?: Error) => void;
 export interface FastifyInstance {
   get<T>(
     path: string,
-    handler: (
-      request: FastifyRequest<T>,
-      reply: FastifyReply
-    ) => Promise<void>
+    handler: (request: FastifyRequest<T>, reply: FastifyReply) => Promise<void>
   ): void;
 }
 
