@@ -3,7 +3,9 @@ import type {
   FastifyRequest,
   FastifyReply,
   FastifyPluginCallback,
-} from 'fastify';
+  FastifyInstance,
+  FastifyDoneCallback,
+} from './types.js';
 import { Profile } from 'pprof-format';
 import { Profiler } from '../profilers/profiler.js';
 import { PyroscopeProfiler } from '../profilers/pyroscope-profiler.js';
@@ -96,7 +98,11 @@ async function wallHandler(
 }
 
 const fastifyMiddleware = (): FastifyPluginCallback => {
-  const plugin: FastifyPluginCallback = (fastify, _options, done) => {
+  const plugin: FastifyPluginCallback = (
+    fastify: FastifyInstance,
+    _options: Record<string, unknown>,
+    done: FastifyDoneCallback
+  ) => {
     // Register route for heap profiling
     fastify.get('/debug/pprof/heap', heapHandler);
 

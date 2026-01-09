@@ -51,7 +51,6 @@
   "devDependencies": {
     "@types/busboy": "^1.5.4",
     "@types/debug": "^4.1.12",
-    "@types/express": "^5.0.6",
     "@types/source-map": "^0.5.7",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.51.0",
