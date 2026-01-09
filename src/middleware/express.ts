@@ -1,5 +1,10 @@
 import debug from 'debug';
-import { NextFunction, Request, Response, RequestHandler } from 'express';
+import type {
+  ExpressNextFunction,
+  ExpressRequest,
+  ExpressResponse,
+  ExpressRequestHandler,
+} from './types.js';
 import { Profile } from 'pprof-format';
 import { Profiler } from '../profilers/profiler.js';
 import { PyroscopeProfiler } from '../profilers/pyroscope-profiler.js';
@@ -64,12 +69,12 @@ function collectWall(ms: number): Promise<Buffer> {
 
 function profileExpressHandler(
   profileKind: string,
-  useCaseHandler: (req: Request) => Promise<Buffer>
-): RequestHandler {
+  useCaseHandler: (req: ExpressRequest) => Promise<Buffer>
+): ExpressRequestHandler {
   return async (
-    req: Request,
-    res: Response
-    // next: NextFunction
+    req: ExpressRequest,
+    res: ExpressResponse
+    // next: ExpressNextFunction
   ): Promise<void> => {
     log(`Fetching ${profileKind} Profile`);
     try {
@@ -82,21 +87,21 @@ function profileExpressHandler(
   };
 }
 
-const heapHandler: RequestHandler = profileExpressHandler('Heap', () =>
+const heapHandler: ExpressRequestHandler = profileExpressHandler('Heap', () =>
   collectHeap()
 );
 
-const wallHandler: RequestHandler = profileExpressHandler(
+const wallHandler: ExpressRequestHandler = profileExpressHandler(
   'Wall',
-  (req: Request) => collectWall(1000 * Number(req.query.seconds))
+  (req: ExpressRequest) => collectWall(1000 * Number(req.query.seconds))
 );
 
 export default function expressMiddleware(): (
-  req: Request,
-  res: Response,
-  next: NextFunction
+  req: ExpressRequest,
+  res: ExpressResponse,
+  next: ExpressNextFunction
 ) => void {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => {
     if (req.method === 'GET') {
       if (req.path === '/debug/pprof/heap') {
         return heapHandler(req, res, next);
