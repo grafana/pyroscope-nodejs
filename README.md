@@ -22,17 +22,6 @@ Visit [docs](https://grafana.com/docs/pyroscope/latest/configure-client/language
 [docs]: https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs
 [releases]: https://www.npmjs.com/package/@pyroscope/nodejs
 
-## Release
-
-1. Create new release branch (e.g. `v0.4.8`)
-2. Update `package.json` with new RC version (e.g. `v0.4.8-rc1`)
-3. Create new RC tag (e.g. `v0.4.8-rc1`)
-4. Push branch and tag, confirm [release and publish action](https://github.com/grafana/pyroscope-nodejs/actions/workflows/publish.yml) is successful
-5. Confirm RC is [available in NPM](https://www.npmjs.com/package/@pyroscope/nodejs?activeTab=versions)
-6. New RCs are added to the release branch with new tags (e.g. `v0.4.8-rc2`) with `package.json` version updated appropriately
-7. Once ready for release, update `package.json` version and merge branch PR to main
-8. Finally, set release tag (e.g. `v0.4.8`) on this commit in main and confirm release
-
 ## Maintainers
 
 This package is maintained by [@grafana/pyroscope-nodejs](https://github.com/orgs/grafana/teams/pyroscope-nodejs).
