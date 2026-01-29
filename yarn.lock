@@ -200,7 +200,7 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
-"@fastify/ajv-compiler@^4.0.0":
+"@fastify/ajv-compiler@^4.0.5":
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@fastify/ajv-compiler/-/ajv-compiler-4.0.5.tgz#fdb0887a7af51abaae8c1829e8099d34f8ddd302"
   integrity sha512-KoWKW+MhvfTRWL4qrhUwAAZoaChluo0m0vbiJlGMt2GXvL4LVPQEjt8kSpHI3IBq5Rez8fg+XeH3cneztq+C7A==
@@ -1354,12 +1354,12 @@ fast-uri@^3.0.0, fast-uri@^3.0.1:
   resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.0.tgz#66eecff6c764c0df9b762e62ca7edcfb53b4edfa"
   integrity sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==
 
-fastify@^5.6.2:
-  version "5.6.2"
-  resolved "https://registry.yarnpkg.com/fastify/-/fastify-5.6.2.tgz#e9bd80c869f54440f62f539d646b1c303b56c40f"
-  integrity sha512-dPugdGnsvYkBlENLhCgX8yhyGCsCPrpA8lFWbTNU428l+YOnLgYHR69hzV8HWPC79n536EqzqQtvhtdaCE0dKg==
+fastify@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/fastify/-/fastify-5.7.2.tgz#3487cd6bd709a28fff00b9c1df3f3390eaa85f59"
+  integrity sha512-dBJolW+hm6N/yJVf6J5E1BxOBNkuXNl405nrfeR8SpvGWG3aCC2XDHyiFBdow8Win1kj7sjawQc257JlYY6M/A==
   dependencies:
-    "@fastify/ajv-compiler" "^4.0.0"
+    "@fastify/ajv-compiler" "^4.0.5"
     "@fastify/error" "^4.0.0"
     "@fastify/fast-json-stringify-compiler" "^5.0.0"
     "@fastify/proxy-addr" "^5.0.0"
