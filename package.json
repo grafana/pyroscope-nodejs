@@ -21,6 +21,7 @@
     "lint": "eslint --cache --ignore-path ./.gitignore --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "yarn lint --fix",
     "test": "vitest",
+    "bun:smoke": "npm run build:cjs && npm run build:esm && bun ./tools/bun-smoke.mjs",
     "test:cov": "vitest run --coverage",
     "addscope": "node tools/packagejson name @pyroscope"
   },
