@@ -85,6 +85,35 @@ describe('common behaviour of profilers', () => {
     expect(req.query.name).toBe('nodejs{}');
   });
 
+  it('should set wall sampleRate from samplingIntervalMicros', async () => {
+    const firstRequest = new Promise<express.Request>((resolve) => {
+      const port = createBackend(
+        (req: express.Request, res: express.Response) => {
+          resolve(req);
+          res.send('ok');
+        }
+      );
+
+      port.then((p: number) => {
+        Pyroscope.init({
+          serverAddress: `http://localhost:${p}`,
+          appName: 'nodejs',
+          flushIntervalMs: 100,
+          wall: {
+            samplingDurationMs: 1000,
+            samplingIntervalMicros: 10000,
+          },
+        });
+        Pyroscope.startWallProfiling();
+        doWork(0.1);
+      });
+    });
+
+    const req = await firstRequest;
+    await Pyroscope.stopWallProfiling();
+    expect(req.query.sampleRate).toBe('100');
+  });
+
   it('should call a server on startHeapProfiling and clear gracefully', async () => {
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(

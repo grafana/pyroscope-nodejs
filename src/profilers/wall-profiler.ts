@@ -81,7 +81,7 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
       log('start');
 
       this.lastProfiledAt = new Date();
-      this.lastSamplingIntervalMicros = args.samplingDurationMs;
+      this.lastSamplingIntervalMicros = args.samplingIntervalMicros;
       time.start({
         sourceMapper: args.sourceMapper,
         durationMillis: args.samplingDurationMs,
