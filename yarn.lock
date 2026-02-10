@@ -34,7 +34,7 @@
 
 "@datadog/pprof@git+https://github.com/SamuelLHuber/pprof-nodejs.git#pyroscope-ts-bun-compat-2026-02-10":
   version "6.0.0-pre"
-  resolved "git+https://github.com/SamuelLHuber/pprof-nodejs.git#d7c88a332a51321959dfdbbef2ec0b1114f3eb52"
+  resolved "git+https://github.com/SamuelLHuber/pprof-nodejs.git#be0a9fd3285fbb154e56c5f606d715d2f6571c47"
   dependencies:
     delay "^5.0.0"
     node-gyp-build "<4.0"
