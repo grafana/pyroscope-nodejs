@@ -66,7 +66,18 @@ jobs:
         run: yarn test
 
   bun-smoke:
-    runs-on: ubuntu-x64-small
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - triplet: linux-x64
+            runs-on: ubuntu-x64-small
+          - triplet: linux-arm64
+            runs-on: ubuntu-24.04-arm
+          - triplet: darwin-arm64
+            runs-on: macos-14
+    runs-on: ${{ matrix.runs-on }}
+    name: bun-smoke-${{ matrix.triplet }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
