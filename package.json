@@ -42,7 +42,7 @@
     "url": "https://github.com/grafana/pyroscope-nodejs/issues"
   },
   "dependencies": {
-    "@datadog/pprof": "6.0.0-pre",
+    "@datadog/pprof": "git+https://github.com/SamuelLHuber/pprof-nodejs.git#8c226c2411bdd59c2156afc97cc38e5b3e2759fd",
     "debug": "^4.4.3",
     "p-limit": "^7.2.0",
     "regenerator-runtime": "^0.14.1",
