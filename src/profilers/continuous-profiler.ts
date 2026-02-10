@@ -18,6 +18,7 @@ export class ContinuousProfiler<TStartArgs> {
   readonly startArgs: TStartArgs;
   private timer: NodeJS.Timeout | undefined;
   private lastExport: Promise<void> | undefined;
+  private running = false;
 
   constructor(input: ContinuousProfilerInput<TStartArgs>) {
     this.exporter = input.exporter;
@@ -27,26 +28,30 @@ export class ContinuousProfiler<TStartArgs> {
   }
 
   public start(): void {
-    if (this.timer !== undefined) {
+    if (this.running) {
       log('already started');
       return;
     }
 
     log('start');
+    this.running = true;
     this.profiler.start(this.startArgs);
     this.scheduleProfilingRound();
   }
 
   public async stop(): Promise<void> {
-    if (this.timer === undefined) {
+    if (!this.running) {
       log('already stopped');
       return;
     }
 
     log('stopping');
+    this.running = false;
 
-    clearTimeout(this.timer);
-    this.timer = undefined;
+    if (this.timer !== undefined) {
+      clearTimeout(this.timer);
+      this.timer = undefined;
+    }
 
     if (this.lastExport !== undefined) {
       await this.lastExport;
@@ -68,8 +73,15 @@ export class ContinuousProfiler<TStartArgs> {
   private scheduleProfilingRound() {
     this.timer = setTimeout(() => {
       setImmediate(() => {
-        void this.profilingRound();
-        this.scheduleProfilingRound();
+        void this.profilingRound()
+          .catch((error: unknown) => {
+            log(`failed to capture profile during round: ${String(error)}`);
+          })
+          .finally(() => {
+            if (this.running) {
+              this.scheduleProfilingRound();
+            }
+          });
       });
     }, this.flushIntervalMs);
   }
