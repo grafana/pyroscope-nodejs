@@ -32,9 +32,9 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-1.0.2.tgz#bbe12dca5b4ef983a0d0af4b07b9bc90ea0ababa"
   integrity sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==
 
-"@datadog/pprof@git+https://github.com/SamuelLHuber/pprof-nodejs.git#8c226c2411bdd59c2156afc97cc38e5b3e2759fd":
+"@datadog/pprof@git+https://github.com/SamuelLHuber/pprof-nodejs.git#5ed285304ec036b2e25bd9e8dffd7619b3252a46":
   version "6.0.0-pre"
-  resolved "git+https://github.com/SamuelLHuber/pprof-nodejs.git#8c226c2411bdd59c2156afc97cc38e5b3e2759fd"
+  resolved "git+https://github.com/SamuelLHuber/pprof-nodejs.git#5ed285304ec036b2e25bd9e8dffd7619b3252a46"
   dependencies:
     delay "^5.0.0"
     node-gyp-build "<4.0"
