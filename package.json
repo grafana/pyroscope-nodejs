@@ -44,7 +44,7 @@
   "dependencies": {
     "@datadog/pprof": "5.13.3",
     "debug": "^4.4.3",
-    "p-limit": "^7.3.0",
+    "tiny-limit": "^1.1.0",
     "regenerator-runtime": "^0.14.1",
     "source-map": "^0.7.6"
   },

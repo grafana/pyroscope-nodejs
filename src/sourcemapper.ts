@@ -24,7 +24,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as sourceMap from 'source-map';
 import { logger } from './logger.js';
-import pLimit from 'p-limit';
+import pLimit from 'tiny-limit';
 
 const readFile = fs.promises.readFile;
 
