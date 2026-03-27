@@ -1,6 +1,5 @@
 import { Function as PprofFunction, Profile } from 'pprof-format';
 
-// eslint-disable-next-line @typescript-eslint/typedef
 const V8_NAME_TO_GOLANG_NAME_MAP: Record<string, string> = {
   objects: 'inuse_objects',
   sample: 'samples',
