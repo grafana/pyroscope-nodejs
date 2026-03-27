@@ -23,7 +23,6 @@ on:
 permissions:
   contents: read
 
-
 jobs:
   lint:
     runs-on: ubuntu-x64-small
@@ -36,6 +35,8 @@ jobs:
         with:
           node-version: 25.x
           package-manager-cache: false
+      - name: Enable corepack
+        run: corepack enable
       - name: Install modules
         run: yarn
       - name: Lint code base
@@ -58,6 +59,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           package-manager-cache: false
+      - name: Enable corepack
+        run: corepack enable
       - name: Install modules
         run: yarn
       - name: Run build

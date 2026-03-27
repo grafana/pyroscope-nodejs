@@ -46,6 +46,8 @@ jobs:
           node-version: '25.2.0'
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
+      - name: Enable corepack
+        run: corepack enable
       - name: Install modules
         run: yarn
       - name: Build
