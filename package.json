@@ -67,7 +67,7 @@
     "pprof-format": "^2.2.1",
     "prettier": "^3.8.1",
     "supertest": "^7.2.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },
   "peerDependencies": {
