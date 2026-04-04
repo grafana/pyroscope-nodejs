@@ -83,7 +83,7 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24.14.1"
   },
   "resolutions": {
     "brace-expansion": "^5.0.5",
