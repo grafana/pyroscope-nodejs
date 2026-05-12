@@ -86,7 +86,7 @@ async function processSourceMap(
     // with regex find line that starts with "//# sourceMappingURL=data:application/json;base64"
     // and extract base64 string
     const base64Match = contents.match(
-      /\/\/# sourceMappingURL=data:application\/json;base64,([^\r\n]*)/
+      /\/\/# sourceMappingURL=data:application\/json;base64,([A-Za-z0-9+/=]*)/
     );
     if (base64Match) {
       contents = Buffer.from(base64Match[1], 'base64').toString();
