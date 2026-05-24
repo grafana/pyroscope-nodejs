@@ -47,17 +47,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@datadog/pprof@npm:5.13.3":
-  version: 5.13.3
-  resolution: "@datadog/pprof@npm:5.13.3"
+"@datadog/pprof@npm:5.14.4":
+  version: 5.14.4
+  resolution: "@datadog/pprof@npm:5.14.4"
   dependencies:
-    delay: "npm:^5.0.0"
     node-gyp: "npm:latest"
-    node-gyp-build: "npm:<4.0"
-    p-limit: "npm:^3.1.0"
+    node-gyp-build: "npm:^4.8.4"
     pprof-format: "npm:^2.2.1"
     source-map: "npm:^0.7.4"
-  checksum: 10c0/854831daa995a15f93b9595bc5749863f084bdc4a3ab05eed59da0bfabf28e03f3487789e3ce01a8f99c8e5541ab44def3a2c5871713d77efa1ef39b57c14abe
+  checksum: 10c0/6386c1660892c9910fa4da9c0b7b76bdfd1b3026da3f4a6457c80a93d3f9f87cbaa5c4f30bb739704e2f88667ef21ec9fc6686d3495692ebd82b810cd529c74e
   languageName: node
   linkType: hard
 
@@ -338,7 +336,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@pyroscope/nodejs@workspace:."
   dependencies:
-    "@datadog/pprof": "npm:5.13.3"
+    "@datadog/pprof": "npm:5.14.4"
     "@types/busboy": "npm:^1.5.4"
     "@types/debug": "npm:^4.1.12"
     "@types/source-map": "npm:^0.5.7"
@@ -1193,13 +1191,6 @@ __metadata:
   version: 0.1.4
   resolution: "deep-is@npm:0.1.4"
   checksum: 10c0/7f0ee496e0dff14a573dc6127f14c95061b448b87b995fc96c017ce0a1e66af1675e73f1d6064407975bc4ea6ab679497a29fff7b5b9c4e99cb10797c1ad0b4c
-  languageName: node
-  linkType: hard
-
-"delay@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "delay@npm:5.0.0"
-  checksum: 10c0/01cdc4cd0cd35fb622518a3df848e67e09763a38e7cdada2232b6fda9ddda72eddcf74f0e24211200fbe718434f2335f2a2633875a6c96037fefa6de42896ad7
   languageName: node
   linkType: hard
 
@@ -2531,14 +2522,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp-build@npm:<4.0":
-  version: 3.9.0
-  resolution: "node-gyp-build@npm:3.9.0"
+"node-gyp-build@npm:^4.8.4":
+  version: 4.8.4
+  resolution: "node-gyp-build@npm:4.8.4"
   bin:
-    node-gyp-build: ./bin.js
-    node-gyp-build-optional: ./optional.js
-    node-gyp-build-test: ./build-test.js
-  checksum: 10c0/0e7e39e5746728e6adf58803d9c3c732b6107f1af3df5128c4c2a6c9c0fb99a6c981ad0a7514d707adccbcfe303b4a92da7949408f1d3ec281f70d37bec29f60
+    node-gyp-build: bin.js
+    node-gyp-build-optional: optional.js
+    node-gyp-build-test: build-test.js
+  checksum: 10c0/444e189907ece2081fe60e75368784f7782cfddb554b60123743dfb89509df89f1f29c03bbfa16b3a3e0be3f48799a4783f487da6203245fa5bed239ba7407e1
   languageName: node
   linkType: hard
 
@@ -2626,7 +2617,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-limit@npm:^3.0.2, p-limit@npm:^3.1.0":
+"p-limit@npm:^3.0.2":
   version: 3.1.0
   resolution: "p-limit@npm:3.1.0"
   dependencies:
