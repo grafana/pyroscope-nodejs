@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'node:test';
+import { strict as assert } from 'node:assert';
 
 import Pyroscope from '../src/index.js';
 import Fastify from 'fastify';
@@ -8,7 +9,7 @@ Pyroscope.init();
 
 describe('fastify middleware', () => {
   it('should be a function', () => {
-    expect(typeof Pyroscope.fastifyMiddleware).toBe('function');
+    assert.strictEqual(typeof Pyroscope.fastifyMiddleware, 'function');
   });
   it('should respond to cpu calls', async () => {
     const app = Fastify();
@@ -17,7 +18,7 @@ describe('fastify middleware', () => {
       method: 'GET',
       url: '/debug/pprof/profile?seconds=1',
     });
-    expect(response.statusCode).toBe(200);
+    assert.strictEqual(response.statusCode, 200);
   });
   it('should respond to repetitive cpu calls', async () => {
     const app = Fastify();
@@ -26,7 +27,7 @@ describe('fastify middleware', () => {
       method: 'GET',
       url: '/debug/pprof/profile?seconds=1',
     });
-    expect(response.statusCode).toBe(200);
+    assert.strictEqual(response.statusCode, 200);
   });
 
   // it('should respond to simultaneous cpu calls', async () => {
@@ -43,8 +44,8 @@ describe('fastify middleware', () => {
   //       url: '/debug/pprof/profile?seconds=1'
   //     }),
   //   ])
-  //   expect(response1.statusCode).toBe(200)
-  //   expect(response2.statusCode).toBe(200)
+  //   assert.strictEqual(response1.statusCode, 200)
+  //   assert.strictEqual(response2.statusCode, 200)
   // })
   it('should respond to heap profiling calls', async () => {
     const app = Fastify();
@@ -53,7 +54,7 @@ describe('fastify middleware', () => {
       method: 'GET',
       url: '/debug/pprof/heap',
     });
-    expect(response.statusCode).toBe(200);
+    assert.strictEqual(response.statusCode, 200);
   });
   it('should respond to repetitive heap profiling calls', async () => {
     const app = Fastify();
@@ -62,7 +63,7 @@ describe('fastify middleware', () => {
       method: 'GET',
       url: '/debug/pprof/heap',
     });
-    expect(response.statusCode).toBe(200);
+    assert.strictEqual(response.statusCode, 200);
   });
 
   it('should respond to simultaneous heap profiling calls', async () => {
@@ -78,8 +79,8 @@ describe('fastify middleware', () => {
         url: '/debug/pprof/heap?seconds=1',
       }),
     ]);
-    expect(response1.statusCode).toBe(200);
-    expect(response2.statusCode).toBe(200);
+    assert.strictEqual(response1.statusCode, 200);
+    assert.strictEqual(response2.statusCode, 200);
   });
 
   it('should be fine using two middlewares at the same time', async () => {
@@ -93,12 +94,12 @@ describe('fastify middleware', () => {
       method: 'GET',
       url: '/debug/pprof/heap',
     });
-    expect(response1.statusCode).toBe(200);
+    assert.strictEqual(response1.statusCode, 200);
 
     const response2 = await app2.inject({
       method: 'GET',
       url: '/debug/pprof/heap',
     });
-    expect(response2.statusCode).toBe(200);
+    assert.strictEqual(response2.statusCode, 200);
   });
 });

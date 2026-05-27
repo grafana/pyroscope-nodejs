@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'node:test';
+import { strict as assert } from 'node:assert';
 
 import Pyroscope from '../src/index.js';
 import request from 'supertest';
@@ -9,7 +10,7 @@ Pyroscope.init();
 
 describe('express middleware', () => {
   it('should be a function', () => {
-    expect(typeof Pyroscope.expressMiddleware).toBe('function');
+    assert.strictEqual(typeof Pyroscope.expressMiddleware, 'function');
   });
   it('should respond to cpu calls', async () => {
     const app = express();
@@ -17,10 +18,10 @@ describe('express middleware', () => {
     return request(app)
       .get('/debug/pprof/profile?seconds=1')
       .then((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       })
       .catch((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       });
   });
   it('should respond to repetitive cpu calls', async () => {
@@ -29,10 +30,10 @@ describe('express middleware', () => {
     return request(app)
       .get('/debug/pprof/profile?seconds=1')
       .then((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       })
       .catch((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       });
   });
 
@@ -44,18 +45,18 @@ describe('express middleware', () => {
   //     request(app)
   //       .get('/debug/pprof/profile?seconds=1')
   //       .then((result) => {
-  //         expect(result.statusCode).toBe(200)
+  //         assert.strictEqual(result.statusCode, 200)
   //       })
   //       .catch((result) => {
-  //         expect(result.statusCode).toBe(200)
+  //         assert.strictEqual(result.statusCode, 200)
   //       }),
   //     request(app)
   //       .get('/debug/pprof/profile?seconds=1')
   //       .then((result) => {
-  //         expect(result.statusCode).toBe(200)
+  //         assert.strictEqual(result.statusCode, 200)
   //       })
   //       .catch((result) => {
-  //         expect(result.statusCode).toBe(200)
+  //         assert.strictEqual(result.statusCode, 200)
   //       }),
   //   ])
   // })
@@ -64,9 +65,9 @@ describe('express middleware', () => {
     app.use(Pyroscope.expressMiddleware());
     return request(app)
       .get('/debug/pprof/heap')
-      .then((result) => expect(result.statusCode).toBe(200))
+      .then((result) => assert.strictEqual(result.statusCode, 200))
       .catch((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       });
   });
   it('should respond to repetitive heap profiling calls', () => {
@@ -74,27 +75,27 @@ describe('express middleware', () => {
     app.use(Pyroscope.expressMiddleware());
     return request(app)
       .get('/debug/pprof/heap')
-      .then((result) => expect(result.statusCode).toBe(200))
+      .then((result) => assert.strictEqual(result.statusCode, 200))
       .catch((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       });
   });
 
-  it('should respond to simultaneous heap profiling calls', () => {
+  it('should respond to simultaneous heap profiling calls', async () => {
     const app = express();
     app.use(Pyroscope.expressMiddleware());
-    return Promise.all([
+    await Promise.all([
       request(app)
         .get('/debug/pprof/heap?seconds=1')
-        .then((result) => expect(result.statusCode).toBe(200))
+        .then((result) => assert.strictEqual(result.statusCode, 200))
         .catch((result) => {
-          expect(result.statusCode).toBe(200);
+          assert.strictEqual(result.statusCode, 200);
         }),
       request(app)
         .get('/debug/pprof/heap?seconds=1')
-        .then((result) => expect(result.statusCode).toBe(200))
+        .then((result) => assert.strictEqual(result.statusCode, 200))
         .catch((result) => {
-          expect(result.statusCode).toBe(200);
+          assert.strictEqual(result.statusCode, 200);
         }),
     ]);
   });
@@ -108,16 +109,16 @@ describe('express middleware', () => {
 
     request(app)
       .get('/debug/pprof/heap')
-      .then((result) => expect(result.statusCode).toBe(200))
+      .then((result) => assert.strictEqual(result.statusCode, 200))
       .catch((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       });
 
     request(app2)
       .get('/debug/pprof/heap')
-      .then((result) => expect(result.statusCode).toBe(200))
+      .then((result) => assert.strictEqual(result.statusCode, 200))
       .catch((result) => {
-        expect(result.statusCode).toBe(200);
+        assert.strictEqual(result.statusCode, 200);
       });
   });
 });
