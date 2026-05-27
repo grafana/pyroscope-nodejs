@@ -1,10 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, it } from 'node:test';
+import { strict as assert } from 'node:assert';
 
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { SourceMapper } from '../src/sourcemapper.ts';
+import { SourceMapper } from '../src/sourcemapper.js';
 
 function buildMinimalSourceMap(file: string): string {
   // sourceRoot filler is sized so the JSON length is divisible by 3 — the
@@ -67,7 +68,7 @@ describe('SourceMapper inline base64 sourcemap', () => {
 
     const mapper = await SourceMapper.create([tmpDir]);
 
-    expect(mapper.hasMappingInfo(jsFile)).toBe(true);
+    assert.strictEqual(mapper.hasMappingInfo(jsFile), true);
   });
 
   // Regression test for the regex at sourcemapper.ts:89. Some bundlers (or
@@ -86,7 +87,7 @@ describe('SourceMapper inline base64 sourcemap', () => {
 
     const mapper = await SourceMapper.create([tmpDir]);
 
-    expect(mapper.hasMappingInfo(jsFile)).toBe(true);
+    assert.strictEqual(mapper.hasMappingInfo(jsFile), true);
   });
 
   // The capture must also terminate at non-base64 characters that appear on
@@ -104,6 +105,6 @@ describe('SourceMapper inline base64 sourcemap', () => {
 
     const mapper = await SourceMapper.create([tmpDir]);
 
-    expect(mapper.hasMappingInfo(jsFile)).toBe(true);
+    assert.strictEqual(mapper.hasMappingInfo(jsFile), true);
   });
 });
