@@ -10,6 +10,7 @@ module.exports = [
       '**/*.test.js',
       '**/*.test.ts',
       'dist/**',
+      'dist-test/**',
     ],
   },
   ...tsEslintPlugin.configs['flat/recommended'],

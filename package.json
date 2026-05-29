@@ -20,8 +20,9 @@
     "format:fix": "prettier --write .",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "yarn lint --fix",
-    "test": "vitest",
-    "test:cov": "vitest run --coverage",
+    "build:test": "node tools/cleanup dist-test && tsc -p config/tsconfig.test.json && echo '{\"type\":\"module\"}' >./dist-test/package.json",
+    "test": "yarn build:test && node --test dist-test/test/*.test.js",
+    "test:cov": "yarn build:test && node --test --experimental-test-coverage dist-test/test/*.test.js",
     "addscope": "node tools/packagejson name @pyroscope"
   },
   "publishConfig": {
@@ -52,10 +53,8 @@
     "@types/busboy": "^1.5.4",
     "@types/debug": "^4.1.12",
     "@types/source-map": "^0.5.7",
-    "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "@typescript-eslint/parser": "^8.58.0",
-    "@vitest/coverage-v8": "^4.1.2",
     "busboy": "^1.6.0",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
@@ -66,9 +65,7 @@
     "pinst": "^3.0.0",
     "pprof-format": "^2.2.1",
     "prettier": "^3.8.1",
-    "supertest": "^7.2.2",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.2"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "express": "^4.0.0 || ^5.0.0",

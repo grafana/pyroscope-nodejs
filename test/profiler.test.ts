@@ -1,4 +1,5 @@
-import { describe, it, expect, onTestFinished } from 'vitest';
+import { describe, it, type TestContext } from 'node:test';
+import { strict as assert } from 'node:assert';
 
 import Pyroscope from '../src/index.js';
 import express from 'express';
@@ -8,7 +9,10 @@ import zlib from 'zlib';
 
 // createBackend creates an Express server with an /ingest endpoint and returns a promise
 // that resolves to the HTTP port the server is listening on
-const createBackend = (handler: express.RequestHandler): Promise<number> => {
+const createBackend = (
+  t: TestContext,
+  handler: express.RequestHandler
+): Promise<number> => {
   const server = express();
   const port = new Promise<number>((resolvePort, rejectPort) => {
     const httpServer = server.listen(0, () => {
@@ -19,7 +23,7 @@ const createBackend = (handler: express.RequestHandler): Promise<number> => {
         rejectPort('Could not resolve port');
       }
     });
-    onTestFinished(() => {
+    t.after(() => {
       httpServer.close();
     });
   });
@@ -56,9 +60,10 @@ const doWork = (d: number): void => {
 };
 
 describe('common behaviour of profilers', () => {
-  it('should call a server on startCpuProfiling and clear gracefully', async () => {
+  it('should call a server on startCpuProfiling and clear gracefully', async (t) => {
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(
+        t,
         (req: express.Request, res: express.Response) => {
           resolve(req);
           res.send('ok');
@@ -81,13 +86,21 @@ describe('common behaviour of profilers', () => {
 
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
-    expect(req.query.spyName).toBe('nodespy');
-    expect(req.query.name).toBe('nodejs{}');
+    assert.strictEqual(req.query.spyName, 'nodespy');
+    assert.strictEqual(req.query.name, 'nodejs{}');
   });
 
-  it('should call a server on startHeapProfiling and clear gracefully', async () => {
+  it('should call a server on startHeapProfiling and clear gracefully', async (t) => {
+    let timer: NodeJS.Timeout | undefined;
+    t.after(() => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    });
+
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(
+        t,
         (req: express.Request, res: express.Response) => {
           resolve(req);
           res.send('ok');
@@ -110,7 +123,7 @@ describe('common behaviour of profilers', () => {
         Pyroscope.startHeapProfiling();
 
         // Simulate memory usage
-        setInterval(() => {
+        timer = setInterval(() => {
           // Use some memory
           new Array<number>(2000)
             .fill(3)
@@ -124,11 +137,11 @@ describe('common behaviour of profilers', () => {
 
     const req = await firstRequest;
     await Pyroscope.stopHeapProfiling();
-    expect(req.query['spyName']).toBe('nodespy');
-    expect(req.query['name']).toBe('nodejs{env=test env}');
+    assert.strictEqual(req.query['spyName'], 'nodespy');
+    assert.strictEqual(req.query['name'], 'nodejs{env=test env}');
   });
 
-  it('should allow to call start profiling twice', async () => {
+  it('should allow to call start profiling twice', async (t) => {
     // Simulate memory usage
     const timer: NodeJS.Timeout = setInterval(() => {
       // Use some memory
@@ -139,6 +152,7 @@ describe('common behaviour of profilers', () => {
           0
         );
     }, 100);
+    t.after(() => clearInterval(timer));
 
     Pyroscope.init({
       serverAddress: 'http://localhost:4444',
@@ -162,10 +176,11 @@ describe('common behaviour of profilers', () => {
     clearInterval(timer);
   });
 
-  it('should have dynamic labels on wall profile', async () => {
+  it('should have dynamic labels on wall profile', async (t) => {
     const valuesPerLabel = new Map<string, Array<number>>();
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(
+        t,
         (req: express.Request, res: express.Response) => {
           extractProfile(req, res, (p: Profile) => {
             const s = (idx: Numeric): string =>
@@ -229,8 +244,8 @@ describe('common behaviour of profilers', () => {
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
 
-    expect(req.query['spyName']).toEqual('nodespy');
-    expect(req.query['name']).toEqual('nodejs{}');
+    assert.strictEqual(req.query['spyName'], 'nodespy');
+    assert.strictEqual(req.query['name'], 'nodejs{}');
 
     // ensure we contain everything expected
     const emptyLabels = JSON.stringify({});
@@ -240,23 +255,24 @@ describe('common behaviour of profilers', () => {
       brand: 'mercedes',
     });
 
-    expect(valuesPerLabel.keys()).toContain(emptyLabels);
-    expect(valuesPerLabel.keys()).toContain(vehicleOnly);
-    expect(valuesPerLabel.keys()).toContain(vehicleAndBrand);
+    assert.ok(valuesPerLabel.has(emptyLabels));
+    assert.ok(valuesPerLabel.has(vehicleOnly));
+    assert.ok(valuesPerLabel.has(vehicleAndBrand));
 
     const valuesVehicleOnly = valuesPerLabel.get(vehicleOnly) ?? [0, 0];
     const valuesVehicleAndBrand = valuesPerLabel.get(vehicleAndBrand) ?? [0, 0];
 
     // ensure the wall time is within a 20% range of each other
     const ratio = valuesVehicleOnly[1] / valuesVehicleAndBrand[1];
-    expect(ratio).toBeGreaterThan(0.8);
-    expect(ratio).toBeLessThan(1.2);
+    assert.ok(ratio > 0.8, `expected ${ratio} > 0.8`);
+    assert.ok(ratio < 1.2, `expected ${ratio} < 1.2`);
   });
 
-  it('should have extra samples for cpu time when enabled on wall profile', async () => {
+  it('should have extra samples for cpu time when enabled on wall profile', async (t) => {
     let sampleType: string[] = [];
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(
+        t,
         (req: express.Request, res: express.Response) => {
           extractProfile(req, res, (p: Profile) => {
             const s = (idx: number | bigint) =>
@@ -288,19 +304,20 @@ describe('common behaviour of profilers', () => {
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
 
-    expect(req.query['spyName']).toEqual('nodespy');
-    expect(req.query['name']).toEqual('nodejs{}');
+    assert.strictEqual(req.query['spyName'], 'nodespy');
+    assert.strictEqual(req.query['name'], 'nodejs{}');
     // expect sample, wall and cpu types
-    expect(sampleType).toEqual([
+    assert.deepStrictEqual(sampleType, [
       'samples=count',
       'wall=nanoseconds',
       'cpu=nanoseconds',
     ]);
   });
 
-  it('should send bearer authentication header when configured', async () => {
+  it('should send bearer authentication header when configured', async (t) => {
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(
+        t,
         (req: express.Request, res: express.Response) => {
           resolve(req);
           res.send('ok');
@@ -324,12 +341,13 @@ describe('common behaviour of profilers', () => {
 
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
-    expect(req.headers['authorization']).toBe('Bearer my-token');
+    assert.strictEqual(req.headers['authorization'], 'Bearer my-token');
   });
 
-  it('should send basic authentication header when configured', async () => {
+  it('should send basic authentication header when configured', async (t) => {
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(
+        t,
         (req: express.Request, res: express.Response) => {
           resolve(req);
           res.send('ok');
@@ -354,12 +372,16 @@ describe('common behaviour of profilers', () => {
 
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
-    expect(req.headers['authorization']).toBe('Basic dXNlcjpwYXNzd29yZA==');
+    assert.strictEqual(
+      req.headers['authorization'],
+      'Basic dXNlcjpwYXNzd29yZA=='
+    );
   });
 
-  it('should send x-scope-orgid header when configured', async () => {
+  it('should send x-scope-orgid header when configured', async (t) => {
     const firstRequest = new Promise<express.Request>((resolve) => {
       const port = createBackend(
+        t,
         (req: express.Request, res: express.Response) => {
           resolve(req);
           res.send('ok');
@@ -383,6 +405,6 @@ describe('common behaviour of profilers', () => {
 
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
-    expect(req.headers['x-scope-orgid']).toBe('my-tenant-id');
+    assert.strictEqual(req.headers['x-scope-orgid'], 'my-tenant-id');
   });
 });
