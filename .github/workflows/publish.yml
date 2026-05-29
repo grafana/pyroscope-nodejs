@@ -1,44 +1,50 @@
-name: Release & Publish
+name: Release Please
 
 on:
   push:
-    tags:
-      # Note: this pattern is protected by a ruleset in the repo.
-      # Any changes to this pattern must be reflected in the ruleset.
-      - 'v*'
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  release:
+  release-please:
+    name: Run release-please
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      id-token: write
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+      tag_name: ${{ steps.rp.outputs.tag_name }}
+      sha: ${{ steps.rp.outputs.sha }}
+      version: ${{ steps.rp.outputs.version }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: get-github-app-token
+        uses: grafana/shared-workflows/actions/create-github-app-token@580590a644e82e79bb2598bdaba0be245a14dda0 # create-github-app-token/v0.2.2
         with:
-          persist-credentials: 'false'
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4 TODO this is unmaintained
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_app: pyroscope-development-app
+
+      - id: rp
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
+          token: ${{ steps.get-github-app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
   publish:
+    name: Publish npm package
+    needs: release-please
     runs-on: ubuntu-latest
-    # Extra guard to make sure publishing is only on v* tags, which are protected.
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: needs.release-please.outputs.release_created == 'true'
     environment: 'NPM Trusted Publishing'
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          ref: ${{ needs.release-please.outputs.sha }}
           persist-credentials: 'false'
       - name: Setup .npmrc file to publish to npm
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # 6.3.0
@@ -54,3 +60,8 @@ jobs:
         run: yarn build
       - name: Publish to npm
         run: npm publish
+      - name: Publish GitHub release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
+        run: gh release edit "$TAG_NAME" --draft=false
