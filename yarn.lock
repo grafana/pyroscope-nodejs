@@ -247,7 +247,7 @@ __metadata:
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-prettier: "npm:^5.5.5"
     express: "npm:^5.2.1"
-    fastify: "npm:^5.7.4"
+    fastify: "npm:^5.8.5"
     husky: "npm:^9.1.7"
     p-limit: "npm:^7.3.0"
     pinst: "npm:^3.0.0"
@@ -258,7 +258,7 @@ __metadata:
     typescript: "npm:^5.9.3"
   peerDependencies:
     express: ^4.0.0 || ^5.0.0
-    fastify: ^5.7.4
+    fastify: ^5.8.5
   peerDependenciesMeta:
     express:
       optional: true
@@ -1074,7 +1074,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fastify@npm:^5.7.4":
+"fastify@npm:^5.8.5":
   version: 5.8.5
   resolution: "fastify@npm:5.8.5"
   dependencies:
