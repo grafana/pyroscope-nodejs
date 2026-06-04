@@ -1,9 +1,7 @@
 {
-  "extends": ["github>grafana/grafana-renovate-config//presets/base"],
-  "packageRules": [
-    {
-      "matchManagers": ["npm"],
-      "rangeStrategy": "bump"
-    }
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>grafana/grafana-renovate-config//presets/base",
+    "security:only-security-updates"
   ]
 }
