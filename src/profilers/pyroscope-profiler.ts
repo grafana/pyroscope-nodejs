@@ -6,6 +6,8 @@ import { SourceMapper } from '../sourcemapper.js';
 import { ContinuousProfiler } from './continuous-profiler.js';
 import { HeapProfiler, HeapProfilerStartArgs } from './heap-profiler.js';
 import { WallProfiler, WallProfilerStartArgs } from './wall-profiler.js';
+import process from 'node:process';
+import { VERSION } from '../version.js';
 
 const MICROS_PER_SECOND = 1e6;
 const MS_PER_SECOND = 1e3;
@@ -43,11 +45,20 @@ export class PyroscopeProfiler {
 
   private buildApplicationName(config: PyroscopeConfig): string {
     const appName: string = config.appName ?? DEFAULT_APP_NAME;
-    const tagsStringified: string = Object.entries(config.tags ?? {})
-      .map(
-        ([tagKey, tagValue]: [string, number | string]) =>
-          `${tagKey}=${tagValue}`
-      )
+    const tags = config.tags ?? {};
+    const stringify = ([tagKey, tagValue]: [string, number | string]) => {
+      return `${tagKey}=${tagValue}`;
+    };
+
+    const tagsStringified = Object.entries({
+      'otel.scope.name': 'com.grafana.pyroscope/nodejs',
+      'otel.scope.version': VERSION,
+      'process.runtime.name': 'nodejs',
+      'process.runtime.version': process.versions.node,
+    })
+      .filter((e: [string, string]) => !(e[0] in tags))
+      .map(stringify)
+      .concat(Object.entries(tags).map(stringify))
       .join(',');
 
     return `${appName}{${tagsStringified}}`;
