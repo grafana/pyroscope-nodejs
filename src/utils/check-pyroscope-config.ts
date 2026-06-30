@@ -4,6 +4,9 @@ import {
   PyroscopeWallConfig,
 } from '../pyroscope-config.js';
 
+const INVALID_LABEL_CHARACTERS = ['{', '}', ',', '='] as const;
+const INVALID_LABEL_CHARACTERS_MESSAGE = "'{', '}', ',', or '=' characters";
+
 export function checkPyroscopeConfig(
   config: unknown
 ): asserts config is PyroscopeConfig {
@@ -15,7 +18,11 @@ export function checkPyroscopeConfig(
 
   if (!hasValidApplicationName(config)) {
     errors.push('Expecting a config with string appName');
+  } else {
+    validateApplicationName(config, errors);
   }
+
+  validateTags(config, errors);
 
   if (!hasValidAuthToken(config)) {
     errors.push('Expecting a config with string auth token');
@@ -49,6 +56,64 @@ function hasValidApplicationName(
     (config as Partial<PyroscopeConfig>).appName === undefined ||
     typeof (config as Partial<PyroscopeConfig>).appName === 'string'
   );
+}
+
+function validateApplicationName(
+  config: Record<string | symbol, unknown>,
+  errors: string[]
+): void {
+  const appName: string | undefined = (config as Partial<PyroscopeConfig>)
+    .appName;
+
+  if (appName === undefined) {
+    return;
+  }
+
+  if (hasInvalidLabelCharacters(appName)) {
+    errors.push(`appName must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`);
+  }
+}
+
+function validateTags(
+  config: Record<string | symbol, unknown>,
+  errors: string[]
+): void {
+  const tags: unknown = (config as Partial<PyroscopeConfig>).tags;
+
+  if (tags === undefined) {
+    return;
+  }
+
+  if (!isObject(tags)) {
+    errors.push('Expecting a config with object tags');
+    return;
+  }
+
+  for (const [tagKey, tagValue] of Object.entries(tags)) {
+    if (hasInvalidLabelCharacters(tagKey)) {
+      errors.push(
+        `tag key "${tagKey}" must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`
+      );
+    }
+
+    if (typeof tagValue === 'string' && hasInvalidLabelCharacters(tagValue)) {
+      errors.push(
+        `tag value for "${tagKey}" must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`
+      );
+    } else if (typeof tagValue !== 'number' && typeof tagValue !== 'string') {
+      errors.push(`tag value for "${tagKey}" must be a string or number`);
+    }
+  }
+}
+
+function hasInvalidLabelCharacters(value: string): boolean {
+  for (const character of INVALID_LABEL_CHARACTERS) {
+    if (value.includes(character)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function hasValidAuthToken(config: Record<string | symbol, unknown>): boolean {
