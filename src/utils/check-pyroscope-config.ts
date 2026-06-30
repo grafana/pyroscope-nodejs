@@ -5,8 +5,7 @@ import {
 } from '../pyroscope-config.js';
 
 const INVALID_LABEL_CHARACTERS = ['{', '}', ',', '='] as const;
-const INVALID_LABEL_CHARACTERS_MESSAGE =
-  "'{', '}', ',', or '=' characters";
+const INVALID_LABEL_CHARACTERS_MESSAGE = "'{', '}', ',', or '=' characters";
 
 export function checkPyroscopeConfig(
   config: unknown
@@ -71,9 +70,7 @@ function validateApplicationName(
   }
 
   if (hasInvalidLabelCharacters(appName)) {
-    errors.push(
-      `appName must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`
-    );
+    errors.push(`appName must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`);
   }
 }
 
@@ -103,10 +100,7 @@ function validateTags(
       errors.push(
         `tag value for "${tagKey}" must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`
       );
-    } else if (
-      typeof tagValue !== 'number' &&
-      typeof tagValue !== 'string'
-    ) {
+    } else if (typeof tagValue !== 'number' && typeof tagValue !== 'string') {
       errors.push(`tag value for "${tagKey}" must be a string or number`);
     }
   }
