@@ -1,0 +1,6 @@
+[tools]
+node = "26.2.0"
+
+[tools."npm:corepack"]
+version = "0.35.0"
+postinstall = "corepack enable"
