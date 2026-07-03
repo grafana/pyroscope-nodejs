@@ -98,10 +98,12 @@ function validateTags(
 
     if (typeof tagValue === 'string' && hasInvalidLabelCharacters(tagValue)) {
       errors.push(
-        `tag value for "${tagKey}" must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`
+        `tag value "${tagValue}" for key "${tagKey}" must not contain ${INVALID_LABEL_CHARACTERS_MESSAGE}`
       );
     } else if (typeof tagValue !== 'number' && typeof tagValue !== 'string') {
-      errors.push(`tag value for "${tagKey}" must be a string or number`);
+      errors.push(
+        `tag value "${String(tagValue)}" for key "${tagKey}" must be a string or number`
+      );
     }
   }
 }
