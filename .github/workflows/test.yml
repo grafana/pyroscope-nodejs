@@ -39,6 +39,8 @@ jobs:
         run: corepack enable
       - name: Install modules
         run: yarn
+      - name: Check version.ts is in sync with package.json
+        run: yarn check:version
       - name: Lint code base
         run: yarn lint
   test:

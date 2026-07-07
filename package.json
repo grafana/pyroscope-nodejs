@@ -12,7 +12,7 @@
   "scripts": {
     "prepublishOnly": "pinst --disable",
     "postpublish": "pinst --enable",
-    "build": "yarn build:cjs && yarn build:esm",
+    "build": "node tools/generate-version.js && yarn build:cjs && yarn build:esm",
     "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json",
     "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && echo '{\"type\":\"module\"}' >./dist/esm/package.json",
     "clean": "node tools/cleanup",
@@ -20,10 +20,10 @@
     "format:fix": "prettier --write .",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "yarn lint --fix",
-    "build:test": "node tools/cleanup dist-test && tsc -p config/tsconfig.test.json && echo '{\"type\":\"module\"}' >./dist-test/package.json",
+    "check:version": "node tools/generate-version.js && node tools/check-version.js",
+    "build:test": "node tools/generate-version.js && node tools/cleanup dist-test && tsc -p config/tsconfig.test.json && echo '{\"type\":\"module\"}' >./dist-test/package.json",
     "test": "yarn build:test && node --test dist-test/test/*.test.js",
-    "test:cov": "yarn build:test && node --test --experimental-test-coverage dist-test/test/*.test.js",
-    "addscope": "node tools/packagejson name @pyroscope"
+    "test:cov": "yarn build:test && node --test --experimental-test-coverage dist-test/test/*.test.js"
   },
   "publishConfig": {
     "access": "public"

@@ -1,11 +1,30 @@
 import { describe, it, type TestContext } from 'node:test';
 import { strict as assert } from 'node:assert';
+import process from 'node:process';
 
 import Pyroscope from '../src/index.js';
+import { VERSION } from '../src/version.js';
 import express from 'express';
 import busboy from 'busboy';
 import { Profile } from 'pprof-format';
 import zlib from 'zlib';
+
+function assertAppNameIncludes(name: unknown, ...parts: string[]): void {
+  const value = String(name);
+  for (const part of parts) {
+    assert.ok(
+      value.includes(part),
+      `expected app name to include ${JSON.stringify(part)}, got ${JSON.stringify(value)}`
+    );
+  }
+}
+
+const defaultSemconvTags = [
+  'otel.scope.name=com.grafana.pyroscope/nodejs',
+  `otel.scope.version=${VERSION}`,
+  'process.runtime.name=nodejs',
+  `process.runtime.version=${process.versions.node}`,
+];
 
 // createBackend creates an Express server with an /ingest endpoint and returns a promise
 // that resolves to the HTTP port the server is listening on
@@ -87,7 +106,7 @@ describe('common behaviour of profilers', () => {
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
     assert.strictEqual(req.query.spyName, 'nodespy');
-    assert.strictEqual(req.query.name, 'nodejs{}');
+    assertAppNameIncludes(req.query.name, 'nodejs{', ...defaultSemconvTags);
   });
 
   it('should call a server on startHeapProfiling and clear gracefully', async (t) => {
@@ -138,7 +157,12 @@ describe('common behaviour of profilers', () => {
     const req = await firstRequest;
     await Pyroscope.stopHeapProfiling();
     assert.strictEqual(req.query['spyName'], 'nodespy');
-    assert.strictEqual(req.query['name'], 'nodejs{env=test env}');
+    assertAppNameIncludes(
+      req.query['name'],
+      'nodejs{',
+      ...defaultSemconvTags,
+      'env=test env'
+    );
   });
 
   it('should allow to call start profiling twice', async (t) => {
@@ -245,7 +269,7 @@ describe('common behaviour of profilers', () => {
     await Pyroscope.stopWallProfiling();
 
     assert.strictEqual(req.query['spyName'], 'nodespy');
-    assert.strictEqual(req.query['name'], 'nodejs{}');
+    assertAppNameIncludes(req.query['name'], 'nodejs{', ...defaultSemconvTags);
 
     // ensure we contain everything expected
     const emptyLabels = JSON.stringify({});
@@ -305,7 +329,7 @@ describe('common behaviour of profilers', () => {
     await Pyroscope.stopWallProfiling();
 
     assert.strictEqual(req.query['spyName'], 'nodespy');
-    assert.strictEqual(req.query['name'], 'nodejs{}');
+    assertAppNameIncludes(req.query['name'], 'nodejs{', ...defaultSemconvTags);
     // expect sample, wall and cpu types
     assert.deepStrictEqual(sampleType, [
       'samples=count',

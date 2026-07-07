@@ -9,6 +9,12 @@
     ".": {
       "release-type": "node",
       "package-name": "@pyroscope/nodejs",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "src/version.ts"
+        }
+      ],
       "bump-minor-pre-major": true,
       "changelog-sections": [
         {"type": "feat", "section": "Features"},
