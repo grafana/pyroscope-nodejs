@@ -96,7 +96,10 @@ export class PyroscopeApiExporter implements ProfileExporter {
   private async buildUploadProfileFormData(
     profile: Profile
   ): Promise<FormData> {
-    const processedProfile: Profile = processProfile(profile);
+    const processedProfile: Profile = processProfile(profile, {
+      stripFilenames: this.config.stripFilenames,
+      shortenPaths: this.config.shortenPaths,
+    });
     const profileBuffer: Buffer = await encode(processedProfile);
     const arrayBuffer: Uint8Array<ArrayBuffer> =
       this.buildArrayBuffer(profileBuffer);

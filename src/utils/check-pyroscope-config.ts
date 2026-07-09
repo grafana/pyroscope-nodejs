@@ -44,9 +44,39 @@ export function checkPyroscopeConfig(
     errors.push('Expecting a config with valid wall options');
   }
 
+  if (!hasValidStripFilenames(config)) {
+    errors.push(
+      "Expecting a config with stripFilenames set to 'all' or 'dependencies'"
+    );
+  }
+
+  if (!hasValidShortenPaths(config)) {
+    errors.push('Expecting a config with boolean shortenPaths');
+  }
+
   if (errors.length > 0) {
     throw new Error(`Invalid config:\n\n${errors.join('\n')}`);
   }
+}
+
+function hasValidStripFilenames(
+  config: Record<string | symbol, unknown>
+): boolean {
+  const stripFilenames = (config as Partial<PyroscopeConfig>).stripFilenames;
+
+  return (
+    stripFilenames === undefined ||
+    stripFilenames === 'all' ||
+    stripFilenames === 'dependencies'
+  );
+}
+
+function hasValidShortenPaths(
+  config: Record<string | symbol, unknown>
+): boolean {
+  const shortenPaths = (config as Partial<PyroscopeConfig>).shortenPaths;
+
+  return shortenPaths === undefined || typeof shortenPaths === 'boolean';
 }
 
 function hasValidApplicationName(

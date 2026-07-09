@@ -28,6 +28,8 @@ export function processConfig(
     basicAuthUser: config.basicAuthUser,
     basicAuthPassword: config.basicAuthPassword,
     tenantID: config.tenantID,
+    stripFilenames: config.stripFilenames ?? env.stripFilenames,
+    shortenPaths: config.shortenPaths ?? env.shortenPaths,
   };
 
   return processedConfig;
