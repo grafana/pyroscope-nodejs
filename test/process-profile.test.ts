@@ -105,6 +105,42 @@ describe('processProfile', () => {
     assert.ok(!profile.stringTable.strings.includes(DEP_FILE));
   });
 
+  it('handles Windows path separators', () => {
+    const stringTable = new StringTable();
+    const str = (value: string): number => stringTable.dedup(value);
+    const winDepFile = 'C:\\app\\node_modules\\@scope\\pkg\\dist\\index.js';
+
+    const profile = new Profile({
+      sampleType: [
+        new ValueType({ type: str('objects'), unit: str('count') }),
+      ],
+      sample: [new Sample({ locationId: [1], value: [1] })],
+      location: [
+        new Location({ id: 1, line: [new Line({ functionId: 1, line: 7 })] }),
+      ],
+      function: [
+        new PprofFunction({
+          id: 1,
+          name: str('winFn'),
+          systemName: str('winFn'),
+          filename: str(winDepFile),
+        }),
+      ],
+      stringTable,
+    });
+
+    processProfile(profile, {
+      shortenPaths: true,
+      stripFilenames: 'dependencies',
+    });
+
+    assert.deepEqual(functionNames(profile), [
+      '@scope\\pkg\\dist\\index.js:winFn:7',
+    ]);
+    assert.equal(Number(profile.function[0]!.filename), 0);
+    assert.ok(!profile.stringTable.strings.includes(winDepFile));
+  });
+
   it('remaps sample type names when rebuilding the string table', () => {
     const profile = processProfile(buildProfile(), { stripFilenames: 'all' });
 

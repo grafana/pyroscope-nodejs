@@ -8,7 +8,9 @@ const V8_NAME_TO_GOLANG_NAME_MAP: Record<string, string> = {
   space: 'inuse_space',
 };
 
-const NODE_MODULES_SEGMENT = 'node_modules/';
+// V8 script names use native separators for CJS modules but URL-style forward
+// slashes for ESM (stripped file:// URLs), so on Windows both can appear.
+const NODE_MODULES_SEGMENTS = ['node_modules/', 'node_modules\\'] as const;
 
 export interface ProcessProfileOptions {
   stripFilenames?: StripFilenamesMode | undefined;
@@ -68,13 +70,21 @@ function adjustCwdPaths(profile: Profile, shortenPaths: boolean): void {
 // package is enough to identify the file, while the (potentially nested)
 // prefix is the biggest contributor to the profile's string table size.
 function packageRelativePath(fileName: string): string | undefined {
-  const index: number = fileName.lastIndexOf(NODE_MODULES_SEGMENT);
+  let start = -1;
 
-  if (index === -1) {
-    return undefined;
+  for (const segment of NODE_MODULES_SEGMENTS) {
+    const index: number = fileName.lastIndexOf(segment);
+
+    if (index !== -1) {
+      start = Math.max(start, index + segment.length);
+    }
   }
 
-  return fileName.slice(index + NODE_MODULES_SEGMENT.length);
+  return start === -1 ? undefined : fileName.slice(start);
+}
+
+function isDependencyPath(fileName: string): boolean {
+  return NODE_MODULES_SEGMENTS.some((segment) => fileName.includes(segment));
 }
 
 function stripFilenames(profile: Profile, mode: StripFilenamesMode): void {
@@ -83,7 +93,7 @@ function stripFilenames(profile: Profile, mode: StripFilenamesMode): void {
       const fileName: string | undefined =
         profile.stringTable.strings[Number(contextFunction.filename)];
 
-      if (!fileName?.includes(NODE_MODULES_SEGMENT)) {
+      if (fileName === undefined || !isDependencyPath(fileName)) {
         continue;
       }
     }
