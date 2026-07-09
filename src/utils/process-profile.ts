@@ -1,4 +1,9 @@
-import { Function as PprofFunction, Profile, StringTable } from 'pprof-format';
+import {
+  Function as PprofFunction,
+  Profile,
+  StringTable,
+  ValueType,
+} from 'pprof-format';
 
 import { StripFilenamesMode } from '../pyroscope-config.js';
 
@@ -111,13 +116,31 @@ function rebuildStringTable(profile: Profile): void {
   const remap = (index: number | bigint): number =>
     newTable.dedup(oldStrings[Number(index)] ?? '');
 
-  for (const valueType of profile.sampleType) {
+  // The serializer aliases objects (the heap profile's periodType is the same
+  // ValueType instance as its second sample type), and remapping an object
+  // twice resolves a new-table index against the old table, corrupting the
+  // string. Track visited objects so each is remapped exactly once.
+  const visited = new WeakSet<object>();
+  const remapValueType = (valueType: ValueType | undefined): void => {
+    if (valueType === undefined || visited.has(valueType)) {
+      return;
+    }
+    visited.add(valueType);
     valueType.type = remap(valueType.type);
     valueType.unit = remap(valueType.unit);
+  };
+
+  for (const valueType of profile.sampleType) {
+    remapValueType(valueType);
   }
+  remapValueType(profile.periodType);
 
   for (const sample of profile.sample) {
     for (const label of sample.label) {
+      if (visited.has(label)) {
+        continue;
+      }
+      visited.add(label);
       label.key = remap(label.key);
       label.str = remap(label.str);
       label.numUnit = remap(label.numUnit);
@@ -125,19 +148,22 @@ function rebuildStringTable(profile: Profile): void {
   }
 
   for (const mapping of profile.mapping) {
+    if (visited.has(mapping)) {
+      continue;
+    }
+    visited.add(mapping);
     mapping.filename = remap(mapping.filename);
     mapping.buildId = remap(mapping.buildId);
   }
 
   for (const contextFunction of profile.function) {
+    if (visited.has(contextFunction)) {
+      continue;
+    }
+    visited.add(contextFunction);
     contextFunction.name = remap(contextFunction.name);
     contextFunction.systemName = remap(contextFunction.systemName);
     contextFunction.filename = remap(contextFunction.filename);
-  }
-
-  if (profile.periodType !== undefined) {
-    profile.periodType.type = remap(profile.periodType.type);
-    profile.periodType.unit = remap(profile.periodType.unit);
   }
 
   profile.dropFrames = remap(profile.dropFrames);

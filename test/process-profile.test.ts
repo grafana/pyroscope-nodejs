@@ -141,6 +141,48 @@ describe('processProfile', () => {
     assert.ok(!profile.stringTable.strings.includes(winDepFile));
   });
 
+  it('remaps aliased value types only once when rebuilding', () => {
+    // The @datadog/pprof heap serializer uses the same ValueType instance for
+    // sampleType[1] and periodType; remapping it twice corrupted
+    // 'inuse_space' back to 'space'.
+    const stringTable = new StringTable();
+    const str = (value: string): number => stringTable.dedup(value);
+    const allocationValueType = new ValueType({
+      type: str('space'),
+      unit: str('bytes'),
+    });
+
+    const profile = new Profile({
+      sampleType: [
+        new ValueType({ type: str('objects'), unit: str('count') }),
+        allocationValueType,
+      ],
+      periodType: allocationValueType,
+      period: 4096,
+      sample: [new Sample({ locationId: [1], value: [1, 100] })],
+      location: [
+        new Location({ id: 1, line: [new Line({ functionId: 1, line: 1 })] }),
+      ],
+      function: [
+        new PprofFunction({
+          id: 1,
+          name: str('foo'),
+          systemName: str('foo'),
+          filename: str(DEP_FILE),
+        }),
+      ],
+      stringTable,
+    });
+
+    processProfile(profile, { stripFilenames: 'all' });
+
+    const resolve = (index: number | bigint): string =>
+      profile.stringTable.strings[Number(index)] as string;
+    assert.equal(resolve(profile.sampleType[1]!.type), 'inuse_space');
+    assert.equal(resolve(profile.periodType!.type), 'inuse_space');
+    assert.equal(resolve(profile.periodType!.unit), 'bytes');
+  });
+
   it('remaps sample type names when rebuilding the string table', () => {
     const profile = processProfile(buildProfile(), { stripFilenames: 'all' });
 
