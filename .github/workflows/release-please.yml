@@ -22,11 +22,6 @@ on:
         description: 'Prerelease suffix (defaults to the sanitized branch name)'
         required: false
         type: string
-      dist_tag:
-        description: 'npm dist-tag to publish under'
-        required: false
-        default: 'dev'
-        type: string
 
 permissions:
   contents: read
@@ -126,16 +121,13 @@ jobs:
       - name: Build
         run: yarn build
       - name: Publish to npm
-        env:
-          DIST_TAG: ${{ inputs.dist_tag }}
-        run: npm publish --tag "$DIST_TAG"
+        run: npm publish --tag dev
       - name: Write summary
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          DIST_TAG: ${{ inputs.dist_tag }}
         run: |
           {
-            echo "Published \`@pyroscope/nodejs@${VERSION}\` under dist-tag \`${DIST_TAG}\`"
+            echo "Published \`@pyroscope/nodejs@${VERSION}\` under dist-tag \`dev\`"
             echo
             echo '```'
             echo "npm install @pyroscope/nodejs@${VERSION}"
