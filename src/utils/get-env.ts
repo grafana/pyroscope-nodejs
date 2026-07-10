@@ -1,4 +1,5 @@
 import { Environment } from '../environment.js';
+import { StripFilenamesMode } from '../pyroscope-config.js';
 
 export function getEnv(): Environment {
   return {
@@ -22,7 +23,17 @@ export function getEnv(): Environment {
     wallCollectCpuTime: parseBooleanEnv(
       process.env['PYROSCOPE_WALL_COLLECT_CPU_TIME']
     ),
+    stripFilenames: parseStripFilenamesEnv(
+      process.env['PYROSCOPE_STRIP_FILENAMES']
+    ),
+    shortenPaths: parseBooleanEnv(process.env['PYROSCOPE_SHORTEN_PATHS']),
   };
+}
+
+function parseStripFilenamesEnv(
+  envVal: string | undefined
+): StripFilenamesMode | undefined {
+  return envVal === 'all' || envVal === 'dependencies' ? envVal : undefined;
 }
 
 function parseNumericEnv(envVal: string | undefined) {

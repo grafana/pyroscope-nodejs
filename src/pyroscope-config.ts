@@ -15,7 +15,16 @@ export interface PyroscopeConfig {
   basicAuthUser?: string | undefined;
   basicAuthPassword?: string | undefined;
   tenantID?: string | undefined;
+  stripFilenames?: StripFilenamesMode | undefined;
+  shortenPaths?: boolean | undefined;
 }
+
+// 'all' removes the filename from every function, 'dependencies' only from
+// functions in files under node_modules. Function names generated for the
+// flame graph keep the file path either way; what is lost is the structured
+// filename field used to link frames to source code (e.g. the GitHub
+// integration in Grafana).
+export type StripFilenamesMode = 'all' | 'dependencies';
 
 export interface PyroscopeWallConfig {
   samplingDurationMs?: number | undefined;

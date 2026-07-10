@@ -1,3 +1,5 @@
+import { StripFilenamesMode } from './pyroscope-config.js';
+
 export interface Environment {
   adhocServerAddress: string | undefined;
   appName: string | undefined;
@@ -9,4 +11,6 @@ export interface Environment {
   wallSamplingDurationMs: number | undefined;
   wallSamplingIntervalMicros: number | undefined;
   wallCollectCpuTime: boolean | undefined;
+  stripFilenames: StripFilenamesMode | undefined;
+  shortenPaths: boolean | undefined;
 }
