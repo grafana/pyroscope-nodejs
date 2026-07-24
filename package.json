@@ -84,7 +84,9 @@
   },
   "resolutions": {
     "brace-expansion": "^5.0.6",
-    "fast-uri": "3.1.2",
+    "body-parser": "2.3.0",
+    "fast-uri": "3.1.4",
+    "find-my-way": "9.7.0",
     "flatted": "^3.4.2",
     "path-to-regexp": "8.4.0",
     "picomatch": "^4.0.4"
