@@ -3,6 +3,10 @@ import { URL } from 'node:url';
 import { encode } from '@datadog/pprof';
 import { Profile } from 'pprof-format';
 import { ProfileExport, ProfileExporter } from './profile-exporter.js';
+import {
+  buildProfileMultipartBody,
+  MultipartRequestBody,
+} from './utils/build-profile-multipart-body.js';
 import { dateToUnixTimestamp } from './utils/date-to-unix-timestamp.js';
 import { processProfile } from './utils/process-profile.js';
 import debug from 'debug';
@@ -93,9 +97,9 @@ export class PyroscopeApiExporter implements ProfileExporter {
     return arrayBuffer;
   }
 
-  private async buildUploadProfileFormData(
+  private async buildUploadProfileRequestBody(
     profile: Profile
-  ): Promise<FormData> {
+  ): Promise<MultipartRequestBody> {
     const processedProfile: Profile = processProfile(profile, {
       stripFilenames: this.config.stripFilenames,
       shortenPaths: this.config.shortenPaths,
@@ -104,30 +108,34 @@ export class PyroscopeApiExporter implements ProfileExporter {
     const arrayBuffer: Uint8Array<ArrayBuffer> =
       this.buildArrayBuffer(profileBuffer);
 
-    const formData: FormData = new FormData();
-    formData.append('profile', new Blob([arrayBuffer]), 'profile');
-
-    return formData;
+    return buildProfileMultipartBody(arrayBuffer);
   }
 
   private async uploadProfile(profileExport: ProfileExport): Promise<void> {
-    const formData: FormData = await this.buildUploadProfileFormData(
-      profileExport.profile
-    );
+    const { body, contentType }: MultipartRequestBody =
+      await this.buildUploadProfileRequestBody(profileExport.profile);
+
+    const headers: Headers = this.buildRequestHeaders();
+    headers.set('content-type', contentType);
 
     try {
       const response = await fetch(
         this.buildEndpointUrl(profileExport).toString(),
         {
-          body: formData,
-          headers: this.buildRequestHeaders(),
+          body,
+          headers,
           method: 'POST',
         }
       );
 
+      // Always drain the response body. The success path (HTTP 200) previously
+      // left the body unconsumed, which keeps the connection from being
+      // released back to the pool promptly and retains the response buffer.
+      const responseText: string = await response.text();
+
       if (!response.ok) {
         log('Server rejected data ingest: HTTP %d', response.status);
-        log(await response.text());
+        log(responseText);
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
