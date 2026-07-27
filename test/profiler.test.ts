@@ -5,7 +5,6 @@ import process from 'node:process';
 import Pyroscope from '../src/index.js';
 import { VERSION } from '../src/version.js';
 import express from 'express';
-import busboy from 'busboy';
 import { Profile } from 'pprof-format';
 import zlib from 'zlib';
 
@@ -51,23 +50,18 @@ const createBackend = (
 };
 type Numeric = number | bigint;
 
+// Uploads are raw gzipped pprof bytes (`/ingest?format=pprof`).
 const extractProfile = (
   req: express.Request,
   res: express.Response,
-  callback: (p: Profile, name: string) => void
+  callback: (p: Profile) => void
 ) => {
-  const bb = busboy({ headers: req.headers });
-  bb.on('file', (name, file) => {
-    file
-      .toArray()
-      .then((values) =>
-        callback(Profile.decode(zlib.gunzipSync(values[0])), name)
-      );
-  });
-  bb.on('close', () => {
+  const chunks: Buffer[] = [];
+  req.on('data', (chunk: Buffer) => chunks.push(chunk));
+  req.on('end', () => {
+    callback(Profile.decode(zlib.gunzipSync(Buffer.concat(chunks))));
     res.send('ok');
   });
-  req.pipe(bb);
 };
 
 const doWork = (d: number): void => {
@@ -106,6 +100,7 @@ describe('common behaviour of profilers', () => {
     const req = await firstRequest;
     await Pyroscope.stopWallProfiling();
     assert.strictEqual(req.query.spyName, 'nodespy');
+    assert.strictEqual(req.query.format, 'pprof');
     assertAppNameIncludes(req.query.name, 'nodejs{', ...defaultSemconvTags);
   });
 
@@ -269,6 +264,7 @@ describe('common behaviour of profilers', () => {
     await Pyroscope.stopWallProfiling();
 
     assert.strictEqual(req.query['spyName'], 'nodespy');
+    assert.strictEqual(req.query['format'], 'pprof');
     assertAppNameIncludes(req.query['name'], 'nodejs{', ...defaultSemconvTags);
 
     // ensure we contain everything expected

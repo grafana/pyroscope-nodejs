@@ -35,6 +35,7 @@ export class PyroscopeApiExporter implements ProfileExporter {
   private buildEndpointUrl(profileExport: ProfileExport): URL {
     const endpointUrl: URL = new URL(`${this.serverAddress}/ingest`);
 
+    endpointUrl.searchParams.append('format', 'pprof');
     endpointUrl.searchParams.append(
       'from',
       dateToUnixTimestamp(profileExport.startedAt).toString()
@@ -93,34 +94,36 @@ export class PyroscopeApiExporter implements ProfileExporter {
     return arrayBuffer;
   }
 
-  private async buildUploadProfileFormData(
+  /**
+   * Serializes the profile into the upload request body: the gzipped pprof
+   * bytes, sent raw.
+   */
+  private async buildUploadProfileBody(
     profile: Profile
-  ): Promise<FormData> {
+  ): Promise<Uint8Array<ArrayBuffer>> {
     const processedProfile: Profile = processProfile(profile, {
       stripFilenames: this.config.stripFilenames,
       shortenPaths: this.config.shortenPaths,
     });
     const profileBuffer: Buffer = await encode(processedProfile);
-    const arrayBuffer: Uint8Array<ArrayBuffer> =
-      this.buildArrayBuffer(profileBuffer);
 
-    const formData: FormData = new FormData();
-    formData.append('profile', new Blob([arrayBuffer]), 'profile');
-
-    return formData;
+    return this.buildArrayBuffer(profileBuffer);
   }
 
   private async uploadProfile(profileExport: ProfileExport): Promise<void> {
-    const formData: FormData = await this.buildUploadProfileFormData(
+    const body: Uint8Array<ArrayBuffer> = await this.buildUploadProfileBody(
       profileExport.profile
     );
+
+    const headers: Headers = this.buildRequestHeaders();
+    headers.set('content-type', 'binary/octet-stream');
 
     try {
       const response = await fetch(
         this.buildEndpointUrl(profileExport).toString(),
         {
-          body: formData,
-          headers: this.buildRequestHeaders(),
+          body,
+          headers,
           method: 'POST',
         }
       );
