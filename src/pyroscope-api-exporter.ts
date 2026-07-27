@@ -116,7 +116,7 @@ export class PyroscopeApiExporter implements ProfileExporter {
     );
 
     const headers: Headers = this.buildRequestHeaders();
-    headers.set('content-type', 'binary/octet-stream');
+    headers.set('content-type', 'application/octet-stream');
 
     try {
       const response = await fetch(

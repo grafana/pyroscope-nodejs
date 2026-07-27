@@ -152,6 +152,7 @@ describe('common behaviour of profilers', () => {
     const req = await firstRequest;
     await Pyroscope.stopHeapProfiling();
     assert.strictEqual(req.query['spyName'], 'nodespy');
+    assert.strictEqual(req.query['format'], 'pprof');
     assertAppNameIncludes(
       req.query['name'],
       'nodejs{',
@@ -325,6 +326,7 @@ describe('common behaviour of profilers', () => {
     await Pyroscope.stopWallProfiling();
 
     assert.strictEqual(req.query['spyName'], 'nodespy');
+    assert.strictEqual(req.query['format'], 'pprof');
     assertAppNameIncludes(req.query['name'], 'nodejs{', ...defaultSemconvTags);
     // expect sample, wall and cpu types
     assert.deepStrictEqual(sampleType, [
