@@ -22,9 +22,9 @@ jobs:
     runs-on: ${{ github.repository_owner == 'grafana' && 'ubuntu-x64-small' || 'ubuntu-latest' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
       - name: Validate Renovate Config
-        uses: grafana/shared-workflows/actions/validate-renovate-config@46f48da11e78ebdba7a8747ae456b11062fac83e # validate-renovate-config/v0.3.1
+        uses: grafana/shared-workflows/actions/validate-renovate-config@5bbb526b1728ca57fbe1750c4c27ab6ab06171c2 # validate-renovate-config/v1.0.0
