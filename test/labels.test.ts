@@ -30,6 +30,15 @@ describe('synchronous labels (default mode)', () => {
     assert.deepEqual(Pyroscope.getLabels(), {});
   });
 
+  it('forwards extra arguments to callbacks without declared parameters', (t) => {
+    start();
+    t.after(() => time.stop());
+    const callback = t.mock.fn(() => 42);
+    const result: number = wrapWithLabels({}, callback, 'extra');
+    assert.equal(result, 42);
+    assert.deepEqual(callback.mock.calls[0].arguments, ['extra']);
+  });
+
   it('restores parent labels on nested synchronous exceptions', (t) => {
     start();
     t.after(() => time.stop());

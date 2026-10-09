@@ -46,6 +46,16 @@ export function wrapWithLabels<R, TArgs extends unknown[]>(
   lbls: Record<string, string | number>,
   fn: (...args: TArgs) => R,
   ...args: TArgs
+): R;
+export function wrapWithLabels<R>(
+  lbls: Record<string, string | number>,
+  fn: () => R,
+  ...args: unknown[]
+): R;
+export function wrapWithLabels<R, TArgs extends unknown[]>(
+  lbls: Record<string, string | number>,
+  fn: (...args: TArgs) => R,
+  ...args: TArgs
 ): R {
   return getProfiler().wallProfiler.profiler.wrapWithLabels(lbls, fn, ...args);
 }

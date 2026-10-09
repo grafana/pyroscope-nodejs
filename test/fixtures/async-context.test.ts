@@ -136,7 +136,7 @@ async function verifyContract() {
   );
   assert.equal(result, 5);
   const original = Promise.resolve(8);
-  const returned: Promise<number> = wrapWithLabels({}, () => original);
+  const returned: Promise<number> = wrapWithLabels({}, () => original, 'extra');
   assert.equal(returned, original);
   assert.equal(await returned, 8);
 
