@@ -16,6 +16,8 @@ Visit the [npm package][releases] to find the latest version of this package.
 
 Visit [docs](https://grafana.com/docs/pyroscope/latest/configure-client/language-sdks/nodejs/) page for usage and configuration documentation.
 
+For opt-in request-scoped labels that survive `await`, see [async labels](docs/async-labels.md).
+
 [Grafana Pyroscope]: https://grafana.com/oss/pyroscope/
 [@datadog/pprof]: https://github.com/DataDog/pprof-nodejs
 [v8-prof]: https://v8.dev/docs/profile

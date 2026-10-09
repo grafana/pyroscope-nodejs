@@ -42,12 +42,12 @@ function setLabels(labels: Record<string, number | string>): void {
   getProfiler().wallProfiler.profiler.setLabels(labels);
 }
 
-export function wrapWithLabels(
+export function wrapWithLabels<R, TArgs extends unknown[]>(
   lbls: Record<string, string | number>,
-  fn: () => void,
-  ...args: unknown[]
-): void {
-  getProfiler().wallProfiler.profiler.wrapWithLabels(lbls, fn, ...args);
+  fn: (...args: TArgs) => R,
+  ...args: TArgs
+): R {
+  return getProfiler().wallProfiler.profiler.wrapWithLabels(lbls, fn, ...args);
 }
 
 function startWallProfiling(): void {
