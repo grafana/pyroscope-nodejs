@@ -18,6 +18,7 @@ export function processConfig(
       env.adhocServerAddress ?? config.serverAddress ?? env.serverAddress,
     tags: config.tags,
     wall: {
+      asyncContext: config.wall?.asyncContext ?? env.wallAsyncContext,
       samplingDurationMs:
         config.wall?.samplingDurationMs ?? env.wallSamplingDurationMs,
       samplingIntervalMicros:

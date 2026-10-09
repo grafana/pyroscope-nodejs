@@ -27,6 +27,7 @@ export interface PyroscopeConfig {
 export type StripFilenamesMode = 'all' | 'dependencies';
 
 export interface PyroscopeWallConfig {
+  asyncContext?: boolean | undefined;
   samplingDurationMs?: number | undefined;
   samplingIntervalMicros?: number | undefined;
   collectCpuTime?: boolean | undefined;

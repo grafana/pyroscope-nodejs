@@ -5,11 +5,11 @@ export interface Profiler<TStartArgs> {
 
   setLabels(labels: Record<string, number | string>): void;
 
-  wrapWithLabels(
+  wrapWithLabels<R, TArgs extends unknown[]>(
     labels: Record<string, number | string>,
-    fn: () => void,
-    ...args: unknown[]
-  ): void;
+    fn: (...args: TArgs) => R,
+    ...args: TArgs
+  ): R;
 
   start(args: TStartArgs): void;
 

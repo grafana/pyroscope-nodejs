@@ -107,7 +107,7 @@ export class PyroscopeProfiler {
     return new ContinuousProfiler({
       exporter,
       flushIntervalMs: flushIntervalMs,
-      profiler: new WallProfiler(),
+      profiler: new WallProfiler(config.wall?.asyncContext ?? false),
       startArgs: {
         sourceMapper: this.toDDSourceMapper(config.sourceMapper),
         samplingDurationMs:

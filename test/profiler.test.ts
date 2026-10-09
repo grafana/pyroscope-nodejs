@@ -1,6 +1,8 @@
 import { describe, it, type TestContext } from 'node:test';
 import { strict as assert } from 'node:assert';
 import process from 'node:process';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 import Pyroscope from '../src/index.js';
 import { VERSION } from '../src/version.js';
@@ -429,4 +431,42 @@ describe('common behaviour of profilers', () => {
     await Pyroscope.stopWallProfiling();
     assert.strictEqual(req.headers['x-scope-orgid'], 'my-tenant-id');
   });
+});
+
+describe('async-context labels', () => {
+  const fixture = fileURLToPath(
+    new URL('./fixtures/async-context.test.js', import.meta.url)
+  );
+  const major = Number(process.versions.node.split('.')[0]);
+
+  function run(flags: string[], mode: string) {
+    execFileSync(process.execPath, [...flags, fixture, mode], {
+      timeout: 30_000,
+      env: {
+        ...process.env,
+        NODE_OPTIONS: '',
+        NODE_TEST_CONTEXT: undefined,
+        PYROSCOPE_WALL_ASYNC_CONTEXT: '',
+      },
+      stdio: 'pipe',
+    });
+  }
+
+  if (major >= 24) {
+    it('propagates async labels and exports correctly attributed native samples', () =>
+      run([], 'supported'));
+    it('rejects disabled AsyncContextFrame and permits a subsequent default-mode start', () =>
+      run(['--no-async-context-frame'], 'unsupported'));
+  } else {
+    it('rejects unavailable AsyncContextFrame and permits a subsequent default-mode start', () =>
+      run([], 'unsupported'));
+    if (
+      process.allowedNodeEnvironmentFlags.has(
+        '--experimental-async-context-frame'
+      )
+    ) {
+      it('propagates async labels and exports correctly attributed native samples with the runtime flag', () =>
+        run(['--experimental-async-context-frame'], 'supported'));
+    }
+  }
 });

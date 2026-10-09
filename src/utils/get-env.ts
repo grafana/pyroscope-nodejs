@@ -20,6 +20,9 @@ export function getEnv(): Environment {
     wallSamplingIntervalMicros: parseNumericEnv(
       process.env['PYROSCOPE_WALL_SAMPLING_INTERVAL_MICROS']
     ),
+    wallAsyncContext: parseBooleanEnv(
+      process.env['PYROSCOPE_WALL_ASYNC_CONTEXT']
+    ),
     wallCollectCpuTime: parseBooleanEnv(
       process.env['PYROSCOPE_WALL_COLLECT_CPU_TIME']
     ),
