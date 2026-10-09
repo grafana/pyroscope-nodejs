@@ -435,7 +435,7 @@ describe('common behaviour of profilers', () => {
 
 describe('async-context labels', () => {
   const fixture = fileURLToPath(
-    new URL('./fixtures/async-context.js', import.meta.url)
+    new URL('./fixtures/async-context.test.js', import.meta.url)
   );
   const major = Number(process.versions.node.split('.')[0]);
 
@@ -445,6 +445,7 @@ describe('async-context labels', () => {
       env: {
         ...process.env,
         NODE_OPTIONS: '',
+        NODE_TEST_CONTEXT: undefined,
         PYROSCOPE_WALL_ASYNC_CONTEXT: '',
       },
       stdio: 'pipe',

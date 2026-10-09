@@ -1,5 +1,6 @@
 import { time, SourceMapper, LabelSet, TimeProfileNode } from '@datadog/pprof';
 import { Profile } from 'pprof-format';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { ProfileExport } from '../profile-exporter.js';
 import { Profiler } from './profiler.js';
@@ -36,6 +37,7 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
   private lastProfiledAt: Date;
   private lastContext: ProfilerContext;
   private lastSamplingIntervalMicros!: number;
+  private readonly contextBoundary = new AsyncLocalStorage<ProfilerContext>();
 
   constructor(private readonly asyncContext = false) {
     this.lastContext = {};
@@ -76,14 +78,18 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
   }
 
   public setLabels(labels: LabelSet): void {
+    const context = { labels };
     if (this.asyncContext) {
-      throw new Error(
-        'setLabels is not supported with wall.asyncContext; use wrapWithLabels instead'
-      );
+      if (!time.isStarted()) {
+        throw new Error('Wall profiler is not started');
+      }
+      // The native setter mutates a shared frame in place; copy it first so
+      // already-created async work retains its previous labels.
+      this.contextBoundary.enterWith(context);
+      time.setContext(context);
+    } else {
+      this.newContext(context);
     }
-    this.newContext({
-      labels: labels,
-    });
   }
 
   public start(args: WallProfilerStartArgs): void {
@@ -161,6 +167,9 @@ export class WallProfiler implements Profiler<WallProfilerStartArgs> {
       this.newContext({});
     }
     const profile: Profile = time.stop(restart, this.generateLabels);
+    if (!restart) {
+      this.contextBoundary.disable();
+    }
 
     const lastProfileStartedAt: Date = this.lastProfiledAt;
     this.lastProfiledAt = new Date();

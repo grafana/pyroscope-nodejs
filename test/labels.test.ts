@@ -48,6 +48,23 @@ describe('synchronous labels (default mode)', () => {
     assert.deepEqual(Pyroscope.getLabels(), { region: 'eu' });
   });
 
+  it('keeps setLabels process-wide for existing async work', async (t) => {
+    start();
+    t.after(() => time.stop());
+    Pyroscope.setLabels({ phase: 'before' });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const reader = (async () => {
+      await gate;
+      assert.deepEqual(Pyroscope.getLabels(), { phase: 'after' });
+    })();
+    Pyroscope.setLabels({ phase: 'after' });
+    release();
+    await reader;
+  });
+
   it('preserves promise identity without extending the synchronous scope', async (t) => {
     start();
     t.after(() => time.stop());

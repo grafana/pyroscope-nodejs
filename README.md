@@ -19,8 +19,9 @@ Visit [docs](https://grafana.com/docs/pyroscope/latest/configure-client/language
 Async labels are opt-in: configure `wall: { asyncContext: true }`, then use
 `wrapWithLabels` to scope work across `await`. Requires Node.js 24+ with
 AsyncContextFrame enabled, or Node.js 22 with
-`--experimental-async-context-frame`. `setLabels` is unsupported in this mode;
-heap profiles are unchanged.
+`--experimental-async-context-frame`. In this mode, `setLabels` replaces labels
+in the current async context without changing sibling contexts. Heap profiles
+are unchanged.
 
 [Grafana Pyroscope]: https://grafana.com/oss/pyroscope/
 [@datadog/pprof]: https://github.com/DataDog/pprof-nodejs
