@@ -1586,11 +1586,11 @@ __metadata:
   linkType: hard
 
 "p-limit@npm:^7.3.0":
-  version: 7.3.1
-  resolution: "p-limit@npm:7.3.1"
+  version: 7.3.3
+  resolution: "p-limit@npm:7.3.3"
   dependencies:
     yocto-queue: "npm:^1.2.1"
-  checksum: 10c0/49b7d7fcc244d4659fa3b260c7b4e632bc72333c60e76e4cd24c7befdeb9b8e22da644e5064e83df9e2ded75245e3e3b9df0e9cf8500b08db8ebf58ac18c6764
+  checksum: 10c0/47e0125583d81c2f5a32c96dd4a1c63cc3fc106ae8b94d00ec152caabd1f64fe22cfa58ba8b7eef47a89991fa64b3403d1549e1e41470dc787d6074f34015f34
   languageName: node
   linkType: hard
 
