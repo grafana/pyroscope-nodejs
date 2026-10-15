@@ -1685,9 +1685,9 @@ __metadata:
   linkType: hard
 
 "pprof-format@npm:^2.2.1":
-  version: 2.3.1
-  resolution: "pprof-format@npm:2.3.1"
-  checksum: 10c0/5372d63b5c3152c550a79edd132c1f99be766df5558b14a1a85904756bd9fd12f26e41e861c223742693724aaec5f9395983500ef1566577a32490e175110d99
+  version: 2.3.2
+  resolution: "pprof-format@npm:2.3.2"
+  checksum: 10c0/f4366424ff317f4d114837f2a06d50c1c0cb680ba4c187f729e64e705fb209febaa34bf28774aa3453f8f9c9c415f456e0560d650fb0654548286aeb521217a9
   languageName: node
   linkType: hard
 
