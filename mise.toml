@@ -1,5 +1,5 @@
 [tools]
-node = "26.4.0"
+node = "26.12.1"
 
 [tools."npm:corepack"]
 version = "0.35.0"
