@@ -11,6 +11,7 @@ export interface Environment {
   wallSamplingDurationMs: number | undefined;
   wallSamplingIntervalMicros: number | undefined;
   wallCollectCpuTime: boolean | undefined;
+  wallAsyncContext: boolean | undefined;
   stripFilenames: StripFilenamesMode | undefined;
   shortenPaths: boolean | undefined;
 }
