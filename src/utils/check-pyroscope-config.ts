@@ -253,7 +253,9 @@ function hasValidWall(config: Record<string | symbol, unknown>): boolean {
 
   return (
     hasValidSamplingDurationMs(wallConfig) &&
-    hasValidSamplingIntervalMicros(wallConfig)
+    hasValidSamplingIntervalMicros(wallConfig) &&
+    (wallConfig.asyncContext === undefined ||
+      typeof wallConfig.asyncContext === 'boolean')
   );
 }
 

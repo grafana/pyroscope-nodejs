@@ -25,7 +25,7 @@ export class HeapProfiler implements Profiler<HeapProfilerStartArgs> {
     throw new Error("heap profiler doesn't support labels");
   }
 
-  public wrapWithLabels(): void {
+  public wrapWithLabels(): never {
     throw new Error("heap profiler doesn't support labels");
   }
 
